@@ -1,0 +1,250 @@
+---
+title: "johnsdata"
+output: html_document
+---
+
+Here I analyse john's data.
+```{r}
+library('knitr')
+
+knitr::opts_chunk$set(cache=TRUE)
+```
+
+```{r,echo=F,eval=FALSE}
+d=read.table("~/Dropbox/john/s1table.txt",header = T)
+genenames=d[,1]
+dataframe=d[,-c(1,2)]
+rownames(dataframe)=genenames
+annotation=read.table("~/Dropbox/john/annotation.txt",header = T)
+```
+
+
+
+```{r,echo=F,eval=T}
+# groupbytime.eighteen=grep(".18",colnames(dataframe))
+# groupbytime.fortyeight=grep(".48",colnames(dataframe))
+# lattertimes=union(groupbytime.eighteen,groupbytime.fortyeight)
+# d=seq(1:ncol(dataframe))
+# groupbytime.four=d[-which(d%in%lattertimes)]
+
+x <- read.table("~/Dropbox/john/s1table.txt", header = TRUE)
+y=x[,-c(1,2)]
+anno <- read.table("~/Dropbox/john/annotation.txt", header = TRUE, stringsAsFactors = FALSE)
+head(anno)
+
+df_ordered <- y[, order(anno$time, anno$bact, anno$ind)]
+anno_ordered <- anno[order(anno$time, anno$bact, anno$ind), ]
+```
+Now, let's quantile normalize these counts:
+
+
+```{r,echo=T,eval=T}
+
+
+voomdat=apply(df_ordered,2,function(x){qqnorm(x,plot.it = F)$x})
+
+##show this data is quantil normalised
+head(apply(voomdat,2,summary))
+```
+And transpose it so that the individuals are in the rows and the genes are in the columns:
+
+```{r,echo=T,eval=T}
+samplesbygenes=t(voomdat)
+dim(samplesbygenes)##rows are the samples, columns are the genes
+````
+
+Then, subtract the column mean (e.g., the mean expression for the gene) from each column.
+```{r}
+rep.row<-function(x,n){
+  matrix(rep(x,each=n),nrow=n)
+}
+
+
+mean_voom_features <- apply(samplesbygenes, 2, mean);###subtract gene(column) means
+voom_class_adj <- samplesbygenes - rep.row(mean_voom_features, dim(samplesbygenes)[1])##subtract the mean expression across genes for the gene
+dim(voom_class_adj)
+
+```
+
+Check to make sure that this has occured correctly, e.g., the *voom_class_adjusted matrix* represents any individuals quantile normalized gene expression minus the mean gene expression for that gene across individuals. Let's check for individual 10 and gene 16:
+
+```{r}
+n=10##individual 10
+j=16
+###check to make sure they match
+samplesbygenes[n,j]-mean(samplesbygenes[,j])
+voom_class_adj[n,j]
+```
+
+Now, create a model matrix that combines the time and bacteria into a factor:
+
+```{r}
+ID=with(anno_ordered,interaction(time,bact),drop=T)
+m=model.matrix(~as.factor(ID)-1)
+
+##check sample id matches strain and time
+rownames(samplesbygenes)[10]
+which(m[10,]==1)
+
+````
+
+
+Now fit the model for all genes to each level of the 27 subgroups iteratively. Essentially, performing univariate regression for all genes on each time*bacterial combination:
+
+```{r,echo=TRUE,eval=F}
+beta=matrix(NA,nrow = dim(voom_class_adj)[2],ncol=dim(m)[2])##make this the J genes by k subgroup betas
+se=matrix(NA,nrow = dim(voom_class_adj)[2],ncol=dim(m)[2])
+t=matrix(NA,nrow = dim(voom_class_adj)[2],ncol=dim(m)[2])
+colnames(se)=colnames(beta)=colnames(t)=as.matrix(levels(ID))
+for(k in 1:ncol(m)){
+  fit=lm((voom_class_adj)~(m[,k]-1))
+  a=matrix(unlist(coef(summary(fit))),byrow = T,nrow=ncol(voom_class_adj))
+  beta[,k]=a[,1]
+  se[,k]=a[,2]
+  t[,k]=a[,3]
+}
+
+
+write.table(beta,"betafit.txt",col.names = T)
+write.table(se,"sefit.txt",col.names = T)
+write.table(t,"tfit.txt",col.names = T)
+
+##check to make sure
+
+lm(voom_class_adj[,37]~m[,9]-1)##model the expression of gene 37 on factor 9
+t[37,9]
+##show that beta is equal to the mean for those individuals
+
+mean(voom_class_adj[which(m[,9]==1),37])##mean gene expression for time point 18 individuals at gene 37
+beta[37,9]
+```
+
+Now fit with univariate ash to choose maxes:
+
+```{r,echo=TRUE,eval=F}
+t=read.table("tfit.txt")
+b=read.table("betafit.txt")
+se=read.table("sefit.txt")
+
+s.j=se/se
+
+lf.ash=matrix(NA,ncol=ncol(t),nrow=nrow(t))
+
+for(i in 1:ncol(t)){
+  lf.ash[,i]=ash(betahat = t[,i],sebetahat = s.j[,1],mixcompdist = "normal")$lfsr
+}
+
+
+thresh=0.05
+
+index=which(rowSums(lf.ash<thresh)>0)
+
+write.table(t[index,],"maxt.txt",col.names = F ,row.names = F)
+
+
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen maxt.txt -g 12538 -k 5 -n 26 i -o john')
+
+A="john"
+
+factor.mat=as.matrix(read.table("john_F.out"))
+lambda.mat=as.matrix(read.table("john_lambda.out"))
+
+library('mash')
+cov=compute.covmat(b.gp.hat = t,sebetahat = s.j,Q =5, t.stat=t[index,],lambda.mat=lambda.mat,P=3,A=A, factor.mat = factor.mat,bma = TRUE,zero=TRUE,power=2)$covmat
+
+omega=compute.covmat(b.gp.hat = t,sebetahat = s.j,Q =5, t.stat=t[index,],lambda.mat=lambda.mat,P=3,A=A, factor.mat = factor.mat,bma = TRUE,zero=TRUE,power=2)$omega
+
+library('mvtnorm')
+compute.hm.train.log.lik.pen(train.b = t,se.train = s.j,covmat = cov,A=A,pen=1)
+
+
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+b.test=t
+se.test=s.j
+weightedquants=lapply(seq(1:nrow(b.test)),function(j){total.quant.per.snp(j,cov,b.gp.hat=b.test,se.gp.hat = se.test,pis,A=A,checkpoint = FALSE)})
+```
+
+Now let's plot the most interesting covariance matrix:
+```{r covmats,echo=TRUE,eval=T}
+library('mash')
+t=read.table("tfit.txt")
+lf.ash=read.table('lfash.txt')
+cov=readRDS("covmatjohn.rds")
+library('gplots')
+library('colorRamps')
+
+for(k in c(2,3,9)){
+  x=cov[[k]]/max(diag(cov[[k]]))
+colnames(x)=rownames(x)=as.matrix(levels(ID)[-24])[,1]
+  heatmap.2(x,revC = T,col = blue2green(256),dendrogram="none",density="none",trace="none")
+v=svd(cov[[k]])$v
+barplot(v[,1]/max(v[,1]),names=as.matrix(levels(ID)[-24])[,1],las=2)
+}
+lfsr=read.table("johnlfsr.txt")[,-1]
+postt=read.table("johnposterior.means.txt")[,-1]
+mean(lfsr<0.05)
+mean(lf.ash<0.05)
+##and this percent of values are shrunk###
+mean(abs(postt)<abs(t))
+```
+
+Checking:
+```{r,eval=F}
+k=441
+
+se.test=t/t
+all.arrays=post.array.per.snp(j=j,covmat = cov,b.gp.hat = b.test,se.gp.hat = se.test)
+
+b.mle=as.vector(t(b.test[j,]))##turn i into a R x 1 vector
+V.gp.hat=diag(se.test[j,])^2
+V.gp.hat.inv <- solve(V.gp.hat)
+
+
+U.gp1kl <- (post.b.gpkl.cov(V.gp.hat.inv, cov[[k]]))
+mu.gp1kl <- as.array(post.b.gpkl.mean(b.mle, V.gp.hat.inv, U.gp1kl))
+source("~/matrix_ash/R/sarah's_mixem.R")
+bovy.mean=post.b.jk.ed.mean(b.mle = b.mle,tinv = solve(V.gp.hat+cov[[k]]),U.k = cov[[k]])
+plot(bovy.mean,mu.gp1kl)
+bovy.cov=post.b.jk.ed.cov(tinv =solve(V.gp.hat+cov[[k]]),U.k = cov[[k]] )
+plot(diag(bovy.cov),diag(U.gp1kl))
+#(all.arrays$post.means[k,]) To show that our computation is correct
+plot(all.arrays$post.means[k,],mu.gp1kl)
+plot(all.arrays$post.covs[k,],diag(U.gp1kl))
+
+##and here we show that our weighting is correct:
+
+##Now, check to make sure weighting is correct
+
+mash.means=postt
+lfsr.mash=lfsr
+
+log.lik.snp=log.lik.func(b.mle,V.gp.hat,cov)
+log.lik.minus.max=log.lik.snp-max(log.lik.snp)
+
+exp.vec=exp(log.lik.minus.max)
+post.weights=t(exp.vec*pis/sum(exp.vec*pis))
+plot(as.matrix(mash.means[j,]),post.weights%*%all.arrays$post.means)
+post.weights[which.max(post.weights)]
+
+r=5
+#r=which(colnames(b.test)=="Esophagus_Muscularis")
+#r=which(colnames(b.test)=="Esophagus_Mucosa")
+mu.gp1kl[r]
+diag(U.gp1kl)[r]
+(lower=pnorm(0,mean = mu.gp1kl[r],sd = sqrt(diag(U.gp1kl)[r]),lower.tail = T))
+(upper=pnorm(0,mean = mu.gp1kl[r],sd = sqrt(diag(U.gp1kl)[r]),lower.tail = F))
+1-max(lower,upper)
+
+##show that this is lcose to lfsr because majority componenet
+lfsr[j,r]
+
+
+dim(post.weights)
+dim(all.arrays$post.downs)
+dim(all.arrays$post.ups)
+total.down=post.weights%*%all.arrays$post.downs
+total.up=post.weights%*%all.arrays$post.ups
+
+
+plot(as.matrix(lfsr.mash[j,]),as.matrix(apply(rbind(rbind(total.down,total.up)),2,function(x){1-max(x)})))
+
