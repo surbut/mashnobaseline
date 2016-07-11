@@ -44,7 +44,7 @@ Now, let's quantile normalize these counts:
 voomdat=apply(df_ordered,2,function(x){qqnorm(x,plot.it = F)$x})
 
 ##show this data is quantil normalised
-head(apply(voomdat,2,summary))
+##head(apply(voomdat,2,summary))
 ```
 And transpose it so that the individuals are in the rows and the genes are in the columns:
 
@@ -81,7 +81,7 @@ Now, create a model matrix that combines the time and bacteria into a factor:
 ```{r}
 ID=with(anno_ordered,interaction(time,bact),drop=T)
 m=model.matrix(~as.factor(ID)-1)
-
+m=m[,-24] #(no staph)
 ##check sample id matches strain and time
 rownames(samplesbygenes)[10]
 which(m[10,]==1)
@@ -89,7 +89,7 @@ which(m[10,]==1)
 ````
 
 
-Now fit the model for all genes to each level of the 27 subgroups iteratively. Essentially, performing univariate regression for all genes on each time*bacterial combination:
+Now fit the model for all genes to each level of the 26 subgroups iteratively. Essentially, performing univariate regression for all genes on each time*bacterial combination:
 
 ```{r,echo=TRUE,eval=F}
 beta=matrix(NA,nrow = dim(voom_class_adj)[2],ncol=dim(m)[2])##make this the J genes by k subgroup betas
