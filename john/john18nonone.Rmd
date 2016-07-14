@@ -156,6 +156,10 @@ weightedquants=lapply(seq(1:nrow(b.test)),function(j){total.quant.per.snp(j,cov,
 ```
 
 Now let's plot the most interesting covariance matrix:
+
+We note that the non-pathogenic (vaccine strains) are correlated, as are the active strains (RV and GC) and the facultative intracellular pathogens (Yers and Salm) stand out.
+
+
 ```{r covmats,echo=TRUE,eval=T}
 A="johntimepoint18nonefree"
 library('mash')
@@ -168,13 +172,17 @@ library('colorRamps')
 
 pi.mat=matrix(pis[-length(pis)],byrow = T,ncol=10+ncol(m))
 barplot(colSums(pi.mat),names=c(seq(1:9),as.matrix(levels(ID))[,1],"All"),las=2)
-mostimportant=order(colSums(pi.mat),decreasing = T)[1:2]
+mostimportant=order(colSums(pi.mat),decreasing = T)[1]
 for(k in mostimportant){
   x=cov[[k]]/max(diag(cov[[k]]))
 colnames(x)=rownames(x)=as.matrix(levels(ID))[,1]
   heatmap.2(x,revC = T,col = blue2green(256),dendrogram="none",density="none",trace="none")
 v=svd(cov[[k]])$v
 barplot(v[,1]/max(v[,1]),names=as.matrix(levels(ID))[,1],las=2)
+barplot(v[,2]/max(v[,2]),names=as.matrix(levels(ID))[,1],las=2)
+barplot(v[,3]/max(v[,3]),names=as.matrix(levels(ID))[,1],las=2)
+barplot(v[,4]/max(v[,3]),names=as.matrix(levels(ID))[,1],las=2)
+barplot(v[,5]/max(v[,3]),names=as.matrix(levels(ID))[,1],las=2)
 }
 lfsr=read.table("johntimepoint18nonefreelfsr.txt")[,-1]
 postt=read.table("johntimepoint18nonefreeposterior.means.txt")[,-1]
