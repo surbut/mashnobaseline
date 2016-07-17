@@ -192,10 +192,28 @@ Where at each of the P components for each gene J
 \begin{equation}
 \begin{aligned}
 \mu^{1}_{jp} = \Sigma_{p} L' T_{jp}^{-1} L \chat_{j} \\
-U^{1}_{jp} = \Sigma_{p} - \Sigma_p L' T_{jp}^{1} L \Sigma_{p}
+U^{1}_{jp} = \Sigma_{p} - \Sigma_p L' T_{jp}^{-1} L \Sigma_{p}
 \end{aligned}
 \end{equation}
 
+If we now replace 
+
+\begin{equation}
+\begin{aligned}
+\Sigma_{p} &= L \Sigma_{p} L' \\
+\hat{V} &=  L\hat{V_j} L'\\
+\bm{w}&=L \chat_{j}
+\end{equation}
+\end{aligned}
+
+Then we can return our old posteriors:
+
+\begin{equation}
+\begin{aligned}
+U^{1}_{jp}  = (\Sigma_{p}^{-1} + \hat{V}_{j}^{-1})^{-1}\\
+\mu^{1}_{jp} = U^{1}_{jp} (\hat{V}_{j}^{-1} \bm{w})
+\end{aligned}
+\end{equation}
 
 And 
 \begin{equation}
