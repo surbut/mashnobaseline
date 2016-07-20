@@ -116,12 +116,26 @@ identical(LVL,lvlobject)
 arrays=post.array.per.snp.no.baseline(j = 10,covmat = covmat,b.gp.hat = b.gp.hat,se.gp.hat = se.train,L = L)
 identical(as.numeric(arrays$post.means[k,]),as.numeric(post.mean.with.proj(b.mle = t(as.vector(b.gp.hat[j,])),tinv = solve(LVL+L%*%covmat[[k]]%*%t(L)),U.k = covmat[[k]],L = L)))
 identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(tinv = solve(LVL+L%*%covmat[[k]]%*%t(L)),U.k = covmat[[k]],L = L))))
+```
 
-plot(rowMeans(L))
+To gain some intuition, show that the rowmeans of L are still 0:
+```{r}
+plot(rowSums(L))
+```
 
-mus=rep(mean(as.numeric(b.gp.hat[1,])),44)
+And that now L%*%mu is just and R-1 vector of 0s:
 
-plot(L%*%mus,ylim=c(-1,1))
+```{r}
+R=44
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+
+
+mus=rep(mean(as.numeric(b.train[1,])),44)
+
+as.numeric(round(L%*%mus,digits = 4))
+
+L=L[-44,]
+as.numeric(round(L%*%mus,digits = 4))
 ```
 
 
@@ -160,4 +174,10 @@ all.equal(as.numeric(b.train[1,]-mean(as.numeric(b.train[1,])))[-20],as.numeric(
 plot(as.numeric(b.train[1,]-mean(as.numeric(b.train[1,])))[-20],as.numeric(b.gp.hat[1,]))
 ```
 
-So essentially, for every j vector, we have transformed the observed averages to the deviation from observed (noisy averages) across all R subgroups, and then effectively omitted a subgroup. And reassuringly, it doesn't matter which subgroup we omit when we transform, because L still takes the deviation across all R subgroups (i.e., L is (n-1)xn).
+So essentially, for every j vector, we have transformed the observed averages to the deviation from observed (noisy averages) across all R subgroups, and then effectively omitted a subgroup. And reassuringly, it doesn't matter which subgroup we omit when we transform, because L still takes the deviation across all R subgroups (i.e., L is (R-1)xR).
+
+And we can see that it's deterministic, in that the 0-sum of the R-1 elements will represent the deviation of the omitted element:
+```{r}
+as.numeric(b.train[1,]-mean(as.numeric(b.train[1,])))[20]
+0-sum(b.gp.hat[1,])
+```
