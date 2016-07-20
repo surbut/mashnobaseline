@@ -196,15 +196,47 @@ U^{1}_{jp} = \Sigma_{p} - \Sigma_p L' T_{jp}^{-1} L \Sigma_{p}
 \end{aligned}
 \end{equation}
 
+In our old code, L was just the identity:
+
+\begin{equation}
+\begin{aligned}
+\mu^{1}_{jp} = \Sigma_{p}  T_{jp}^{-1}  \chat_{j} \\
+U^{1}_{jp} = \Sigma_{p} - \Sigma_p  T_{jp}^{-1}  \Sigma_{p}
+\end{aligned}
+\end{equation}
+
+and was equivalent to :
+
+\begin{equation}
+\begin{aligned}
+U^{1}_{jp}  = (\Sigma_{p}^{-1} + \hat{V}_{j}^{-1})^{-1}\\
+\mu^{1}_{jp} = U^{1}_{jp} (\hat{V}_{j}^{-1} \bm{w})
+\end{aligned}
+\end{equation}
+
+
+
 If we now replace 
 
 \begin{equation}
 \begin{aligned}
-\Sigma_{p} &= L \Sigma_{p} L' \\
-\hat{V} &=  L\hat{V_j} L'\\
+\Sigma*_{p} &= L \Sigma_{p} L' \\
+\hat{V}* &=  L\hat{V_j} L'\\
 \bm{w}&=L \chat_{j}
 \end{equation}
 \end{aligned}
+
+
+And let the new $L$ be the identity, we would get the following:
+
+\begin{equation}
+\begin{aligned}
+\mu^{1}_{jp} = \Sigma*_{p} T_{jp}^{-1} L \chat_{j} \\
+U^{1}_{jp} = \Sigma*_{p} - \Sigma*_p T_{jp}^{-1}  \Sigma*_{p}
+\end{aligned}
+\end{equation}
+
+But as you can see that isn't going to work because in the Bovy equation, $\Sigma$ should represent the prior covariance of the '`true` deviation v, while here, $\Sigma*$ represent the covariance of $\ceff$, $L\bv$ which is $L \Sigma* L$
 
 Then we can return our old posteriors:
 
@@ -485,6 +517,22 @@ Some questions:
 %\end{equation}
 %
 
-
+%\section{Translation Algebra}
+%
+%For the authors:
+%\begin{equation}
+%\begin{aligned}
+%  U( V^{-1} U+ I )^{-1} V^{-1} \hat{\bm{b}}_{j}\ &= U L [U+\hat{V}]^{-1}\hat{\bm{b}_{j}}\\
+%U ( V^{-1} U + I )^{-1} &= U-U L' [U+V]^{-1} L U
+%\end{aligned}
+%\end{equation}
+%
+%For us:
+%\begin{equation}
+%  \begin{aligned}
+%    \bm{b}_{jk}= U_{k} \left( \hat{V}_{j}^{-1} U_{k} + I \right)^{-1} \hat{V}_{j}^{-1} \hat{\bm{b}}_{j}\\
+%    B_{jk} = U_{k} \left( \hat{V}_{j}^{-1} U_{k} + I \right)^{-1}
+%    \end{aligned}
+%\end{equation}
 
 \end{document}  

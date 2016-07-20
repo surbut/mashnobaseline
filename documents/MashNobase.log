@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  17 JUL 2016 11:06
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  18 JUL 2016 14:44
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -415,20 +415,21 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-./MashNobase.tex:206: You can't use `\eqno' in math mode.
+[4]
+./MashNobase.tex:226: You can't use `\eqno' in math mode.
 \endmathdisplay@a ...\df@tag \@empty \else \veqno 
                                                   \alt@tag \df@tag \fi \ifx ...
-l.206 \end{equation}
+l.226 \end{equation}
                     
 Sorry, but I'm not programmed to handle this case;
 I'll just pretend that you didn't ask for it.
 If you're in the wrong mode, you might be able to
 return to the right one by typing `I}' or `I$' or `I\par'.
 
-./MashNobase.tex:206: Missing } inserted.
+./MashNobase.tex:226: Missing } inserted.
 <inserted text> 
                 }
-l.206 \end{equation}
+l.226 \end{equation}
                     
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -437,23 +438,23 @@ really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
 
-./MashNobase.tex:206: LaTeX Error: \begin{aligned} on input line 202 ended by \
+./MashNobase.tex:226: LaTeX Error: \begin{aligned} on input line 222 ended by \
 end{equation}.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.206 \end{equation}
+l.226 \end{equation}
                     
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
 or  <return>  to continue without it.
 
-./MashNobase.tex:206: Missing $ inserted.
+./MashNobase.tex:226: Missing $ inserted.
 <inserted text> 
                 $
-l.206 \end{equation}
+l.226 \end{equation}
                     
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -461,10 +462,10 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:206: Missing } inserted.
+./MashNobase.tex:226: Missing } inserted.
 <inserted text> 
                 }
-l.206 \end{equation}
+l.226 \end{equation}
                     
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -472,34 +473,34 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:206: Missing \cr inserted.
+./MashNobase.tex:226: Missing \cr inserted.
 <inserted text> 
                 \cr 
-l.206 \end{equation}
+l.226 \end{equation}
                     
 I'm guessing that you meant to end an alignment here.
 
-./MashNobase.tex:206: Missing { inserted.
+./MashNobase.tex:226: Missing { inserted.
 <inserted text> 
                 {
-l.206 \end{equation}
+l.226 \end{equation}
                     
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-./MashNobase.tex:206: Missing $ inserted.
+./MashNobase.tex:226: Missing $ inserted.
 <inserted text> 
                 $
-l.206 \end{equation}
+l.226 \end{equation}
                     
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./MashNobase.tex:206: Missing } inserted.
+./MashNobase.tex:226: Missing } inserted.
 <inserted text> 
                 }
-l.206 \end{equation}
+l.226 \end{equation}
                     
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -507,10 +508,10 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:207: Misplaced \crcr.
+./MashNobase.tex:227: Misplaced \crcr.
 \endaligned ->\crcr 
                     \egroup \restorecolumn@ \egroup 
-l.207 \end{aligned}
+l.227 \end{aligned}
                    
 I can't figure out why you would want to use a tab mark
 or \cr or \span just now. If something like a right brace
@@ -518,10 +519,10 @@ up above has ended a previous alignment prematurely,
 you're probably due for more error messages, and you
 might try typing `S' now just to see what is salvageable.
 
-./MashNobase.tex:207: Extra }, or forgotten $.
+./MashNobase.tex:227: Extra }, or forgotten $.
 \endaligned ->\crcr \egroup 
                             \restorecolumn@ \egroup 
-l.207 \end{aligned}
+l.227 \end{aligned}
                    
 I've deleted a group-closing symbol because it seems to be
 spurious, as in `$x}$'. But perhaps the } is legitimate and
@@ -529,10 +530,10 @@ you forgot something else, as in `\hbox{$x}'. In such cases
 the way to recover is to insert both the forgotten and the
 deleted material, e.g., by typing `I$}'.
 
-./MashNobase.tex:207: Extra }, or forgotten $.
+./MashNobase.tex:227: Extra }, or forgotten $.
 \endaligned ...cr \egroup \restorecolumn@ \egroup 
                                                   
-l.207 \end{aligned}
+l.227 \end{aligned}
                    
 I've deleted a group-closing symbol because it seems to be
 spurious, as in `$x}$'. But perhaps the } is legitimate and
@@ -541,23 +542,23 @@ the way to recover is to insert both the forgotten and the
 deleted material, e.g., by typing `I$}'.
 
 
-./MashNobase.tex:207: LaTeX Error: \begin{equation} on input line 201 ended by 
+./MashNobase.tex:227: LaTeX Error: \begin{equation} on input line 221 ended by 
 \end{aligned}.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.207 \end{aligned}
+l.227 \end{aligned}
                    
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
 or  <return>  to continue without it.
 
-./MashNobase.tex:207: Missing $ inserted.
+./MashNobase.tex:227: Missing $ inserted.
 <inserted text> 
                 $
-l.207 \end{aligned}
+l.227 \end{aligned}
                    
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -565,79 +566,86 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:207: Display math should end with $$.
+./MashNobase.tex:227: Display math should end with $$.
 <to be read again> 
                    \endgroup 
-l.207 \end{aligned}
+l.227 \end{aligned}
                    
 The `$' that I just saw supposedly matches a previous `$$'.
 So I shall assume that you typed `$$' both times.
 
-[4]
+./MashNobase.tex:239: Undefined control sequence.
+l.239 ...epresent the covariance of $\ceff$, $L\bv
+                                                  $ which is $L \Sigma* L$
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 228.
+(hyperref)                removing `math shift' on input line 260.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 228.
+(hyperref)                removing `math shift' on input line 260.
 
-
-Overfull \hbox (33.85225pt too wide) in paragraph at lines 244--245
+[5]
+Overfull \hbox (33.85225pt too wide) in paragraph at lines 276--277
 \OT1/cmr/m/n/10.95 than ini-tial-iz-ing with the vec-tors of $[]$ that have bee
 n com-puted on $[]$? 
  []
 
-[5]
 
-./MashNobase.tex:247: Package amsmath Error: \hat allowed only in math mode.
+./MashNobase.tex:279: Package amsmath Error: \hat allowed only in math mode.
 
 See the amsmath package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.247 ...input will still be that matrix   \hat{C}
+l.279 ...input will still be that matrix   \hat{C}
                                                     of uncentered noisy aver...
 
 You're in trouble here.  Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 
-./MashNobase.tex:490: LaTeX Error: \begin{itemize} on input line 120 ended by \
+./MashNobase.tex:538: LaTeX Error: \begin{itemize} on input line 120 ended by \
 end{document}.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.490 \end{document}
+l.538 \end{document}
                     
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
 or  <return>  to continue without it.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 490.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 538.
 [6]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 490.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 538.
  (./MashNobase.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 490.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 490.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 538.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 538.
 Package rerunfilecheck Info: File `MashNobase.out' has not changed.
 (rerunfilecheck)             Checksum: 645197AA2F98B6B48FB85BE43BE6F69A;353.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 490.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 538.
  )
 (\end occurred inside a group at level 1)
 
 ### semi simple group (level 1) entered at line 120 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 6640 strings out of 493089
- 95566 string characters out of 6134842
- 188921 words of memory out of 5000000
+ 6643 strings out of 493089
+ 95605 string characters out of 6134842
+ 187921 words of memory out of 5000000
  9998 multiletter control sequences out of 15000+600000
  24785 words of font info for 93 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 29i,8n,31p,607b,453s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 29i,8n,31p,607b,519s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts
 /cm/cmbx10.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmbx12.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/c
@@ -655,10 +663,10 @@ b></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb><
 /usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></
 usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on MashNobase.pdf (6 pages, 179721 bytes).
+Output written on MashNobase.pdf (6 pages, 180915 bytes).
 PDF statistics:
- 160 PDF objects out of 1000 (max. 8388607)
- 133 compressed objects within 2 object streams
- 34 named destinations out of 1000 (max. 500000)
+ 166 PDF objects out of 1000 (max. 8388607)
+ 139 compressed objects within 2 object streams
+ 37 named destinations out of 1000 (max. 500000)
  49 words of extra memory for PDF output out of 10000 (max. 10000000)
 

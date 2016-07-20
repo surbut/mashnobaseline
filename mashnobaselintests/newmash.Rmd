@@ -1,0 +1,163 @@
+---
+title: "nobaseline"
+output: html_document
+---
+
+With our new model, we've written some code. We assure ourselves that when the porjection matrix is the identity, nothing changes:
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+```
+
+```{r}
+rm(list=ls())
+source('~/mashnobaseline/mashnobasescripts.R')
+library('mash')
+
+
+j=10
+b.train=read.table("~/Dropbox/jul3/maxz.txt")
+#se.train=b.train/b.train
+se.gp.hat=read.table("~/gtexresults_matrixash/Data/standard.error.txt")
+covmat=readRDS("~/Dropbox/Aug12/covmatAug13withED.rds")
+pis=readRDS("~/Dropbox/Aug12/pisAug13withED.rds")$pihat
+```
+
+
+Let $B.gp.hat$ represent the transformed estimates, but here $L$ is the Identity.
+```{r}
+
+b.gp.hat=data.frame(t(diag(1,44)%*%t(b.train)))
+
+mu=post.array.per.snp(j = 1,covmat = covmat,b.gp.hat = b.gp.hat,se.gp.hat = se.gp.hat)
+mutwo=post.array.per.snp.no.baseline(j = 1,covmat = covmat,b.gp.hat = b.gp.hat,se.gp.hat = se.gp.hat,L = diag(1,44))
+all.equal((mutwo$post.means),(mu$post.means),tolerance = 1e-6)
+all.equal((mutwo$post.nulls),(mu$post.nulls),tolerance = 1e-6)
+all.equal((mutwo$post.ups),(mu$post.ups),tolerance = 1e-6)
+all.equal((mutwo$post.downs),(mu$post.downs),tolerance = 1e-6)
+all.equal((mutwo$post.weights),(mu$post.weights),tolerance = 1e-6)
+
+
+
+tqone=total.quant.per.snp(j=1,covmat = covmat,b.gp.hat = b.gp.hat,se.gp.hat = se.gp.hat,pis = pis,A = A,checkpoint = T)
+d=44
+tqtwo=total.quant.per.snp.no.baseline(j=1,covmat = covmat,b.gp.hat = b.gp.hat,se.gp.hat = se.gp.hat,pis = pis,A = A,checkpoint = T,L=diag(1,d))
+
+all.equal(tqone$posterior.means,tqtwo$posterior.means)
+all.equal(tqone$posterior.nulls,tqtwo$posterior.nulls)
+all.equal(tqone$posterior.means,tqtwo$posterior.means)
+all.equal(tqone$posterior.downs,tqtwo$posterior.downs)
+all.equal(tqone$post.weights,tqtwo$post.weights)
+all.equal(tqone$lfsr,tqtwo$lfsr)
+all.equal(tqone$marginal.var,tqtwo$marginal.var)
+```
+
+Great, now let's check our projection case:
+ Suppose we generate a 44x44 centering matrix L and remove the final row:
+
+```{r}
+R=ncol(b.train)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+L=L[-44,]
+```
+
+This matrix will transform $b.train$ into a matrix of deviations from average expression across all R subgroups for R-1 tissues.
+
+Recall that in our model, 
+
+$$Ceff_{R}=\mu_{R} + v_{R}$$
+$$Chat_{R} = \mu_{R} + v_{R} + E_{R}$$
+
+where $$v_{R} \sim N(0,Uk)$$
+and 
+$$E_{R} ~ N(0,V)$$
+
+$$(LCefff)_{R-1} = (Lv)_{R-1)$$
+$$LChat = Lv + E*$$
+
+where $$E_{R-1}* ~ N(0,LVL')$$ and $$(Lv)_{R-1} ~ N(0,LUkL')$$ so that 
+$$(LChat)_{R-1}|V ~ N(0,LVL' + LUkL')$$
+
+```{r}
+
+rm(list=ls())
+rm(list=ls())
+source('~/mashnobaseline/mashnobasescripts.R')
+
+
+R=44
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+L=L[-44,]
+
+j=10
+b.train=read.table("~/Dropbox/jul3/maxz.txt")
+#se.train=b.train/b.train
+se.train=read.table("~/gtexresults_matrixash/Data/standard.error.txt")
+covmat=readRDS("~/Dropbox/Aug12/covmatAug13withED.rds")
+pis=readRDS("~/Dropbox/Aug12/pisAug13withED.rds")$pihat
+
+b.gp.hat=data.frame(t(L%*%t(b.train)))
+
+
+t=total.quant.per.snp.no.baseline(j=10,covmat = covmat,b.gp.hat = b.gp.hat,se.gp.hat = se.train,pis = pis,A = A,checkpoint = T,L=L)
+
+lvlobject=t$LVL
+LSigList=t$LSigL
+tinvlist=t$tinvlist
+
+k=3
+V.gp.hat=diag(se.train[j,])^2
+LVL=L%*%V.gp.hat%*%t(L)
+#solve(LVL+L%*%covmat[[k]]%*%t(L))
+
+identical(solve(LVL+L%*%covmat[[k]]%*%t(L)),tinvlist[[k]])
+mean(as.numeric(lapply(seq(1:length(covmat)),function(x){identical(LSigList[[x]],L%*%covmat[[x]]%*%t(L))})))
+identical(LVL,lvlobject)
+
+arrays=post.array.per.snp.no.baseline(j = 10,covmat = covmat,b.gp.hat = b.gp.hat,se.gp.hat = se.train,L = L)
+identical(as.numeric(arrays$post.means[k,]),as.numeric(post.mean.with.proj(b.mle = t(as.vector(b.gp.hat[j,])),tinv = solve(LVL+L%*%covmat[[k]]%*%t(L)),U.k = covmat[[k]],L = L)))
+identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(tinv = solve(LVL+L%*%covmat[[k]]%*%t(L)),U.k = covmat[[k]],L = L))))
+
+plot(rowMeans(L))
+
+mus=rep(mean(as.numeric(b.gp.hat[1,])),44)
+
+plot(L%*%mus,ylim=c(-1,1))
+```
+
+
+Show that this doesn't change if you change which row of L you are omitting:
+```{r}
+rm(L)
+rm(b.gp.hat)
+R=44
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+L=L[-44,]
+
+b.gp.hat=data.frame(t(L%*%t(b.train)))
+
+t44=total.quant.per.snp.no.baseline(j=10,covmat = covmat,b.gp.hat = b.gp.hat,se.gp.hat = se.train,pis = pis,A = A,checkpoint = T,L=L)
+
+rm(L)
+rm(b.gp.hat)
+##Here we omit the 20^{th} row
+R=44
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+L=L[-20,]
+
+b.gp.hat=data.frame(t(L%*%t(b.train)))
+t20=total.quant.per.snp.no.baseline(j=10,covmat = covmat,b.gp.hat = b.gp.hat,se.gp.hat = se.train,pis = pis,A = A,checkpoint = T,L=L)
+
+all.equal(t20$posterior.means,t44$posterior.means)
+all.equal(t20$posterior.nulls,t44$posterior.nulls)
+all.equal(t20$posterior.downs,t44$posterior.downs)
+all.equal(t20$posterior.ups,t44$posterior.ups)
+```
+
+And as you can see, this transfomred matrix b.gp.hat represents the deviations from the mean across subgroups for n-1 subgroups (not the deviation from the mean of the n-1 subgroups, reassuringly), so the results are robust to which subgroup we omit.
+
+```{r}
+all.equal(as.numeric(b.train[1,]-mean(as.numeric(b.train[1,])))[-20],as.numeric(b.gp.hat[1,]))
+plot(as.numeric(b.train[1,]-mean(as.numeric(b.train[1,])))[-20],as.numeric(b.gp.hat[1,]))
+```
+
+So essentially, for every j vector, we have transformed the observed averages to the deviation from observed (noisy averages) across all R subgroups, and then effectively omitted a subgroup. And reassuringly, it doesn't matter which subgroup we omit when we transform, because L still takes the deviation across all R subgroups (i.e., L is (n-1)xn).
