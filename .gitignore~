@@ -11,5 +11,8 @@ Vignettes/*.Rhistory
 Vignettes/Reprosim/*cache*
 Vignettes/Reprosim/*files*
 */*cache*/
-*/_files*/
+*/*_files*/
 gh-pages
+*/*.txt*
+*.out*
+*.Rda*

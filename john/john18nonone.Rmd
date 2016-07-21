@@ -122,7 +122,7 @@ s.j=se/se
 lf.ash=matrix(NA,ncol=ncol(t),nrow=nrow(t))
 
 for(i in 1:ncol(t)){
-  lf.ash[,i]=ash(betahat = t[,i],sebetahat = s.j[,1],mixcompdist = "normal")$lfsr
+  lf.ash[,i]=ash(betahat = t[,i],sebetahat = s.j[,i],mixcompdist = "normal")$lfsr
 }
 
 

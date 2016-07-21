@@ -1,0 +1,155 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+Let's try this out with john's data at time point 19, and not do the centering:
+
+```{r}
+x <- read.table("~/Dropbox/john/s1table.txt", header = TRUE)
+y=x[,-c(1,2)]
+anno <- read.table("~/Dropbox/john/annotation.txt", header = TRUE, stringsAsFactors = FALSE)
+head(anno)
+
+df_ordered <- y[, order(anno$time, anno$bact, anno$ind)]
+anno_ordered <- anno[order(anno$time, anno$bact, anno$ind), ]
+
+eighteenguys=which(anno_ordered$time==18&anno_ordered$bact!="none")
+
+anno_ordered=anno_ordered[eighteenguys,]
+df_ordered=df_ordered[,eighteenguys]
+##we transpose so rows are indiviudals
+
+
+samplesbygenes=t(df_ordered)
+
+ID=with(anno_ordered,interaction(time,bact),drop=T)
+m=model.matrix(~as.factor(ID)-1)
+
+##check sample id matches strain and time
+rownames(samplesbygenes)[10]
+which(m[10,]==1)
+```
+
+Now we compute the average for each subgroup of the uncentered read counts at each gene. Here, voom_class_adj will not acutally be adjusted byt the mean.
+
+```{r, echo=FALSE}
+voom_class_adj=samplesbygenes
+
+beta=matrix(NA,nrow = dim(voom_class_adj)[2],ncol=dim(m)[2])##make this the J genes by k subgroup betas
+se=matrix(NA,nrow = dim(voom_class_adj)[2],ncol=dim(m)[2])
+t=matrix(NA,nrow = dim(voom_class_adj)[2],ncol=dim(m)[2])
+colnames(se)=colnames(beta)=colnames(t)=as.matrix(levels(ID))
+for(k in 1:ncol(m)){
+  fit=lm((voom_class_adj)~(m[,k]-1))
+  a=matrix(unlist(coef(summary(fit))),byrow = T,nrow=ncol(voom_class_adj))
+  beta[,k]=a[,1]
+  se[,k]=a[,2]
+  t[,k]=a[,3]
+}
+
+
+
+write.table(beta,"betafitunadjust.txt",col.names = T)
+write.table(se,"sefitunadjust.txt",col.names = T)
+write.table(t,"tfitunadjust.txt",col.names = T)
+
+##check to make sure
+
+summary(lm(voom_class_adj[,37]~m[,8]-1))##model the expression of gene 37 on factor 9
+t[37,8]
+##show that beta is equal to the mean for those individuals
+
+mean(voom_class_adj[which(m[,8]==1),37])##mean gene expression for time point 18 individuals at gene 37
+b[37,8]
+
+```
+
+Now we compute factors on the centered T statistics:
+
+```{r}
+
+b=read.table("betafitunadjust.txt")
+se=read.table("sefitunadjust.txt")
+t=read.table("tfitunadjust.txt")
+
+###You can see uncentered###
+hist(as.matrix(b))
+R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+s.j=se/se
+w=t(L%*%t(t))
+hist(w)
+dim(w)##see that this omits a data point
+
+##now we want to compute the lfsr on the centered, but this is a problem because LVL' is obviously not diagonal. So we choose the genes who have max observed deviation greater than 2 in at least one stugbroutp
+
+# lf.ash=matrix(NA,ncol=ncol(w),nrow=nrow(w))
+# 
+# for(i in 1:ncol(w)){
+#   lf.ash[,i]=ash(betahat = w[,i],sebetahat = swj[,i],mixcompdist = "normal")$lfsr
+# }
+
+# thresh=0.10
+# 
+# index=which(rowSums(lf.ash<thresh)>0)
+# length(index)
+
+###this should be of the same dimension as v, so use the full projection matrix
+
+inde=
+strongprojectedt=t(L%*%t(t[index,]))
+##check to make sure rowSums 0
+rowSums(strongprojectedt)[1:10]
+
+write.table(strongprojectedt,"strongprojectedt.txt",col.names = F ,row.names = F)
+write.table(lf.ash,"lfash18unadjusted.txt")
+```
+
+Now, we need to project into the centered space to estimate the covariance matrix of the ture deviations, using the full L since $v$ will be R, and not $R-1$.
+
+```{r}
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedt.txt -g 78 -k 5 -n 8 i -o johnnobaseline')
+A="johnnobaseline"
+
+factor.mat=as.matrix(read.table("johnnobaseline_F.out"))
+lambda.mat=as.matrix(read.table("johnnobaseline_lambda.out"))
+
+initlist=init.covmat.single.with.projection(t.stat = strongprojectedt,factor.mat = factor.mat,lambda.mat = lambda.mat,Q = 5,P=3)
+
+
+##check to see correctly initalised, e.g., empirical covariance of strong projected t, full rank factor mat, and svd.
+
+plot(initlist[1,,],cov(strongprojectedt))
+M=nrow(strongprojectedt)
+full.rank=lambda.mat%*%factor.mat
+plot(initlist[2,,],(t(full.rank)%*%full.rank)/(M-1))
+
+P=3;X.c=apply(strongprojectedt,2,function(x) x-mean(x)) ##Column centered matrix of t statistics
+svd.X=svd(X.c)
+v=svd.X$v;u=svd.X$u;d=svd.X$d
+cov.pc=1/M*v[,1:P]%*%diag(d[1:P])%*%t(u[,1:P])%*%t(v[,1:P]%*%diag(d[1:P])%*%t(u[,1:P]))
+plot(cov.pc,initlist[3,,])
+
+q=3
+load=as.matrix(lambda.mat[,q])
+fact=as.matrix(factor.mat[q,])
+rank.prox=load%*%t(fact)
+a=(1/(M-1)*(t(rank.prox)%*% rank.prox))
+plot(as.matrix(a),as.matrix(initlist[3+q,,]))
+```
+
+Great, now let's run Bovy:
+Recall that we'll need w to be Mx(R-1) and the initialized covariacne matrices to be RxR, so we will use the full set of deviations to initatlise.
+```{r}
+
+wmax=w[index,]
+scaledsj=swj[index,]
+
+##and here are the initalizeing t.stats
+t.stat=(t(L%*%t(t[index,])))
+
+v.j=scaledsj^2
+
+
+
