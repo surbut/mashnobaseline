@@ -78,9 +78,9 @@ hist(as.matrix(b))
 R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
-w=t(L%*%t(t))
-hist(w)
-dim(w)##see that this omits a data point
+tcenteredfull=t(L%*%t(t))
+hist(tcenteredfull)
+dim(tcenteredfull)
 
 ##now we want to compute the lfsr on the centered, but this is a problem because LVL' is obviously not diagonal. So we choose the genes who have max observed deviation greater than 2 in at least one stugbroutp
 
@@ -97,19 +97,18 @@ dim(w)##see that this omits a data point
 
 ###this should be of the same dimension as v, so use the full projection matrix
 
-inde=
+index=which(rowSums(abs(tcenteredfull)>2)>0)
 strongprojectedt=t(L%*%t(t[index,]))
 ##check to make sure rowSums 0
 rowSums(strongprojectedt)[1:10]
 
 write.table(strongprojectedt,"strongprojectedt.txt",col.names = F ,row.names = F)
-write.table(lf.ash,"lfash18unadjusted.txt")
 ```
 
 Now, we need to project into the centered space to estimate the covariance matrix of the ture deviations, using the full L since $v$ will be R, and not $R-1$.
 
 ```{r}
-system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedt.txt -g 78 -k 5 -n 8 i -o johnnobaseline')
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedt.txt -g 858 -k 5 -n 8 i -o johnnobaseline')
 A="johnnobaseline"
 
 factor.mat=as.matrix(read.table("johnnobaseline_F.out"))
@@ -143,13 +142,48 @@ Great, now let's run Bovy:
 Recall that we'll need w to be Mx(R-1) and the initialized covariacne matrices to be RxR, so we will use the full set of deviations to initatlise.
 ```{r}
 
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+t.stat=(t(L%*%t(t[index,])))
+###here will be the ws and lvls
+L=L[-1,]
+w=t(L%*%t(t))
 wmax=w[index,]
-scaledsj=swj[index,]
+dim(wmax)
+lvlarray=genlvlarray(s.j = s.j[index,],L = L)
+dim(lvlarray)
 
 ##and here are the initalizeing t.stats
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 t.stat=(t(L%*%t(t[index,])))
+dim(t.stat)
+##right now this isn't working because of array issue, 
+##deconvolution.em.with.bovy(t.stat = t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvlarray,P = 3,L = L[-1,],Q = 5)
+```
 
-v.j=scaledsj^2
+Alternatively, we can generate using our old covmat function:
+```{r}
+library('mash')
+allcenteredt=(t(L%*%t(t)))
+sjmat=convertstandarderrors(s.j = s.j,L= L)##make this be the standard errors of all
+dim(allcenteredt)
+dim(sjmat)
 
+maxt=(t(L%*%t(t[index,])))
 
+c=compute.covmat(b.gp.hat = allcenteredt,sebetahat = sjmat,Q = 5,t.stat = maxt,lambda.mat = lambda.mat,P = 3,A = "test",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
+
+##you can see that these will all by 8x8##
+
+dim(c[[1]])
+```
+
+Now, let's fit the model and compute posteriors:
+```{r}
+compute.hm.train.log.lik.pen.with.L(w,se.train = s.j,covmat = c,A = "test",pen = 1,L = L[-1,])
+
+pis=readRDS(paste0("pis",A,".rds"))
+cov=c
+
+for(j in 1:nrow(w)){
+  total.quant.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = w,se.gp.hat = s.j,pis = pis,A = "test",checkpoint = F,L = L)}
 
