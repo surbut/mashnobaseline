@@ -1,13 +1,17 @@
 ---
-title: "Untitled"
+title: "Analysing John's Data with our New Approach"
 output: html_document
 ---
 
-Let's try this out with john's data at time point 18, and notperform the centering in advnace. Critcally, I'm going to use the raw counts, and then perform the voom normalization myself, and use the weights from limma.
+Let's try this out with john's data at time point 18, and notperform the centering in advnace. Critcally, I'm going to use the raw counts from John's Repo, and then perform the voom normalization myself, and use the weights from limma.
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+```
 
 ```{r}
 library("limma")
 library("edgeR")
+library('mash')
 
 full <- read.table("~/Dropbox/john/counts_per_sample.txt", header = TRUE,
                    stringsAsFactors = FALSE)
@@ -67,27 +71,13 @@ beta_class[j,k]
 Now we compute the average for each subgroup of the uncentered read counts at each gene. Here, voom_class_adj will not acutally be adjusted byt the mean.
 
 ```{r, echo=FALSE, eval=FALSE}
-# voom_class_adj=samplesbygenes
-# 
-# beta=matrix(NA,nrow = dim(voom_class_adj)[2],ncol=dim(m)[2])##make this the J genes by k subgroup betas
-# se=matrix(NA,nrow = dim(voom_class_adj)[2],ncol=dim(m)[2])
-# t=matrix(NA,nrow = dim(voom_class_adj)[2],ncol=dim(m)[2])
-# colnames(se)=colnames(beta)=colnames(t)=as.matrix(levels(ID))
-# for(k in 1:ncol(m)){
-#   fit=lm((voom_class_adj)~(m[,k]-1))
-#   a=matrix(unlist(coef(summary(fit))),byrow = T,nrow=ncol(voom_class_adj))
-#   beta[,k]=a[,1]
-#   se[,k]=a[,2]
-#   t[,k]=a[,3]
-# }
-
-
-
 write.table(beta_class,"beta_voomuncentered.txt",col.names = T)
 write.table(sebeta_class,"sebeta_voomuncentered.txt",col.names = T)
 write.table(t_class,"tvoom_uncentered.txt",col.names = T)
+```
 
-##check to make sure
+Check to make sure these are stored properly:
+```{r,check}
 j=8
 k=3
 lmFit(norm.expression,model_mat[,k],weights = weights)$coefficients[j,1]
@@ -108,24 +98,28 @@ se=read.table("sebeta_voomuncentered.txt")
 t=read.table("tvoom_uncentered.txt")
 
 ###You can see uncentered###
-hist(as.matrix(b))
-hist(as.matrix(t))
+hist(as.matrix(b),main="Uncentered Betas")
+hist(as.matrix(t),main="Uncentered Ts")
 R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
 
 
 tcenteredfull=t(L%*%t(t))
-hist(tcenteredfull)
+hist(tcenteredfull,main="Centered T")
 dim(tcenteredfull)
 ```
 
 Critically,this should be of the same dimension as v, so use the full projection matrix. I don't use an lfsr threshold (instead I use a projected t cutoff) because we know that using the standard errors as the diagonal of $LVL'$ ignores the correlation terms.
-```{r}
+
+```{r,eval=TRUE}
 index=which(rowSums(abs(tcenteredfull)>2)>0)
 strongprojectedt=t(L%*%t(t[index,]))
 ##check to make sure rowSums 0
 rowSums(strongprojectedt)[1:10]
+```
+
+```{r,echo=F,eval=F}
 write.table(strongprojectedt,"strongprojectedt.txt",col.names = F ,row.names = F)
 ```
 
@@ -138,11 +132,17 @@ A="johnnobaseline"
 factor.mat=as.matrix(read.table("johnnobaseline_F.out"))
 lambda.mat=as.matrix(read.table("johnnobaseline_lambda.out"))
 
+```
+
+Here are the matrices we will initialize BOVY with. Note that  t.stat is the matrix, MxR, of centered maximum t statistics.
+```{r}
+source("~/matrix_ash/R/mashnobasescripts.R")
 initlist=init.covmat.single.with.projection(t.stat = strongprojectedt,factor.mat = factor.mat,lambda.mat = lambda.mat,Q = 5,P=3)
+```
 
+We check to see correctly initalised, e.g., empirical covariance of strong projected t, full rank factor mat, and svd.
 
-##check to see correctly initalised, e.g., empirical covariance of strong projected t, full rank factor mat, and svd.
-
+```{r}
 plot(initlist[1,,],cov(strongprojectedt))
 M=nrow(strongprojectedt)
 full.rank=lambda.mat%*%factor.mat
@@ -164,25 +164,26 @@ plot(as.matrix(a),as.matrix(initlist[3+q,,]))
 
 Great, now let's run Bovy:
 
-Recall that we'll need $w$ to be Mx(R-1) and the initialized covariacne matrices to be RxR, so we will use the full set of deviations to initatlise.
+Recall that we'll need $w$ to be Mx(R-1) and the initialized covariacne matrices to be RxR, so we will use the full set of deviations to initatlise our covariance matrices, and 'train Bovy' for the scales on the centered maximum T that are $Mx(R-1)$,
+
+Here are the initalizing t.stats,e.g., the MxR matrix of maximums acorss all
 ```{r}
-
-L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
-t.stat=(t(L%*%t(t[index,])))
-###here will be the ws and lvls, these need to be R-1xR-1
-L=L[-1,]
-w=t(L%*%t(t))
-wmax=w[index,]
-dim(wmax)
-lvlarray=genlvlarray(s.j = s.j[index,],L = L)
-dim(lvlarray)
-
-##and here are the initalizing t.stats,e.g., the MxR matrix of maximums acorss all
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 t.stat=(t(L%*%t(t[index,])))
 dim(t.stat)
 ```
-Curretnly, Bovy's R apprroach requires the S be diagonal (i.e., you put in a matrix of standard erros) when we know that w|Lv ~ N(Lv,LVL'), so we use our old covariance function with the matrices that we would have used to initalize Bovy (i.e., various rank approximations of the empirical covariance matrix of centered T statistics).
+
+Here will be the ws and lvls, these need to be R-1xR-1 and of the transformed max $t$ statistcis, not $betahats$.
+```{r}
+L=L[-1,]
+wt=t(L%*%t(t))
+wtmax=wt[index,]
+dim(wtmax)
+lvlarray=genlvlarray(s.j = s.j[index,],L = L)
+dim(lvlarray)
+```
+
+Currently, Bovy's R approach requires the S be diagonal (i.e., you put in a matrix of standard erros) when we know that w|Lv ~ N(Lv,LVL'), so we use our old covariance function with the matrices that we would have used to initalize Bovy (i.e., various rank approximations of the empirical covariance matrix of centered T statistics).
 
 
 ```{r,eval=FALSE}
@@ -192,33 +193,28 @@ Curretnly, Bovy's R apprroach requires the S be diagonal (i.e., you put in a mat
 deconvolution.em.with.bovy(t.stat = t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvlarray,P = 3,L = L[-1,],Q = 5,w)
 ```
 
-Alternatively, we can generate using our old covmat function. Let's use the EE model, so we estimate the grid, fit and compute posteriors using w as the transformed betahat.
+Alternatively, we can generate using our old covmat function. Let's use the EE model, so we estimate the grid, fit and compute posteriors using $w$ as the transformed betahat.
 
 ```{r}
-library('mash')
+
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 allcenteredt=(t(L%*%t(t)))
 maxt=(t(L%*%t(t[index,])))
-
-
-
 ##w should represent transformed betahats using all
 wfull=t(L%*%t(b))
 sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR.
 dim(wfull)
 dim(sjmat)
-
 A="jul22"
-c=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = maxt,lambda.mat = lambda.mat,P = 3,A = "jul22",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
+cov=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = maxt,lambda.mat = lambda.mat,P = 3,A = "jul22",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
 ##you can see that these will all by 8x8##
-dim(c[[1]])
-length(c)
+dim(cov[[1]])
+length(cov)
 ```
 
 Now, let's fit the model and compute posteriors on the reduced w:
-```{r}
+```{r,eval=FALSE}
 A="jul22"
-
-
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 R=ncol(L)
 w=t(L[-R,]%*%t(b))
@@ -226,55 +222,62 @@ w=t(L[-R,]%*%t(b))
 wfull[1,]
 w[1,]
 
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = c,A = A,pen = 1,L = L[-1,])
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L = L[-1,])
 
 pis=readRDS(paste0("pis",A,".rds"))$pihat
-cov=c
+covmat=cov=c
 
 for(j in 1:nrow(w)){
   total.quant.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}
-
 ```
-##check
+
+Check
 ```{r}
+
 j=137
 k=5
 se.gp.hat=se
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
-b.gp.hat=w
+R=ncol(L)
+w=t(L[-R,]%*%t(b))
+b.gp.hat=data.frame(w)
 R=ncol(L)
 L=L[-1,]
 b.mle=as.vector(t(b.gp.hat[j,]))
-K=length(covmat)
+K=length(c)
 R=ncol(L)
 V.gp.hat=diag(se.gp.hat[j,])^2
 LVL=L%*%V.gp.hat%*%t(L)
-tinvlist=lapply(covmat,function(x){solve(LVL+L%*%x%*%t(L))})
+A="jul22"
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+tinvlist=lapply(cov,function(x){solve(LVL+L%*%x%*%t(L))})
 mupost=post.mean.with.proj(b.mle = b.mle,tinv = tinvlist[[k]],U.k = cov[[k]],L = L)
 covpost=post.cov.with.proj(tinv = tinvlist[[k]],U.k = cov[[k]],L = L)
-a=post.array.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = b.gp.hat,se.gp.hat = s.j,L = L)
+a=post.array.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = b.gp.hat,se.gp.hat = se,L = L)
 all.equal(as.numeric(a$post.means[k,]),as.numeric(mupost))
-all.equal(as.numeric(a$post.covs[k,]),diag((covpost)))
+all.equal(as.numeric(a$post.covs[k,]),as.numeric(diag((covpost))))
 
 LVL=L%*%V.gp.hat%*%t(L)###redfine V.jhat as the marginal varianc of Lchat which is LVL'
-LSigL=lapply(covmat,function(x){L%*%x%*%t(L)})##redefine Sigma_p as a list of the variance of Lv (i.e., LUkL')
+LSigL=lapply(cov,function(x){L%*%x%*%t(L)})##redefine Sigma_p as a list of the variance of Lv (i.e., LUkL')
 log.lik.snp=log.lik.func(b.mle,LVL,LSigL)
 log.lik.minus.max=log.lik.snp-max(log.lik.snp)
   
 exp.vec=exp(log.lik.minus.max)
 post.weights=t(exp.vec*pis/sum(exp.vec*pis))
-mash.means=read.table("testposterior.means.txt")[,-1]
+mash.means=read.table("jul22posterior.means.txt")[,-1]
+colnames(mash.means)=levels(groups$bact)[-1]
 all.equal(as.numeric(post.weights%*%a$post.means),as.numeric(mash.means[j,]))
 ```
 
 And here, we plot the patterns of sharing:
 ```{r}
 library('gplots')
-
+barplot(colSums(matrix(pis[-433],byrow = T,ncol=18)))
 
 for(k in 2:9){
-  x=cov([[k]])
-  colnames(x)=rownames(x)=colnames(t)
-  heatmap.2(cov[[k]],revC=T,dendrogram=F,main=paste0("Pattern",k))}
-}
+  x=cov[[k]]
+  colnames(x)=rownames(x)=levels(groups$bact)[-1]
+  heatmap.2(x,revC=T,dendrogram=NULL,main=paste0("Uk",k))
+  }
+
 ```

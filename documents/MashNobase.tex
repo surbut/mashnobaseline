@@ -146,10 +146,11 @@ Where $E \sim \Norm (0, L\hat{V} L')$
 
 \subsection{Selecting The Covariance Matrices}
 
-We initiate our set of covariance matrices for the denoising step as before in $\mash$, where now we compute the empirical covariance matrices and a variety of dimensional reductions on the feature-centered JxR \textit{matrix} of maximum average, $L \hat{C}' $ instead of $\hat{C}$ alone. In practice, we actually use the matrix of maximum uncentered statistics. Two critical things to note:
+We initiate our set of covariance matrices for the denoising step as before in $\mash$, where now we compute the empirical covariance matrices and a variety of dimensional reductions on the feature-centered JxR \textit{matrix} of maximum average, $L \hat{C}' $ instead of $\hat{C}$ alone. In practice, we actually use the matrix of maximum uncentered $T$ statistics. Three critical things to note:
 
 \begin{itemize}
-\item Here, L will be $RxR$because we need $U_{k}$ to be RxR
+\item Here, L will be $RxR$ because we need $U_{k}$ to be RxR
+\item When denoising with Bovy, our previous approach used the matrix of maximum t statistics to both initialize and train the BovyEM. Now, we will initalize with the MXR matrix of $L_{R,R}T$ and train the EM on the MxR-1 matrix of maximum $L_{R,R-1} T$
 \item When choosing omega, we will use the diagonal of $L V L'$, where $V$ is $D(s.j^2)$
 \end{itemize}
 
