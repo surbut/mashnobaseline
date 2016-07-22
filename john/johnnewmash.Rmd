@@ -270,14 +270,15 @@ all.equal(as.numeric(post.weights%*%a$post.means),as.numeric(mash.means[j,]))
 ```
 
 And here, we plot the patterns of sharing:
-```{r}
+```{r,echo=F}
 library('gplots')
+library('colorRamps')
 barplot(colSums(matrix(pis[-433],byrow = T,ncol=18)))
 
 for(k in 2:9){
   x=cov[[k]]
   colnames(x)=rownames(x)=levels(groups$bact)[-1]
-  heatmap.2(x,revC=T,dendrogram=NULL,main=paste0("Uk",k))
+  heatmap.2(x,revC=T,dendrogram="none",main=paste0("Uk",k),density.info = "none",trace="none",col=blue2green(256))
   }
 
 ```
