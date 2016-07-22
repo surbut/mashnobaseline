@@ -14,3 +14,6 @@ Vignettes/Reprosim/*files*
 */*_files*/
 gh-pages
 */*.txt*
+*.out*
+*.Rda*
+*.rds*
