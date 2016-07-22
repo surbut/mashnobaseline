@@ -192,44 +192,54 @@ Curretnly, Bovy's R apprroach requires the S be diagonal (i.e., you put in a mat
 deconvolution.em.with.bovy(t.stat = t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvlarray,P = 3,L = L[-1,],Q = 5,w)
 ```
 
-Alternatively, we can generate using our old covmat function:
+Alternatively, we can generate using our old covmat function. Let's use the EE model, so we estimate the grid, fit and compute posteriors using w as the transformed betahat.
+
 ```{r}
 library('mash')
 allcenteredt=(t(L%*%t(t)))
-sjmat=convertstandarderrors(s.j = s.j,L= L)##make this be the standard errors of all, it is the diagaonl of LVL' for each j.
-dim(allcenteredt)
-dim(sjmat)
-
 maxt=(t(L%*%t(t[index,])))
 
+
+
+##w should represent transformed betahats using all
+wfull=t(L%*%t(b))
+sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR.
+dim(wfull)
+dim(sjmat)
+
 A="jul22"
-c=compute.covmat(b.gp.hat = allcenteredt,sebetahat = sjmat,Q = 5,t.stat = maxt,lambda.mat = lambda.mat,P = 3,A = "jul22",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
+c=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = maxt,lambda.mat = lambda.mat,P = 3,A = "jul22",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
 ##you can see that these will all by 8x8##
 dim(c[[1]])
 length(c)
 ```
 
-Now, let's fit the model and compute posteriors:
+Now, let's fit the model and compute posteriors on the reduced w:
 ```{r}
 A="jul22"
-w=data.frame(w)
-R=ncol(t)
-L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 
-compute.hm.train.log.lik.pen.with.L(w,se.train = s.j,covmat = c,A = A,pen = 1,L = L[-1,])
+
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+R=ncol(L)
+w=t(L[-R,]%*%t(b))
+##which is just like removing a column of wfull
+wfull[1,]
+w[1,]
+
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = c,A = A,pen = 1,L = L[-1,])
 
 pis=readRDS(paste0("pis",A,".rds"))$pihat
 cov=c
 
 for(j in 1:nrow(w)){
-  total.quant.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = w,se.gp.hat = s.j,pis = pis,A = A,checkpoint = F,L = L[-1,])}
+  total.quant.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}
 
 ```
 ##check
 ```{r}
 j=137
 k=5
-se.gp.hat=s.j
+se.gp.hat=se
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 b.gp.hat=w
 R=ncol(L)
