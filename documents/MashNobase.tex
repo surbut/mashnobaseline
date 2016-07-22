@@ -146,7 +146,17 @@ Where $E \sim \Norm (0, L\hat{V} L')$
 
 \subsection{Selecting The Covariance Matrices}
 
-We initiate our set of covariance matrices for the denoising step as before in $\mash$, where now we compute the empirical covariance matrices and a variety of dimensional reductions on the feature-centered JxR \textit{matrix} of maximum average, $L \hat{C}' $ instead of $\hat{C}$ alone. In practice, we actually use the matrix of maximum uncentered Z statistics.
+We initiate our set of covariance matrices for the denoising step as before in $\mash$, where now we compute the empirical covariance matrices and a variety of dimensional reductions on the feature-centered JxR \textit{matrix} of maximum average, $L \hat{C}' $ instead of $\hat{C}$ alone. In practice, we actually use the matrix of maximum uncentered statistics. Two critical things to note:
+
+\begin{itemize}
+\item Here, L will be $RxR$because we need $U_{k}$ to be RxR
+\item When choosing omega, we will use the diagonal of $L V L'$, where $V$ is $D(s.j^2)$
+\end{itemize}
+
+
+\section{Likelihood}
+
+Now we will replace the RxR matrix $L$ with the RxR-1 matrix $L*$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
 
 Now for each gene J at each component k, integrating over $\vb$,
 
@@ -154,18 +164,19 @@ Now for each gene J at each component k, integrating over $\vb$,
 \begin{equation}
 \begin{aligned}
 \label{maxlike}
-L \ceff \sim \Norm (0, L U_{k} L') \\
-L \chat \sim \Norm (0, L U_{k} L' + L\hat{V} L') 
+L_{R-1,R} \ceff \sim \Norm (0, L_{R-1,R} U_{k} L_{R-1,R} ') \\
+L_{R-1,R} \chat \sim \Norm (0, L_{R-1,R}  U_{k} L_{R-1,R} ' + L_{R-1,R} \hat{V} L_{R-1,R} ') 
 \end{aligned}
 \end{equation}
+
 
 And thus we can use the Bovy et al algorithm invoked in both the Extreme Deconvolution package and in `Sarah's MixEm' where:
 
 \begin{equation}
- T_{jp} = L U_k L' + L\hat{V}_{j} L'
+ T_{jp} = L_{R-1,R} U_k L_{R-1,R}' + L_{R-1,R} \hat{V}_{j} L_{R-1,R}'
 \end{equation}
 
-And as mentioned, L is the $RxR$ centering matrix for each gene, and $w_{j} = L \chat_{j}$.
+For each gene, and $w_{j} = L_{R-1,R} \chat_{j}$.
 
 Recall that our previous approach was simplified by the fact that $\bm{w}_{j}$ was simply $\hat{\bm{b}_{j}}$ and the projection matrix was simply the $I_{r}$ identity matrix. Our inference on $\bm{b}$ was analogous to their inference on $\bv_{j}$. 
 
@@ -175,7 +186,7 @@ As before, we are interested in returning the prior covariance $U_k$ matrices of
 and choose the set of $\pi$ that maximizes compute the following likelihood at each of the P components: 
 
 \begin{equation}
-L \chat _j \sim \Norm (0, L \Sigma_{p} L' + L\hat{V_j} L') 
+L_{R-1,R}  \chat _j \sim \Norm (0, L_{R-1,R}  \Sigma_{p} L_{R-1,R} ' + L_{R-1,R} \hat{V_j} L_{R-1,R} ') 
 \end{equation}
  
 
@@ -184,78 +195,78 @@ L \chat _j \sim \Norm (0, L \Sigma_{p} L' + L\hat{V_j} L')
 Now, as before we can compute a posterior distribution such that:
 
 \begin{equation}
-\vb | \L \chat, \pi, \Sigma, \bm{s} \sim N(\mu^{1} , U^{1})
+\vb | L_{R-1,R}  \chat, \pi, \Sigma, \bm{s} \sim N(\mu^{1} , U^{1})
 \end{equation}
 
 Where at each of the P components for each gene J 
 
 \begin{equation}
 \begin{aligned}
-\mu^{1}_{jp} = \Sigma_{p} L' T_{jp}^{-1} L \chat_{j} \\
-U^{1}_{jp} = \Sigma_{p} - \Sigma_p L' T_{jp}^{-1} L \Sigma_{p}
+\mu^{1}_{jp} = \Sigma_{p} L_{R-1,R} ' T_{jp}^{-1} L_{R-1,R}  \chat_{j} \\
+U^{1}_{jp} = \Sigma_{p} - \Sigma_p L_{R-1,R} ' T_{jp}^{-1} L_{R-1,R}  \Sigma_{p}
 \end{aligned}
 \end{equation}
 
-In our old code, L was just the identity:
-
-\begin{equation}
-\begin{aligned}
-\mu^{1}_{jp} = \Sigma_{p}  T_{jp}^{-1}  \chat_{j} \\
-U^{1}_{jp} = \Sigma_{p} - \Sigma_p  T_{jp}^{-1}  \Sigma_{p}
-\end{aligned}
-\end{equation}
-
-and was equivalent to :
-
-\begin{equation}
-\begin{aligned}
-U^{1}_{jp}  = (\Sigma_{p}^{-1} + \hat{V}_{j}^{-1})^{-1}\\
-\mu^{1}_{jp} = U^{1}_{jp} (\hat{V}_{j}^{-1} \bm{w})
-\end{aligned}
-\end{equation}
-
-
-
-If we now replace 
-
-\begin{equation}
-\begin{aligned}
-\Sigma*_{p} &= L \Sigma_{p} L' \\
-\hat{V}* &=  L\hat{V_j} L'\\
-\bm{w}&=L \chat_{j}
-\end{equation}
-\end{aligned}
-
-
-And let the new $L$ be the identity, we would get the following:
-
-\begin{equation}
-\begin{aligned}
-\mu^{1}_{jp} = \Sigma*_{p} T_{jp}^{-1} L \chat_{j} \\
-U^{1}_{jp} = \Sigma*_{p} - \Sigma*_p T_{jp}^{-1}  \Sigma*_{p}
-\end{aligned}
-\end{equation}
-
-But as you can see that isn't going to work because in the Bovy equation, $\Sigma$ should represent the prior covariance of the '`true` deviation v, while here, $\Sigma*$ represent the covariance of $\ceff$, $L\bv$ which is $L \Sigma* L$
-
-Then we can return our old posteriors:
-
-\begin{equation}
-\begin{aligned}
-U^{1}_{jp}  = (\Sigma_{p}^{-1} + \hat{V}_{j}^{-1})^{-1}\\
-\mu^{1}_{jp} = U^{1}_{jp} (\hat{V}_{j}^{-1} \bm{w})
-\end{aligned}
-\end{equation}
-
-And 
-\begin{equation}
-\vb \sim \sum_p \tilde{\pi}_{p}   \Norm ( \mu_{p}^{1}, U_{p}^{1})
-\end{equation}
-
-Where 
-\begin{equation}
-\tilde{\pi}_{jp} = \frac{\Norm(L\chat;0, T_{jp})}{\sum_{p} \Norm(L\chat;0, T_{jp})}
-\end{equation}
+%In our old code, L was just the identity:
+%
+%\begin{equation}
+%\begin{aligned}
+%\mu^{1}_{jp} = \Sigma_{p}  T_{jp}^{-1}  \chat_{j} \\
+%U^{1}_{jp} = \Sigma_{p} - \Sigma_p  T_{jp}^{-1}  \Sigma_{p}
+%\end{aligned}
+%\end{equation}
+%
+%and was equivalent to :
+%
+%\begin{equation}
+%\begin{aligned}
+%U^{1}_{jp}  = (\Sigma_{p}^{-1} + \hat{V}_{j}^{-1})^{-1}\\
+%\mu^{1}_{jp} = U^{1}_{jp} (\hat{V}_{j}^{-1} \bm{w})
+%\end{aligned}
+%\end{equation}
+%
+%
+%
+%If we now replace 
+%
+%\begin{equation}
+%\begin{aligned}
+%\Sigma*_{p} &= L \Sigma_{p} L' \\
+%\hat{V}* &=  L\hat{V_j} L'\\
+%\bm{w}&=L \chat_{j}
+%\end{equation}
+%\end{aligned}
+%
+%
+%And let the new $L$ be the identity, we would get the following:
+%
+%\begin{equation}
+%\begin{aligned}
+%\mu^{1}_{jp} = \Sigma*_{p} T_{jp}^{-1} L \chat_{j} \\
+%U^{1}_{jp} = \Sigma*_{p} - \Sigma*_p T_{jp}^{-1}  \Sigma*_{p}
+%\end{aligned}
+%\end{equation}
+%
+%But as you can see that isn't going to work because in the Bovy equation, $\Sigma$ should represent the prior covariance of the '`true` deviation v, while here, $\Sigma*$ represent the covariance of $\ceff$, $L\bv$ which is $L \Sigma* L$
+%
+%Then we can return our old posteriors:
+%
+%\begin{equation}
+%\begin{aligned}
+%U^{1}_{jp}  = (\Sigma_{p}^{-1} + \hat{V}_{j}^{-1})^{-1}\\
+%\mu^{1}_{jp} = U^{1}_{jp} (\hat{V}_{j}^{-1} \bm{w})
+%\end{aligned}
+%\end{equation}
+%
+%And 
+%\begin{equation}
+%\vb \sim \sum_p \tilde{\pi}_{p}   \Norm ( \mu_{p}^{1}, U_{p}^{1})
+%\end{equation}
+%
+%Where 
+%\begin{equation}
+%\tilde{\pi}_{jp} = \frac{\Norm(L\chat;0, T_{jp})}{\sum_{p} \Norm(L\chat;0, T_{jp})}
+%\end{equation}
 
 \section{Differences required over $\mash$ implementation}
 
@@ -267,17 +278,20 @@ Where
 	\item choose our set of scales, $\omega_{l}$
 	\item compute our hierarchical weights, $\bm{\pi}_{p}$ as well as our posteriors. 
 \end{enumerate}
-\item The new distribution we seek to estimate for each j is then $v | L \chat , \bm{s}_{j}$
+\item It is critical to note that here \textbf{L will need to be RxR because $U_{k}$ must be RxR}
+\item The new distribution we seek to estimate for each j is then $v | L_{R-1,R} \chat , \bm{s}_{j}$
+\item To choose the maxes, I think we ought to use a $w_{j}$ cutoff since computing the univariate lfsr on $w_{j}$ and the diagonal of $LVL'$ assumes that $LVL'$ is diagonal when we know it cannot be.
 \end{itemize}
 
-Some questions:
-
-\begin{itemize}
-\item How is using $\bm{w}_{j}$ as $L\chat_{j}$ as the data from which we estimate our model different than initializing with the vectors of $\hat{\bm{b}}$ that have been computed on $\textit{feature centered data}$?
-\item  I think it is because we are now broadly incorporating the centering information into our prior on $L \ceff$ as well, such that at each component for each gene, $L \ceff_{j} \sim \Norm (0, L \Sigma_{jp} L')$.
-\item If this is the case, we will probably need to denoise all of the initiation matrices (not just the multirank Uk) since previously our projection matrix was the Identity
-\item Since our input will still be that matrix   \hat{C}  of uncentered noisy averages and their standard errors, our scaling parameter $\omega$ ought to be chosen consistent with $L \hat C$, and not $\hat C$, since this will tend to scale with the true deviations $\vb_{j}$.
-\end{itemize}
+%Some questions:
+%
+%\begin{itemize}
+%\item How is using $\bm{w}_{j}$ as $L\chat_{j}$ as the data from which we estimate our model different than initializing with the vectors of $\hat{\bm{b}}$ that have been computed on $\textit{feature centered data}$?
+%\item  I think it is because we are now broadly incorporating the centering information into our prior on $L \ceff$ as well, such that at each component for each gene, $L \ceff_{j} \sim \Norm (0, L \Sigma_{jp} L')$.
+%\item If this is the case, we will probably need to denoise all of the initiation matrices (not just the multirank Uk) since previously our projection matrix was the Identity
+%\item Since our input will still be that matrix   $\hat{C}$  of uncentered noisy averages and their standard errors, our scaling parameter $\omega$ ought to be chosen consistent with $L \hat C$, and not $\hat C$, since this will tend to scale with the true deviations $\vb_{j}$. 
+%\item In practice, it probably won't matter if we use the $L_{R-1,R} $ or $L_{R,R}$ to choose the scaling factors, but it becomes a bit tricky when we specify the standard errors as the diagonal of $L_{R-1,R} V L_{R-1,R} '$, since we know this marginal covariance is not really diagonal.
+%\end{itemize}
 
 %\subsection{E-Step}
 %For a data set with J gene snp pairs and $K$ components:

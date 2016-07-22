@@ -2,5 +2,6 @@
 \BOOKMARK [1][-]{section.2}{Defining the Old Model}{}% 2
 \BOOKMARK [1][-]{section.3}{Applications}{}% 3
 \BOOKMARK [2][-]{subsection.3.1}{Selecting The Covariance Matrices}{section.3}% 4
-\BOOKMARK [1][-]{section.4}{Posteriors}{}% 5
-\BOOKMARK [1][-]{section.5}{Differences required over mash implementation}{}% 6
+\BOOKMARK [1][-]{section.4}{Likelihood}{}% 5
+\BOOKMARK [1][-]{section.5}{Posteriors}{}% 6
+\BOOKMARK [1][-]{section.6}{Differences required over mash implementation}{}% 7

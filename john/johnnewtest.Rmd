@@ -6,12 +6,23 @@ output: html_document
 Let's try this out with john's data at time point 19, and not do the centering:
 
 ```{r}
+# library('limma')
+# library('edgeR')
+# 
+# full <- read.table("counts_per_sample.txt", header = TRUE,stringsAsFactors = FALSE)
+# full <- full[order(full$dir), ]
+# rownames(full) <- paste(full$dir, full$ind, full$bact, full$time, sep = ".")
+# counts <- t(full[, grep("ENSG", colnames(full))])
+# # Filter lowly expressed genes
+# counts <- counts[rowSums(cpm(counts) > 1) > 6, ]
+
+
 x <- read.table("~/Dropbox/john/s1table.txt", header = TRUE)
 y=x[,-c(1,2)]
 anno <- read.table("~/Dropbox/john/annotation.txt", header = TRUE, stringsAsFactors = FALSE)
 head(anno)
 
-df_ordered <- y[, order(anno$time, anno$bact, anno$ind)]
+df_ordered <- counts[, order(anno$time, anno$bact, anno$ind)]
 anno_ordered <- anno[order(anno$time, anno$bact, anno$ind), ]
 
 eighteenguys=which(anno_ordered$time==18&anno_ordered$bact!="none")
@@ -19,6 +30,8 @@ eighteenguys=which(anno_ordered$time==18&anno_ordered$bact!="none")
 anno_ordered=anno_ordered[eighteenguys,]
 df_ordered=df_ordered[,eighteenguys]
 ##we transpose so rows are indiviudals
+
+
 
 
 samplesbygenes=t(df_ordered)
@@ -68,7 +81,6 @@ b[37,8]
 Now we compute factors on the centered T statistics:
 
 ```{r}
-
 b=read.table("betafitunadjust.txt")
 se=read.table("sefitunadjust.txt")
 t=read.table("tfitunadjust.txt")
@@ -78,6 +90,8 @@ hist(as.matrix(b))
 R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
+
+
 tcenteredfull=t(L%*%t(t))
 hist(tcenteredfull)
 dim(tcenteredfull)
@@ -126,7 +140,7 @@ plot(as.matrix(a),as.matrix(initlist[3+q,,]))
 ```
 
 Great, now let's run Bovy:
-Recall that we'll need w to be Mx(R-1) and the initialized covariacne matrices to be RxR, so we will use the full set of deviations to initatlise.
+Recall that we'll need $w$ to be Mx(R-1) and the initialized covariacne matrices to be RxR, so we will use the full set of deviations to initatlise.
 ```{r}
 
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
@@ -178,9 +192,9 @@ cov=c
 for(j in 1:nrow(w)){
   total.quant.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = w,se.gp.hat = s.j,pis = pis,A = "test",checkpoint = F,L = L[-1,])}
 
-
+```
 ##check
-
+```{r}
 j=137
 k=5
 se.gp.hat=s.j
@@ -210,3 +224,14 @@ post.weights=t(exp.vec*pis/sum(exp.vec*pis))
 mash.means=read.table("testposterior.means.txt")[,-1]
 all.equal(as.numeric(post.weights%*%a$post.means),as.numeric(mash.means[j,]))
 ```
+
+And here, we plot the patterns of sharing:
+```{r}
+library('gplots')
+
+
+for(k in 2:9){
+  x=cov([[k]])
+  colnames(x)=rownames(x)=colnames(t)
+  heatmap.2(cov[[k]],revC=T,dendrogram=F,main=paste0("Pattern",k))}
+}
