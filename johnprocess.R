@@ -32,7 +32,6 @@ voom2 <- function(counts){
 
 }
 
-known.samples=
 
 
 groups <- full[, c("ind", "bact", "time", "extr", "rin")]
