@@ -121,7 +121,7 @@ $(document).ready(function () {
 
 <p>With our new model, we’ve written some code. We assure ourselves that when the porjection matrix is the identity, nothing changes:</p>
 <pre class="r"><code>rm(list=ls())
-source('~/mashnobaseline/mashnobasescripts.R')
+#source('~/matrix_ash/R/mashnobasescripts.R')
 library('mash')</code></pre>
 <pre><code>## Loading required package: SQUAREM</code></pre>
 <pre><code>## Loading required package: mvtnorm</code></pre>
@@ -172,11 +172,11 @@ L=L[-44,]</code></pre>
 <p>Recall that in our model,</p>
 <p><span class="math">\[Ceff_{R}=\mu_{R} + v_{R}\]</span> <span class="math">\[Chat_{R} = \mu_{R} + v_{R} + E_{R}\]</span></p>
 <p>where <span class="math">\[v_{R} \sim N(0,Uk)\]</span> and <span class="math">\[E_{R} ~ N(0,V)\]</span></p>
-<p><span class="math">\[(LCefff)_{R-1} = (Lv)_{R-1)\]</span> <span class="math">\[LChat = Lv + E*\]</span></p>
+<p><span class="math">\[LCeff_{R-1} = (Lv)_{R-1}\]</span> <span class="math">\[LChat = Lv + E*\]</span></p>
 <p>where <span class="math">\[E_{R-1}* ~ N(0,LVL')\]</span> and <span class="math">\[(Lv)_{R-1} ~ N(0,LUkL')\]</span> so that <span class="math">\[(LChat)_{R-1}|V ~ N(0,LVL' + LUkL')\]</span></p>
 <pre class="r"><code>rm(list=ls())
 rm(list=ls())
-source('~/mashnobaseline/mashnobasescripts.R')
+#source('~/matrix_ash/mashnobasescripts.R')
 
 
 R=44
@@ -198,6 +198,7 @@ t=total.quant.per.snp.no.baseline(j=10,covmat = covmat,b.gp.hat = b.gp.hat,se.gp
 lvlobject=t$LVL
 LSigList=t$LSigL
 tinvlist=t$tinvlist
+vo=genlvlarray(s.j = se.train,L = L)
 
 k=3
 V.gp.hat=diag(se.train[j,])^2
@@ -208,7 +209,7 @@ identical(solve(LVL+L%*%covmat[[k]]%*%t(L)),tinvlist[[k]])</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 <pre class="r"><code>mean(as.numeric(lapply(seq(1:length(covmat)),function(x){identical(LSigList[[x]],L%*%covmat[[x]]%*%t(L))})))</code></pre>
 <pre><code>## [1] 1</code></pre>
-<pre class="r"><code>identical(LVL,lvlobject)</code></pre>
+<pre class="r"><code>identical(LVL,lvlobject,vo[j,,])</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 <pre class="r"><code>arrays=post.array.per.snp.no.baseline(j = 10,covmat = covmat,b.gp.hat = b.gp.hat,se.gp.hat = se.train,L = L)
 identical(as.numeric(arrays$post.means[k,]),as.numeric(post.mean.with.proj(b.mle = t(as.vector(b.gp.hat[j,])),tinv = solve(LVL+L%*%covmat[[k]]%*%t(L)),U.k = covmat[[k]],L = L)))</code></pre>
