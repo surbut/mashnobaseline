@@ -7,7 +7,7 @@ Let's try this out with john's data at time point 18, and notperform the centeri
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(cache=TRUE)
 ```
-
+First, let's generate the voom weights accoridng to John's pipeline
 ```{r}
 library("limma")
 library("edgeR")
@@ -48,57 +48,75 @@ Preparing the data for modeling:
 *  Normalize with TMM (`calcNormFactors`)
 *  Transform with `voom`
 
+John's model:
+
 ```{r model}
-design <- model.matrix(~ ind + with(groups,interaction(time,bact),drop=T)+ extr + rin-1, data = groups)##since we're only considering one time point collapse
+design <- model.matrix(~ ind + bact*time + extr + rin, data = groups)
 # Clean up names of design matrix
 colnames(design) <- gsub("ind", "", colnames(design))
-colnames(design) = gsub("with(groups, interaction(time, bact), drop = T)","t",colnames(design))
 colnames(design) <- gsub("time", "t", colnames(design))
 colnames(design) <- gsub("bact", "", colnames(design))
 colnames(design) <- gsub(":", ".", colnames(design))
+colnames(design)[1] <- "Intercept"
+# Remove Staph 48 hr timepoint that does not exist
+design <- design[, -which(colnames(design) == "Staph.t48")]
+print(colnames(design))
+y <- DGEList(counts)
+y <- calcNormFactors(y)
+v <- voom(y, design)
+johnsweights=v$weights
+head(johnsweights)
+```
+
+My model: 
+```{r model}
+model_mat <- model.matrix(~ bact + extr + rin- 1, data = groups)
+# Clean up names of design matrix
+colnames(model_mat) <- gsub("bact", "", colnames(model_mat))
+colnames(model_mat) <- gsub(":", ".", colnames(model_mat))
 #colnames(design)[1] <- "Intercept"
 # Remove Staph 48 hr timepoint that does not exist
+#design <- design[, -which(colnames(design) == "Staph.t48")]
+print(colnames(model_mat))
 
-groups <- full[, c("ind", "bact", "time", "extr", "rin")]
-groups$bact <- gsub("\\+", "plus", groups$bact)
-groups$ind <- factor(groups$ind)
-groups$bact <- factor(groups$bact, levels = c("none", "Rv", "Rvplus", "GC",
-                                              "BCG", "Smeg", "Yers", "Salm",
-                                              "Staph"))
-groups$time <- factor(groups$time, levels = c(4, 18, 48))
-groups$extr <- factor(groups$extr)
-head(groups)
-dim(groups)
-
-# Remove Staph 48 hr timepoint that does not exist
-
-
+###now just do for time point 18
 knownsamples=which(groups$time==18&groups$bact!="none")
-counts_class=counts[,knownsamples]
-dim(counts_class)
+model_mat <- model_mat[knownsamples,-which(colnames(model_mat) == "none")]##remove the none column
+dim(model_mat)
 
-model_mat <- design[knownsamples,]##remove the none column
+vsarah <- voom(y[,knownsamples], model_mat)
+sarahsweights=vsarah$weights
+```
+
+```{r}
 ##show how many individuals in each class##
-colSums(model_mat)
-beta_class <- matrix(0, dim(counts_class)[1], dim(model_mat)[2]);
-sebeta_class <- matrix(0, dim(counts_class)[1], dim(model_mat)[2])
-t_class = matrix(0, dim(counts_class)[1], dim(model_mat)[2])
+colSums(model_mat)[c(7:14)]
+beta_class <- matrix(0, dim(counts_class)[1], 8);
+sebeta_class <- matrix(0, dim(counts_class)[1], 8)
+t_class = matrix(0, dim(counts_class)[1], 8)
 
 colnames(counts_class)[10]
 which(model_mat[10,]==1)
 
 ##voomobject without design matrix, voom takes a JxN matrix
 dim(counts_class)
-voom.obj=voom((counts_class))
+voom.obj=voom(y,design=model_mat)
 norm.expression=voom.obj$E##this takes the log2 counts normalized for library size
 weights=voom.obj$weights##numeric matrix of inverse variance weights
 ##fit with limma weights
-for(k in 1:dim(model_mat)[2]){
-  model_mat_temp <- cbind(model_mat[,k]);
-  limma.obj <- limma::lmFit(norm.expression, model_mat_temp,weights=weights);
-  beta_class[,k] <- as.matrix(limma.obj$coefficients[,1]);
-  sebeta_class[,k] <- limma.obj$sigma*(as.matrix(limma.obj$stdev.unscaled[,1]));
-  t_class[,k] = (as.matrix(limma.obj$coefficients[,1]))/(limma.obj$sigma*(as.matrix(limma.obj$stdev.unscaled[,1])));
+for(k in c(1:8)){
+  
+  model_mat_temp <- cbind(model_mat[,c(k,c(9:21))]);
+  vsarah <- voom(y[,knownsamples], model_mat_temp)
+  vsarah2 <- voom(y[,knownsamples], model_mat)
+  vjohn <- voom(y[,knownsamples], design[knownsamples,])
+  limma.obj <- limma::lmFit(vsarah$E, model_mat_temp,weights=vsarah$weights);
+  limma.obj2 <- limma::lmFit(vsarah$E, model_mat_temp,weights=vsarah2$weights);
+  limma.obj3 <- limma::lmFit(vsarah$E, model_mat_temp,weights=johnsweights[,knownsamples]);
+  ##ask why not the same as l=lmFit(object = tables1[,knownsamples],model_mat_temp[,1],weights=vsarah$weights)
+  beta_class[,k-6] <- as.matrix(limma.obj$coefficients[,1]);
+  sebeta_class[,k-6] <- limma.obj$sigma*(as.matrix(limma.obj$stdev.unscaled[,1]));
+  t_class[,k-6] = (as.matrix(limma.obj$coefficients[,1]))/(limma.obj$sigma*(as.matrix(limma.obj$stdev.unscaled[,7])));
   }
 
 ##show that beta_class[j,k] ##roughly## corresponds to the average expression at gene j of samples from class k, without incorporation of weights
@@ -111,31 +129,31 @@ beta_class[j,k]
 Now we compute the average for each subgroup of the uncentered read counts at each gene. Here, voom_class_adj will not acutally be adjusted byt the mean.
 
 ```{r, echo=FALSE, eval=FALSE}
-write.table(beta_class,"beta_voomuncentered.txt",col.names = T)
-write.table(sebeta_class,"sebeta_voomuncentered.txt",col.names = T)
-write.table(t_class,"tvoom_uncentered.txt",col.names = T)
+write.table(beta_class,"beta_voomuncenterednew.txt",col.names = T)
+write.table(sebeta_class,"sebeta_voomuncenterednew.txt",col.names = T)
+write.table(t_class,"tvoom_uncenterednew.txt",col.names = T)
 ```
 
 Check to make sure these are stored properly:
 ```{r,check}
 j=8
 k=3
-lmFit(norm.expression,model_mat[,k],weights = weights)$coefficients[j,1]
+lmFit(norm.expression,cbind(model_mat[,c((1:6),k+6)]),weights = weights)$coefficients[j,7]
 beta_class[j,k]
 ##show that beta is close to the (unadjusted) mean for those individuals
 
-mean(norm.expression[37,which(model_mat[,8]==1)])##mean gene expression for time point 18 individuals at gene 37
-beta_class[37,8]
-beta_class[37,8]/sebeta_class[37,8]
-t_class[37,8]
+mean(norm.expression[37,which(model_mat[,k+6]==1)])##mean gene expression for time point 18 individuals at gene 37
+beta_class[37,3]
+beta_class[37,3]/sebeta_class[37,3]
+t_class[37,3]
 ```
 
 Now we compute factors on the centered T statistics:
 
 ```{r}
-b=read.table("beta_voomuncentered.txt")
-se=read.table("sebeta_voomuncentered.txt")
-t=read.table("tvoom_uncentered.txt")
+b=read.table("beta_voomuncenterednew.txt")
+se=read.table("sebeta_voomuncenterednew.txt")
+t=read.table("tvoom_uncenterednew.txt")
 
 ###You can see uncentered###
 hist(as.matrix(b),main="Uncentered Betas")
@@ -153,24 +171,24 @@ dim(tcenteredfull)
 Critically,this should be of the same dimension as v, so use the full projection matrix. I don't use an lfsr threshold (instead I use a projected t cutoff) because we know that using the standard errors as the diagonal of $LVL'$ ignores the correlation terms.
 
 ```{r,eval=TRUE}
-index=which(rowSums(abs(tcenteredfull)>2)>0)
+index=which(rowSums(abs(tcenteredfull)>3)>0)
 strongprojectedt=t(L%*%t(t[index,]))
 ##check to make sure rowSums 0
 rowSums(strongprojectedt)[1:10]
 ```
 
 ```{r,echo=F,eval=F}
-write.table(strongprojectedt,"strongprojectedt.txt",col.names = F ,row.names = F)
+write.table(strongprojectedt,"strongprojectedtnew.txt",col.names = F ,row.names = F)
 ```
 
 Now, we need to project into the centered space to estimate the covariance matrix of the true deviations, using the full L since $v$ will be R, and not $R-1$.
 
 ```{r}
-system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedt.txt -g 892 -k 5 -n 8 i -o johnnobaseline')
-A="johnnobaseline"
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtnew.txt -g 7028 -k 5 -n 8 i -o jnbnew')
+A="jnbnew"
 
-factor.mat=as.matrix(read.table("johnnobaseline_F.out"))
-lambda.mat=as.matrix(read.table("johnnobaseline_lambda.out"))
+factor.mat=as.matrix(read.table("jnbnew_F.out"))
+lambda.mat=as.matrix(read.table("jnbnew_lambda.out"))
 
 ```
 
@@ -247,8 +265,8 @@ wfull=t(L%*%t(b))
 sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR.
 dim(wfull)
 dim(sjmat)
-A="jul22"
-cov=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = maxt,lambda.mat = lambda.mat,P = 3,A = "jul22",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
+A="jul25"
+cov=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = maxt,lambda.mat = lambda.mat,P = 3,A = "jul25",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
 ##you can see that these will all by 8x8##
 dim(cov[[1]])
 length(cov)
@@ -256,7 +274,7 @@ length(cov)
 
 Now, let's fit the model and compute posteriors on the reduced w:
 ```{r,eval=FALSE}
-A="jul22"
+A="jul25"
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 R=ncol(L)
 w=t(L[-R,]%*%t(b))
@@ -267,8 +285,8 @@ w[1,]
 compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L = L[-1,])
 
 pis=readRDS(paste0("pis",A,".rds"))$pihat
-covmat=cov=c
 
+w=data.frame(w)
 for(j in 1:nrow(w)){
   total.quant.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}
 ```
@@ -290,7 +308,7 @@ K=length(c)
 R=ncol(L)
 V.gp.hat=diag(se.gp.hat[j,])^2
 LVL=L%*%V.gp.hat%*%t(L)
-A="jul22"
+A="jul25"
 pis=readRDS(paste0("pis",A,".rds"))$pihat
 tinvlist=lapply(cov,function(x){solve(LVL+L%*%x%*%t(L))})
 mupost=post.mean.with.proj(b.mle = b.mle,tinv = tinvlist[[k]],U.k = cov[[k]],L = L)
@@ -306,7 +324,7 @@ log.lik.minus.max=log.lik.snp-max(log.lik.snp)
   
 exp.vec=exp(log.lik.minus.max)
 post.weights=t(exp.vec*pis/sum(exp.vec*pis))
-mash.means=read.table("jul22posterior.means.txt")[,-1]
+mash.means=read.table("jul25posterior.means.txt")[,-1]
 colnames(mash.means)=levels(groups$bact)[-1]
 all.equal(as.numeric(post.weights%*%a$post.means),as.numeric(mash.means[j,]))
 ```
@@ -315,7 +333,7 @@ And here, we plot the patterns of sharing:
 ```{r,echo=F}
 library('gplots')
 library('colorRamps')
-barplot(colSums(matrix(pis[-433],byrow = T,ncol=18)))
+barplot(colSums(matrix(pis[-487],byrow = T,ncol=18)))
 
 for(k in 2:9){
   x=cov[[k]]
