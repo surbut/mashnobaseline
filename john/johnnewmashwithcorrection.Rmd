@@ -59,7 +59,7 @@ colnames(design) <- gsub(":", ".", colnames(design))
 # Remove Staph 48 hr timepoint that does not exist
 #design <- design[, -which(colnames(design) == "Staph.t48")]
 
-print(colnames(model_mat))
+print(colnames(design))
 
 ###now just do for time point 18
 knownsamples=which(groups$time==18&groups$bact!="none")
@@ -85,7 +85,7 @@ colnames(counts_class)[10]
 which(model_mat[10,]==1)
 
 ##voomobject without design matrix, voom takes a JxN matrix
-dim(counts_class)
+dim(y)
 voom.obj=voom(y,design=model_mat)
 norm.expression=voom.obj$E##this takes the log2 counts normalized for library size
 weights=voom.obj$weights##numeric matrix of inverse variance weights

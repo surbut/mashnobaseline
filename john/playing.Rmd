@@ -113,7 +113,9 @@ for(k in c(1:8)){
   limma.obj <- limma::lmFit(vsarah$E, model_mat_temp,weights=vsarah$weights);
   limma.obj2 <- limma::lmFit(vsarah$E, model_mat_temp,weights=vsarah2$weights);
   limma.obj3 <- limma::lmFit(vsarah$E, model_mat_temp,weights=johnsweights[,knownsamples]);
-  ##ask why not the same as l=lmFit(object = tables1[,knownsamples],model_mat_temp[,1],weights=vsarah$weights)
+  tables1=read.table("~/Dropbox/oldnobaseline/john/s1table.txt",header = T,stringsAsFactors = F)[,-c(1,2)]
+  ##ask why not the same as 
+  l=lmFit(object = tables1[,knownsamples],model_mat_temp[,k],weights=vsarah$weights)
   beta_class[,k-6] <- as.matrix(limma.obj$coefficients[,1]);
   sebeta_class[,k-6] <- limma.obj$sigma*(as.matrix(limma.obj$stdev.unscaled[,1]));
   t_class[,k-6] = (as.matrix(limma.obj$coefficients[,1]))/(limma.obj$sigma*(as.matrix(limma.obj$stdev.unscaled[,7])));
