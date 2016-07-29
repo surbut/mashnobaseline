@@ -3,11 +3,15 @@ title: "Analysing John's Data with our New Approach"
 output: html_document
 ---
 
-Let's try this out with john's data at time point 18, and not perform the centering in advnace. Critcally, I'm going to use the raw counts from John's Repo, and then perform the voom normalization myself, and use the weights from limma.
+Let's try this out with john's data at time point 18, and not perform the centering in advnace. Critcally, I'm going to use the raw counts from John's Repo, and then perform the voom normalization myself, and use the weights from limma.I want to show that the weights a) don't make a big difference, regardless of whether you use design matrix, and b) if we want to correct for RIN and extraction by using the voom object on the raw counts object and extracting the group wise coefficients from an `lmfit` that uses RIN and extr as additional covariates, we will lose $\mu_{j}$ unless we include an intercept term, but then we will have to add the intercept to our estimate $\chat_{jr}$
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(cache=TRUE)
 ```
 First, let's generate the voom weights accoridng to John's pipeline
+
+1) use 
+
 ```{r}
 library("limma")
 library("edgeR")
