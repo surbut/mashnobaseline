@@ -18,7 +18,7 @@ REad in the batch corrected data. This includes the mean gene expression for eac
 ```{r}
 batchcorrectdata=read.table("~/Dropbox/oldnobaseline/john/s1table.txt",header = T,stringsAsFactors = F)[,-c(1,2)]
 anno=read.table("~/Dropbox/oldnobaseline/john/annotation.txt",header=T)
-
+library('limma')
 ```
 
 
@@ -118,6 +118,7 @@ Critically,this should be of the same dimension as v, so use the full projection
 ```{r,eval=TRUE}
 index=which(rowSums(abs(tcenteredfull)>2)>0)
 strongprojectedt=t(L%*%t(t[index,]))
+length(index)
 ##check to make sure rowSums 0
 rowSums(strongprojectedt)[1:10]
 ```
@@ -129,7 +130,7 @@ write.table(strongprojectedt,"strongprojectedtbatchcorrect.txt",col.names = F ,r
 Now, we need to project into the centered space to estimate the covariance matrix of the true deviations, using the full L since $v$ will be R, and not $R-1$.
 
 ```{r}
-system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtbatchcorrect.txt -g 856 -k 5 -n 8 i -o batchcorrect')
+#system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtbatchcorrect.txt -g 856 -k 5 -n 8 i -o batchcorrect')
 A="batchcorrect"
 
 factor.mat=as.matrix(read.table("batchcorrect_F.out"))
@@ -187,22 +188,56 @@ wtmax=wt[index,]
 dim(wtmax)
 lvlarray=genlvlarray(s.j = s.j[index,],L = L)
 dim(lvlarray)
+lvllist=genlvllist(s.j = s.j[index,],L = L)
+length(lvllist)
+dim(lvllist[[1]])
 ```
 
 Currently, Bovy's R approach requires the S be diagonal (i.e., you put in a matrix of standard erros) when we know that w|Lv ~ N(Lv,LVL'), so we use our old covariance function with the matrices that we would have used to initalize Bovy (i.e., various rank approximations of the empirical covariance matrix of centered T statistics).
 
 
-```{r,eval=FALSE}
+```{r,eval=T}
 ##here, t.stat, factor.mat and lambda.mat will be MxR, KxR, and MxR (not Rx1) and
 ###each matrix in the lvlarray will be R-1,R-1 and w Mx(R-1) 
 ##t.stat represents the MxR centered observed t statistics, w the Mx(R-1) matrix
-deconvolution.em.with.bovy(t.stat = t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvlarray,P = 3,L = L[-1,],Q = 5,w)
+
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+R=ncol(L)
+
+# deconvolution.em.with.bovy.with.L(t.stat = t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvllist,P = 3,L = L[-1,],Q = 5,w=wtmax)
+
+
+
+
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+t.stat=strongprojectedt
+library("ExtremeDeconvolution")
+efunc=deconvolution.em.with.bovy.with.L(t.stat = strongprojectedt,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvllist,P = 3,L = L[-1,],Q = 5,w = wtmax)
+
+Q=5;P=3;K=8
+init.cov=init.covmat.single.with.projection(t.stat=t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,P=P,Q=Q)
+init.cov.list=list()
+for(i in 1:K){init.cov.list[[i]]=init.cov[i,,]}
+mean.mat=matrix(rep(0,ncol(t.stat)*nrow(t.stat)),ncol=ncol(t.stat),nrow=nrow(t.stat))
+  
+  ydata=  wtmax
+  xamp= rep(1/K,K)
+  xcovar= init.cov.list
+  fixmean= TRUE     
+  ycovar2=  lvllist  
+  xmean=   mean.mat   
+  projection=list();for(l in 1:nrow(t.stat)){projection[[l]]=L[-1,]}
+  
+  e=extreme_deconvolution(ydata=ydata,ycovar=ycovar2,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+
+sapply(seq(1:8),function(k){all.equal(as.numeric(e$xcovar[[k]]),as.numeric(efunc$true.covs[k,,]))})
+
 ```
 
 Alternatively, we can generate using our old covmat function. Let's use the EE model, so we estimate the grid, fit and compute posteriors using $w$ as the transformed betahat.
 
 ```{r}
-
+library('mash')
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 allcenteredt=(t(L%*%t(t)))
 maxt=(t(L%*%t(t[index,])))
@@ -224,7 +259,7 @@ Now, let's fit the model and compute posteriors on the reduced w:
 A="batchcorrect"
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 R=ncol(L)
-w=t(L[-R,]%*%t(b))
+w=t(L[-1,]%*%t(b))
 ##which is just like removing a column of wfull
 as.numeric(wfull[1,])
 as.numeric(w[1,])

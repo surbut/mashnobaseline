@@ -223,6 +223,7 @@ wtmax=wt[index,]
 dim(wtmax)
 lvlarray=genlvlarray(s.j = s.j[index,],L = L)
 dim(lvlarray)
+lvllist=list();for(j in 1:dim(lvlarray)[1]){lvllist[[j]]=lvlarray[j,,]}
 ```
 
 Currently, Bovy's R approach requires the S be diagonal (i.e., you put in a matrix of standard erros) when we know that w|Lv ~ N(Lv,LVL'), so we use our old covariance function with the matrices that we would have used to initalize Bovy (i.e., various rank approximations of the empirical covariance matrix of centered T statistics).
@@ -232,7 +233,25 @@ Currently, Bovy's R approach requires the S be diagonal (i.e., you put in a matr
 ##here, t.stat, factor.mat and lambda.mat will be MxR, KxR, and MxR (not Rx1) and
 ###each matrix in the lvlarray will be R-1,R-1 and w Mx(R-1) 
 ##t.stat represents the MxR centered observed t statistics, w the Mx(R-1) matrix
-deconvolution.em.with.bovy(t.stat = t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvlarray,P = 3,L = L[-1,],Q = 5,w)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+t.stat=strongprojectedt
+#deconvolution.em.with.bovy.with.L(t.stat = t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvllist,P = 3,L = L[-1,],Q = 5,wtmax)
+
+Q=5;P=3
+init.cov=init.covmat.single.with.projection(t.stat=t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,P=P,Q=Q)
+init.cov.list=list()
+for(i in 1:K){init.cov.list[[i]]=init.cov[i,,]}
+mean.mat=matrix(rep(0,ncol(t.stat)*nrow(t.stat)),ncol=ncol(t.stat),nrow=nrow(t.stat))
+  
+  ydata=  wtmax
+  xamp= rep(1/K,K)
+  xcovar= init.cov.list
+  fixmean= TRUE     
+  ycovar2=  lvllist  
+  xmean=   mean.mat   
+  projection=list();for(l in 1:nrow(t.stat)){projection[[l]]=L[-1,]}
+  
+  e=extreme_deconvolution(ydata=ydata,ycovar=ycovar2,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
 ```
 
 Alternatively, we can generate using our old covmat function. Let's use the EE model, so we estimate the grid, fit and compute posteriors using $w$ as the transformed betahat.
