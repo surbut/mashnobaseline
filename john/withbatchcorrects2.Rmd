@@ -238,6 +238,7 @@ Alternatively, we can generate using our old covmat function. Let's use the EE m
 
 ```{r}
 library('mash')
+source("~/matrix_ash/R/sarah's_mixem.R")
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 allcenteredt=(t(L%*%t(t)))
 maxt=(t(L%*%t(t[index,])))
@@ -252,37 +253,58 @@ cov=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = maxt,lambda
 ##you can see that these will all by 8x8##
 dim(cov[[1]])
 length(cov)
+
+max.step=efunc
+edcov=compute.hm.covmat.all.max.step(b.hat = wfull,se.hat = sjmat,t.stat = maxt,Q = 5,lambda.mat = lambda.mat,A = "witheffunc",factor.mat = factor.mat,max.step = max.step,zero = T,power = 2)$cov
 ```
 
 Now, let's fit the model and compute posteriors on the reduced w:
 ```{r,eval=FALSE}
-A="batchcorrect"
+A="batchcorrectwithED"
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 R=ncol(L)
 w=t(L[-1,]%*%t(b))
 ##which is just like removing a column of wfull
 as.numeric(wfull[1,])
 as.numeric(w[1,])
-all.equal(w,wfull[,-R])
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L = L[-1,])
-
+all.equal(w,wfull[,-1])
+#compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L = L[-1,])
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
 pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+
+lik.mated=readRDS("liketrainbatchcorrectwithED.rds")
+lik.matbatch=readRDS("liketrainbatchcorrect.rds")
+pibatch=readRDS("pisbatchcorrect.rds")$pihat
+pied=readRDS('pisbatchcorrectwithED.rds')$piha
+sum(log(pied%*%exp(lik.mated)))
+sum(log(pied%*%exp(lik.mated)))
+dim(pied)
+length(pied)
+pied=matrix(pied,byrow=T,nrow=1)
+dim(pied)
+sum(log(pied%*%exp(lik.mated)))
+dim(exp(lik.mated))
+sum(log(exp(lik.mated)%*%t(pied)))
+sum(log(exp(lik.matbatch)%*%pibatch))
 
 w=data.frame(w)
 for(j in 1:nrow(w)){
-  total.quant.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}
+#   total.quant.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])
+total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])  }
 ```
 
 Check
 ```{r}
 
+A="batchcorrectwithED"
 
 j=137
 k=5
 se.gp.hat=se
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 R=ncol(L)
-w=t(L[-R,]%*%t(b))
+w=t(L[-1,]%*%t(b))
 b.gp.hat=data.frame(w)
 R=ncol(L)
 L=L[-1,]
@@ -294,6 +316,7 @@ LVL=L%*%V.gp.hat%*%t(L)
 
 pis=readRDS(paste0("pis",A,".rds"))$pihat
 tinvlist=lapply(cov,function(x){solve(LVL+L%*%x%*%t(L))})
+cov=edcov
 mupost=post.mean.with.proj(b.mle = b.mle,tinv = tinvlist[[k]],U.k = cov[[k]],L = L)
 covpost=post.cov.with.proj(tinv = tinvlist[[k]],U.k = cov[[k]],L = L)
 a=post.array.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = b.gp.hat,se.gp.hat = se,L = L)
@@ -306,7 +329,8 @@ log.lik.snp=log.lik.func(b.mle,LVL,LSigL)
 log.lik.minus.max=log.lik.snp-max(log.lik.snp)
 exp.vec=exp(log.lik.minus.max)
 post.weights=t(exp.vec*pis/sum(exp.vec*pis))
-mash.means=read.table("batchcorrectposterior.means.txt")[,-1]
+#mash.means=read.table("batchcorrectposterior.means.txt")[,-1]
+mash.means=read.table("batchcorrectwithEDposterior.means.txt")[,-1]
 colnames(mash.means)=levels(groups$bact)[-1]
 all.equal(as.numeric(post.weights%*%a$post.means),as.numeric(mash.means[j,]))
 ```
@@ -318,9 +342,9 @@ library('colorRamps')
 barplot(colSums(matrix(pis[-433],byrow = T,ncol=18)))
 
 for(k in 2:9){
-  x=cov[[k]]
+  x=cov[[k]]/max(diag(cov[[k]]))
   colnames(x)=rownames(x)=levels(groups$bact)[-1]
-  heatmap.2(x,revC=T,dendrogram="none",main=paste0("Uk",k),density.info = "none",trace="none",col=blue2green(256))
+  heatmap.2(x,revC=T,dendrogram="none",main=paste0("Uk",k,round(colSums(matrix(pis[-433],byrow = T,ncol=18))[k],2)),density.info = "none",trace="none",col=blue2green(256))
   }
 
 ```

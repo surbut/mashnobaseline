@@ -1,0 +1,68 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+Test with knitr
+
+```{r}
+b=read.table("betabatchcorrected.txt")
+se=read.table("sebetabatchcorrected.txt")
+t=read.table("tbatchcorrected.txt")
+
+R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+s.j=se/se
+
+
+index=which(rowSums(abs(t(L%*%t(t)))>2)>0)
+length(index)
+strongprojectedt=t(L%*%t(t[index,]))
+
+
+
+#write.table(strongprojectedt,"strongprojectedtbatchcorrect.txt",col.names = 
+
+```
+
+
+Now, we need to project into the centered space to estimate the covariance matrix of the true deviations, using the full L since $v$ will be R, and not $R-1$.
+
+
+```{r}
+#system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtbatchcorrect.txt -g 856 -k 5 -n 8 i -o batchcorrect')
+#A="batchcorrect"
+
+factor.mat=as.matrix(read.table("batchcorrect_F.out"))
+lambda.mat=as.matrix(read.table("batchcorrect_lambda.out"))
+
+#recall here that w will now be the L[-1,]%*%t(t[strong,]), which is equivalent to removing the first column of the strong projected t
+
+library('mash')
+source("~/matrix_ash/R/mashnobasescripts.R")
+lvllist=genlvllist(s.j[index,],L = L[-1,])
+library("ExtremeDeconvolution")
+efunc=deconvolution.em.with.bovy.with.L(t.stat = strongprojectedt,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvllist,P = 3,L = L[-1,],Q = 5,w = strongprojectedt[,-1])
+
+
+##w should represent transformed betahats using all R subgroups and j genes
+wfull=t(L%*%t(b))
+sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
+dim(wfull)
+dim(sjmat)
+A="withefuncknitr"
+
+max.step=efunc
+source("~/matrix_ash/R/sarah's_mixem.R")
+edcov=compute.hm.covmat.all.max.step(b.hat = wfull,se.hat = sjmat,t.stat = strongprojectedt,Q = 5,lambda.mat = lambda.mat,A=A,factor.mat = factor.mat,max.step = efunc,zero = T,power = 2)$cov
+
+w=data.frame(wfull)[,-1]
+
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+
+for(j in 1:nrow(w)){
+total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}
+```
+
