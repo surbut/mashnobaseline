@@ -138,18 +138,18 @@ length(index)</code></pre>
 
 #write.table(strongprojectedt,&quot;strongprojectedtbatchcorrect.txt&quot;,col.names = </code></pre>
 <p>Now, we need to project into the centered space to estimate the covariance matrix of the true deviations, using the full L since <span class="math">\(v\)</span> will be R, and not <span class="math">\(R-1\)</span>.</p>
-<pre class="r"><code>#system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtbatchcorrect.txt -g 856 -k 5 -n 8 i -o batchcorrect')
-#A=&quot;batchcorrect&quot;
+<pre class="r"><code>system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtbatchcorrect.txt -g 856 -k 5 -n 8 i -o batchcorrect2')
+A=&quot;batchcorrect2&quot;
 
-factor.mat=as.matrix(read.table(&quot;batchcorrect_F.out&quot;))
-lambda.mat=as.matrix(read.table(&quot;batchcorrect_lambda.out&quot;))
+factor.mat=as.matrix(read.table(&quot;batchcorrect2_F.out&quot;))
+lambda.mat=as.matrix(read.table(&quot;batchcorrect2_lambda.out&quot;))
 
 #recall here that w will now be the L[-1,]%*%t(t[strong,]), which is equivalent to removing the first column of the strong projected t
 
 library('mash')</code></pre>
 <pre><code>## Loading required package: SQUAREM</code></pre>
 <pre><code>## Loading required package: mvtnorm</code></pre>
-<pre class="r"><code>source(&quot;~/matrix_ash/R/mashnobasescripts.R&quot;)
+<pre class="r"><code>#source(&quot;~/matrix_ash/R/mashnobasescripts.R&quot;)
 lvllist=genlvllist(s.j[index,],L = L[-1,])
 library(&quot;ExtremeDeconvolution&quot;)
 efunc=deconvolution.em.with.bovy.with.L(t.stat = strongprojectedt,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvllist,P = 3,L = L[-1,],Q = 5,w = strongprojectedt[,-1])
@@ -162,10 +162,9 @@ dim(wfull)</code></pre>
 <pre><code>## [1] 12728     8</code></pre>
 <pre class="r"><code>dim(sjmat)</code></pre>
 <pre><code>## [1] 12728     8</code></pre>
-<pre class="r"><code>A=&quot;withefuncknitr&quot;
+<pre class="r"><code>A=&quot;withefuncknitr2&quot;
 
 max.step=efunc
-source(&quot;~/matrix_ash/R/sarah's_mixem.R&quot;)
 edcov=compute.hm.covmat.all.max.step(b.hat = wfull,se.hat = sjmat,t.stat = strongprojectedt,Q = 5,lambda.mat = lambda.mat,A=A,factor.mat = factor.mat,max.step = efunc,zero = T,power = 2)$cov
 
 w=data.frame(wfull)[,-1]

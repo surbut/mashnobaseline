@@ -30,16 +30,16 @@ Now, we need to project into the centered space to estimate the covariance matri
 
 
 ```{r}
-#system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtbatchcorrect.txt -g 856 -k 5 -n 8 i -o batchcorrect')
-#A="batchcorrect"
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtbatchcorrect.txt -g 856 -k 5 -n 8 i -o batchcorrect2')
+A="batchcorrect2"
 
-factor.mat=as.matrix(read.table("batchcorrect_F.out"))
-lambda.mat=as.matrix(read.table("batchcorrect_lambda.out"))
+factor.mat=as.matrix(read.table("batchcorrect2_F.out"))
+lambda.mat=as.matrix(read.table("batchcorrect2_lambda.out"))
 
 #recall here that w will now be the L[-1,]%*%t(t[strong,]), which is equivalent to removing the first column of the strong projected t
 
 library('mash')
-source("~/matrix_ash/R/mashnobasescripts.R")
+#source("~/matrix_ash/R/mashnobasescripts.R")
 lvllist=genlvllist(s.j[index,],L = L[-1,])
 library("ExtremeDeconvolution")
 efunc=deconvolution.em.with.bovy.with.L(t.stat = strongprojectedt,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvllist,P = 3,L = L[-1,],Q = 5,w = strongprojectedt[,-1])
@@ -50,10 +50,9 @@ wfull=t(L%*%t(b))
 sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
 dim(wfull)
 dim(sjmat)
-A="withefuncknitr"
+A="withefuncknitr2"
 
 max.step=efunc
-source("~/matrix_ash/R/sarah's_mixem.R")
 edcov=compute.hm.covmat.all.max.step(b.hat = wfull,se.hat = sjmat,t.stat = strongprojectedt,Q = 5,lambda.mat = lambda.mat,A=A,factor.mat = factor.mat,max.step = efunc,zero = T,power = 2)$cov
 
 w=data.frame(wfull)[,-1]
