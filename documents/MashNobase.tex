@@ -118,7 +118,7 @@ Critically, our quantity of interest now, $\vb$  represents the true `deviations
 We will again apply a two-step process to our selection of covariance matrices, where we select a set of denoised `pattern` matrices $U_{k}$ by using the EM algorithm on the max effects across conditions,
 and then expanding this list by a fixed grid of scalar weights $\omega_{l}$ such that we conclude with a list of $P=KxL$ covariance matrices $\Sigma$. We can then:
 \begin{itemize}
-\item estimate the p prior weights $\bm\pi$ on this fixed P-list of covariance matrices from a training matrix of randomly selected feature expression measurements across conditions
+\item estimate the $P$ prior weights $\bm\pi$ on this fixed P-list of covariance matrices from a training matrix of randomly selected feature expression measurements across conditions
 \item compute the posterior distribution $\vb | L \chat, \bm{s_{j}}$
 
 Let 
@@ -148,18 +148,18 @@ Where $E \sim \Norm (0, L\hat{V} L')$
 
 We initiate our set of covariance matrices for the denoising step as before in $\mash$, where now we compute the empirical covariance matrices and a variety of dimensional reductions on the feature-centered JxR \textit{matrix} of maximum average, $L \hat{C}' $ instead of $\hat{C}$ alone. In practice, we actually use the matrix of maximum uncentered $T$ statistics. Three critical things to note:
 
-\begin{itemize}
+\begin{enumerate}
 \item Here, L will be $RxR$ because we need $U_{k}$ to be RxR
-\item When denoising with Bovy, our previous approach used the matrix of maximum t statistics to both initialize and train the BovyEM. Now, we will initalize with the MXR matrix of $L_{R,R}T$ and train the EM on the MxR-1 matrix of maximum $L_{R,R-1} T$
-\item When choosing omega, we will use the diagonal of $L V L'$, where $V$ is $D(s.j^2)$
-\end{itemize}
+\item When denoising with Bovy, our previous approach used the matrix of maximum $T$ statistics $T_{Mxr}$ to both initialize and train the BovyEM. Now, we will initalize with the MXR matrix of t($L_{R,R}T')$ (or alternatively, $TL$) and train the EM on the MxR-1 matrix of maximum $t(L_{R-1,R}T')$
+\item When choosing $\omega$, we will use the diagonal of $L V L'$, where $V$ is $D(s.j^2)$, and select from the MxR matrix of centered T statistics and their centered standard errors.
+\end{enumerate}
 
 
 \section{Likelihood}
 
-Now we will replace the RxR matrix $L$ with the RxR-1 matrix $L*$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
+Now we will replace the RxR matrix $L$ with the R-1xR matrix $L*$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
 
-Now for each gene J at each component k, integrating over $\vb$,
+Now for each gene J at each component k, integrating over $\vb$, 
 
 
 \begin{equation}
