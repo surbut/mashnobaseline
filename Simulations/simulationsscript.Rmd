@@ -6,8 +6,9 @@ output: html_document
 
 
 ```{r}
+library('mash')
 set.seed(123)
-c=chat_sim(n = 10000,d = 10,betasd = 1,esd = 1,K = 10)
+c=chat_sim(n = 10000,d = 20,betasd = 1,esd = 1,K = 10)
 t=c$t;b=c$chat;se=c$shat
 hist(t)
 hist(b)
@@ -31,7 +32,7 @@ Now, we need to project into the centered space to estimate the covariance matri
 
 
 ```{r}
-system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtsimulations.txt -g 995 -k 5 -n 10 i -o simulationsL')
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtsimulations.txt -g 2168 -k 5 -n 20 i -o simulationsL')
 A="simulationsL"
 
 factor.mat=as.matrix(read.table("simulationsL_F.out"))
@@ -66,5 +67,36 @@ pis=readRDS(paste0("pis",A,".rds"))$pihat
 
 for(j in 1:nrow(w)){
 total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}
+
+lik=readRDS("liketrainsimulationsL.rds")
+likmat=exp(lik)
+sum(log(likmat%*%pis))
+
+
+```
+We can also compare our results to what we would get using the eqtlbma configs:
+
+```{r}
+
+rm(A)
+A = "withbmaL"
+covbma=compute.covmat.with.heterogeneity.no.shrink(b.gp.hat = wfull,sebetahat = sjmat,A = A,zero = T,power = 2 )
+
+
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = covbma,A = A,pen = 1,L = L[-1,])
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+
+for(j in 1:nrow(w)){
+total.quant.per.snp.no.baseline(j = j,covmat = covbma,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}
+
+lik=readRDS("liketrainwithbmaL.rds")
+likmat=exp(lik)
+sum(log(likmat%*%pis))
+
+bma.means=as.matrix(read.table("withbmaLposterior.means.txt")[,-1])
+mash.means=as.matrix(read.table("simulationsLposterior.means.txt")[,-1])
+sqrt(mean(bma.means-b)^2)
+sqrt(mean(mash.means-b)^2)
 ```
 
