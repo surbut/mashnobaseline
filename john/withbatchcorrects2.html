@@ -358,33 +358,35 @@ L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 R=ncol(L)
 w=t(L[-1,]%*%t(b))
 ##which is just like removing a column of wfull
-as.numeric(wfull[1,])
-as.numeric(w[1,])
-all.equal(w,wfull[,-1])
-#compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L = L[-1,])
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
+as.numeric(wfull[1,])</code></pre>
+<pre><code>## [1]  8.221164e-02 -4.184684e-02  7.334806e-02 -2.338731e-02  2.332703e-02
+## [6] -8.052389e-02 -3.316737e-02  3.868046e-05</code></pre>
+<pre class="r"><code>as.numeric(w[1,])</code></pre>
+<pre><code>## [1] -4.184684e-02  7.334806e-02 -2.338731e-02  2.332703e-02 -8.052389e-02
+## [6] -3.316737e-02  3.868046e-05</code></pre>
+<pre class="r"><code>all.equal(w,wfull[,-1])</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>#compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L = L[-1,])
+#compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
 pis=readRDS(paste0(&quot;pis&quot;,A,&quot;.rds&quot;))$pihat
 
 
 lik.mated=readRDS(&quot;liketrainbatchcorrectwithED.rds&quot;)
 lik.matbatch=readRDS(&quot;liketrainbatchcorrect.rds&quot;)
 pibatch=readRDS(&quot;pisbatchcorrect.rds&quot;)$pihat
-pied=readRDS('pisbatchcorrectwithED.rds')$piha
-sum(log(pied%*%exp(lik.mated)))
-sum(log(pied%*%exp(lik.mated)))
-dim(pied)
-length(pied)
-pied=matrix(pied,byrow=T,nrow=1)
-dim(pied)
-sum(log(pied%*%exp(lik.mated)))
-dim(exp(lik.mated))
-sum(log(exp(lik.mated)%*%t(pied)))
-sum(log(exp(lik.matbatch)%*%pibatch))
-
-w=data.frame(w)
-for(j in 1:nrow(w)){
-#   total.quant.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])
-total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])  }</code></pre>
+pied=readRDS('pisbatchcorrectwithED.rds')$pihat
+length(pied)</code></pre>
+<pre><code>## [1] 433</code></pre>
+<pre class="r"><code>length(pibatch)</code></pre>
+<pre><code>## [1] 433</code></pre>
+<pre class="r"><code>sum(log(exp(lik.mated)%*%pied))</code></pre>
+<pre><code>## [1] -109951.3</code></pre>
+<pre class="r"><code>sum(log(exp(lik.matbatch)%*%pibatch))</code></pre>
+<pre><code>## [1] -110937</code></pre>
+<pre class="r"><code>w=data.frame(w)
+# for(j in 1:nrow(w)){
+# #   total.quant.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])
+# total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])  }</code></pre>
 <p>Check</p>
 <pre class="r"><code>A=&quot;batchcorrectwithED&quot;
 

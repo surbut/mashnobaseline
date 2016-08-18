@@ -29,14 +29,16 @@ absmat=abs(t(L%*%t(c$t)))
 index=which(rowMeans(absmat)>1.1)
 length(index)
 mean(index<400)
-#index2=which(rowSums(absmat>4)>0)
-#index=which(rowMeans(abs(t(L%*%t(c$t))))>1.3)##choose the associations with average deviation large.
+index2=which(rowSums(absmat>4)>0)
+length(index2)
+mean(index2<400)
+
 
 ##show average deviations
 plot((rowMeans(abs(t(L%*%t(c$t))))))
 points(index,(rowMeans(abs(t(L%*%t(c$t)))))[index],col="red")
-#plot(rowSums(absmat))
-#points(index2,rowSums(absmat)[index2],col="blue")
+plot(rowSums(absmat>4))
+points(index2,rowSums(absmat>4)[index2],col="blue")
 
 strongprojectedtsimulations=t(L%*%t(t[index,]))
 
@@ -52,6 +54,7 @@ Now, we need to project into the centered space to estimate the covariance matri
 
 ```{r}
 system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtgtexsimulations.txt -g 234 -k 5 -n 44 i -o gtexsimulationsL')
+#system('sfa -gen strongprojectedtgtexsimulations.txt -g 234 -k 5 -n 44 i -o gtexsimulationsL')
 A="gtexsimulationsL"
 
 factor.mat=as.matrix(read.table("gtexsimulationsL_F.out"))
@@ -92,7 +95,41 @@ Compute the likelihood without ED:
 ```{r}
 A="noedcovgtex"
 noedcov=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = strongprojectedt,lambda.mat = lambda.mat,P = 3,A = "noedcovgtex",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
+```
 
+Check that all the matrices are correctly computed:
+```{r}
+pca=svd(strongprojectedt);v=pca$v[,1:3];d=pca$d[1:3];u=pca$u[,1:3]
+pcaprox=t(u%*%diag(d)%*%t(v))%*%(u%*%diag(d)%*%t(v))/max(diag(t(u%*%diag(d)%*%t(v))%*%(u%*%diag(d)%*%t(v))))
+
+
+P=3;X.c=apply(strongprojectedt,2,function(x) x-mean(x)) ##Column centered matrix of t statistics
+svd.X=svd(X.c)
+M=nrow(X.c)
+v=svd.X$v;u=svd.X$u;d=svd.X$d
+cov.pc=1/M*v[,1:P]%*%diag(d[1:P])%*%t(u[,1:P])%*%t(v[,1:P]%*%diag(d[1:P])%*%t(u[,1:P]))
+
+for(q in 1:5){
+load=as.matrix(lambda.mat[,q])
+fact=as.matrix(factor.mat[q,])
+rank.prox=load%*%t(fact)
+a=(1/(M-1)*(t(rank.prox)%*% rank.prox))/max(diag((1/(M-1)*(t(rank.prox)%*% rank.prox))))
+print(all.equal(as.numeric(a),as.numeric(noedcov[[3+q]]/max(diag(noedcov[[3+q]])))))}
+
+load=as.matrix(lambda.mat)
+fact=as.matrix(factor.mat)
+rank.prox=load%*%(fact)
+a=(1/(M-1)*(t(rank.prox)%*% rank.prox))/max(diag((1/(M-1)*(t(rank.prox)%*% rank.prox))))
+all.equal(as.numeric(a),as.numeric(noedcov[[9]]/max(diag(noedcov[[9]]))))
+
+all.equal(cov(strongprojectedt)/max(diag(cov(strongprojectedt))),noedcov[[2]]/max(diag(noedcov[[2]])))
+all.equal(as.numeric(cov.pc)/max(diag(cov.pc)),as.numeric(noedcov[[3]]/max(diag(noedcov[[3]]))))
+
+```
+
+Now, compute likelihood without ED:
+
+```{r}
 w=data.frame(wfull)[,-1]
 compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = noedcov,A = "noedcovgtex",pen = 1,L = L[-1,])
 pis=readRDS(paste0("pis",A,".rds"))$pihat
@@ -104,7 +141,8 @@ sum(log(test%*%pis))
 
 Now run with ED:
 ```{r}
-
+rm(A)
+rm(noedcov)
 #detach("package:ashr", unload=TRUE)
 #detach("package:REBayes", unload=TRUE)
 library("ExtremeDeconvolution")

@@ -259,7 +259,7 @@ edcov=compute.hm.covmat.all.max.step(b.hat = wfull,se.hat = sjmat,t.stat = maxt,
 ```
 
 Now, let's fit the model and compute posteriors on the reduced w:
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 A="batchcorrectwithED"
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 R=ncol(L)
@@ -269,29 +269,27 @@ as.numeric(wfull[1,])
 as.numeric(w[1,])
 all.equal(w,wfull[,-1])
 #compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L = L[-1,])
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
+#compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
 pis=readRDS(paste0("pis",A,".rds"))$pihat
 
 
 lik.mated=readRDS("liketrainbatchcorrectwithED.rds")
 lik.matbatch=readRDS("liketrainbatchcorrect.rds")
 pibatch=readRDS("pisbatchcorrect.rds")$pihat
-pied=readRDS('pisbatchcorrectwithED.rds')$piha
-sum(log(pied%*%exp(lik.mated)))
-sum(log(pied%*%exp(lik.mated)))
-dim(pied)
+pied=readRDS('pisbatchcorrectwithED.rds')$pihat
 length(pied)
-pied=matrix(pied,byrow=T,nrow=1)
-dim(pied)
-sum(log(pied%*%exp(lik.mated)))
-dim(exp(lik.mated))
-sum(log(exp(lik.mated)%*%t(pied)))
+length(pibatch)
+
+sum(log(exp(lik.mated)%*%pied))
+test=exp(lik.mated)
+total.lik.func(test = test,pis = pied)
 sum(log(exp(lik.matbatch)%*%pibatch))
 
+
 w=data.frame(w)
-for(j in 1:nrow(w)){
-#   total.quant.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])
-total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])  }
+# for(j in 1:nrow(w)){
+# #   total.quant.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])
+# total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])  }
 ```
 
 Check

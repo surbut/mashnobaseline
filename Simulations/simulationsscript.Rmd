@@ -10,16 +10,19 @@ knitr::opts_chunk$set(cache=TRUE)
 
 
 ```{r}
-
 library('mash')
+library('clusterGeneration')
 set.seed(123)
-c=chat_sim(n = 10000,d = 40,betasd = 1,esd =0.1,K = 10)
+RNGkind("Mersenne-Twister")
+c=chat_sim(n=10000,d=40,betasd=1,esd=0.1,K=10)
+
 identical(c$beta[1,]+c$mumat[1,],c$ceff[1,])
 identical(c$chat[1,],c$ceff[1,]+c$error[1,])
+
 saveRDS(c,"chatsimesd0.1.rds")
 t=c$t;b=c$chat;se=c$shat
-hist(t)
-hist(b)
+#hist(t)
+#hist(b)
 R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
@@ -28,14 +31,16 @@ absmat=abs(t(L%*%t(c$t)))
 index=which(rowMeans(absmat)>1.1)
 length(index)
 mean(index<1000)
-#index2=which(rowSums(absmat>4)>0)
+index2=which(rowSums(absmat>4)>0)
+mean(index2<1000)
+length(index2)
 #index=which(rowMeans(abs(t(L%*%t(c$t))))>1.3)##choose the associations with average deviation large.
 
-##show average deviations
+##show median deviations
 plot((rowMeans(abs(t(L%*%t(c$t))))))
 points(index,(rowMeans(abs(t(L%*%t(c$t)))))[index],col="red")
-#plot(rowSums(absmat))
-#points(index2,rowSums(absmat)[index2],col="blue")
+plot(rowSums(absmat>4))
+points(index2,rowSums(absmat>4)[index2],col="blue")
 
 strongprojectedtsimulations=t(L%*%t(t[index,]))
 
@@ -50,7 +55,8 @@ Now, we need to project into the centered space to estimate the covariance matri
 
 
 ```{r}
-system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtsimulations.txt -g 991 -k 5 -n 40 i -o simulationsL')
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtsimulations.txt -g 998 -k 5 -n 40 i -o simulationsL')
+#system('sfa -gen strongprojectedtsimulations.txt -g 998 -k 5 -n 40 i -o simulationsL')
 A="simulationsL"
 
 factor.mat=as.matrix(read.table("simulationsL_F.out"))
@@ -91,7 +97,39 @@ Compute the likelihood without ED:
 ```{r}
 A="noedcov"
 noedcov=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = strongprojectedt,lambda.mat = lambda.mat,P = 3,A = "noedcov",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
+```
+Check that all the matrices are correctly computed:
+```{r}
+pca=svd(strongprojectedt);v=pca$v[,1:3];d=pca$d[1:3];u=pca$u[,1:3]
+pcaprox=t(u%*%diag(d)%*%t(v))%*%(u%*%diag(d)%*%t(v))/max(diag(t(u%*%diag(d)%*%t(v))%*%(u%*%diag(d)%*%t(v))))
 
+
+P=3;X.c=apply(strongprojectedt,2,function(x) x-mean(x)) ##Column centered matrix of t statistics
+svd.X=svd(X.c)
+M=nrow(X.c)
+v=svd.X$v;u=svd.X$u;d=svd.X$d
+cov.pc=1/M*v[,1:P]%*%diag(d[1:P])%*%t(u[,1:P])%*%t(v[,1:P]%*%diag(d[1:P])%*%t(u[,1:P]))
+
+for(q in 1:5){
+load=as.matrix(lambda.mat[,q])
+fact=as.matrix(factor.mat[q,])
+rank.prox=load%*%t(fact)
+a=(1/(M-1)*(t(rank.prox)%*% rank.prox))/max(diag((1/(M-1)*(t(rank.prox)%*% rank.prox))))
+print(all.equal(as.numeric(a),as.numeric(noedcov[[3+q]]/max(diag(noedcov[[3+q]])))))}
+
+load=as.matrix(lambda.mat)
+fact=as.matrix(factor.mat)
+rank.prox=load%*%(fact)
+a=(1/(M-1)*(t(rank.prox)%*% rank.prox))/max(diag((1/(M-1)*(t(rank.prox)%*% rank.prox))))
+all.equal(as.numeric(a),as.numeric(noedcov[[9]]/max(diag(noedcov[[9]]))))
+
+all.equal(cov(strongprojectedt)/max(diag(cov(strongprojectedt))),noedcov[[2]]/max(diag(noedcov[[2]])))
+all.equal(as.numeric(cov.pc)/max(diag(cov.pc)),as.numeric(noedcov[[3]]/max(diag(noedcov[[3]]))))
+
+```
+
+Now compute likelihood without ED:
+```{r}
 w=data.frame(wfull)[,-1]
 compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = noedcov,A = "noedcov",pen = 1,L = L[-1,])
 pis=readRDS(paste0("pis",A,".rds"))$pihat
@@ -103,9 +141,9 @@ sum(log(test%*%pis))
 
 Now run with ED:
 ```{r}
-
-#detach("package:ashr", unload=TRUE)
-#detach("package:REBayes", unload=TRUE)
+rm(A)
+rm(noedcov)
+rm(pis)
 library("ExtremeDeconvolution")
 efunc=deconvolution.em.with.bovy.with.L(t.stat = strongprojectedt,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvllist,P = 3,L = L[-1,],Q = 5,w = strongprojectedt[,-1])
 
@@ -159,8 +197,8 @@ bma.means=as.matrix(read.table("withbmaLposterior.means.txt")[,-1])
 lfsr.bma=as.matrix(read.table("withbmaLlfsr.txt"))[,-1]
 mash.means=as.matrix(read.table("simulationsLposterior.means.txt")[,-1])
 lfsr.mash=as.matrix(read.table("simulationsLlfsr.txt"))[,-1]
-ash.pm=as.matrix(read.table("ashmeans.txt"))
-ash.lfsr=as.matrix(read.table("ashlfsr.txt"))
+#ash.pm=as.matrix(read.table("ashmeans.txt"))
+#ash.lfsr=as.matrix(read.table("ashlfsr.txt"))
 mle=as.matrix(wfull)
 beta=as.matrix(c$beta)
 
@@ -168,12 +206,12 @@ beta=as.matrix(c$beta)
 standard=sqrt(mean((beta-mle)^2))
 sqrt(mean((bma.means-beta)^2))/standard
 sqrt(mean((mash.means-beta)^2))/standard
-sqrt(mean((ash.pm-beta)^2))/standard
+#sqrt(mean((ash.pm-beta)^2))/standard
 
 
 sum(lfsr.mash<0.05)
 sum(lfsr.bma<0.05)
-sum(ash.lfsr<0.05)
+#sum(ash.lfsr<0.05)
 
 ```
 
@@ -181,15 +219,15 @@ Show ROC curves:
 ```{r}
 mash.power=NULL
 bma.power=NULL
-ash.power=NULL
+#ash.power=NULL
 
 mash.fp=NULL
 bma.fp=NULL
-ash.fp=NULL
+#ash.fp=NULL
 
 sign.test.mash=as.matrix(c$beta)*mash.means
 sign.test.bma=as.matrix(c$beta)*bma.means
-sign.test.ash=as.matrix(b$beta)$ash.pm
+#sign.test.ash=as.matrix(b$beta)$ash.pm
 
 thresholds=seq(0.01,1,by=0.01)
 beta=as.matrix(c$beta)
@@ -199,13 +237,13 @@ thresh=thresholds[s]
 ##sign power is the proportion of true effects correctly signed at a given threshold
 mash.power[s]=sum(sign.test.mash>0&lfsr.mash<=thresh)/sum(beta!=0)
 bma.power[s]=sum(sign.test.bma>0&lfsr.bma<=thresh)/sum(beta!=0)
-ash.power[s]=sum(sign.test.ash>0&lfsr.ash<=thresh)/sum(beta!=0)
+#ash.power[s]=sum(sign.test.ash>0&lfsr.ash<=thresh)/sum(beta!=0)
 
 
 ##false positives is the proportion of null effects called at a given threshold
 mash.fp[s]=sum(beta==0&lfsr.mash<=thresh)/sum(beta==0)
 bma.fp[s]=sum(beta==0&lfsr.bma<=thresh)/sum(beta==0)
-ash.fp[s]=sum(beta==0&lfsr.ash<=thresh)/sum(beta==0)
+#ash.fp[s]=sum(beta==0&lfsr.ash<=thresh)/sum(beta==0)
 
 }
 
@@ -213,7 +251,7 @@ ash.fp[s]=sum(beta==0&lfsr.ash<=thresh)/sum(beta==0)
 
 
 
-plot(mash.fp,mash.power,cex=0.5,pch=1,xlim=c(0,0.2),lwd=1,ylim=c(0,0.4),col="green",ylab="True Positive Rate",xlab="False Positive Rate",type="l",main="")
+plot(mash.fp,mash.power,cex=0.5,pch=1,xlim=c(0,0.2),lwd=1,ylim=c(0,1),col="green",ylab="True Positive Rate",xlab="False Positive Rate",type="l",main="")
 #title("True Positive vs False Positive",cex.main=1.5)
 #lines(ash.fp,ash.power,cex=0.5,pch=1,ylim=c(0,1),col="red")
 lines(bma.fp,bma.power,cex=0.5,pch=1,ylim=c(0,1),col="blue")
@@ -223,6 +261,8 @@ legend("bottomright",legend = c("mash","bmalite","ash"),col=c("green","blue","re
 
 Test to show our calculations are accurate:
 ```{r}
+mash.means=as.matrix(read.table("simulationsLposterior.means.txt")[,-1])
+lfsr.mash=as.matrix(read.table("simulationsLlfsr.txt"))[,-1]
 j=10
 arrays=post.array.per.snp.no.baseline(j = 10,covmat = edcov,b.gp.hat = w,se.gp.hat = se,L = L[-1,])
 k=5
