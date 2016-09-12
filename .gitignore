@@ -17,3 +17,6 @@ gh-pages
 *.out*
 *.Rda*
 *.rds*
+*.txt
+*cache*
+*_files*
