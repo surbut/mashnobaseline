@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  10 AUG 2016 10:24
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  12 SEP 2016 09:47
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -404,10 +404,10 @@ File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 121.
 [3]
-./MashNobase.tex:182: Undefined control sequence.
+./MashNobase.tex:183: Undefined control sequence.
 <recently read> \bv 
                     
-l.182 ... was analogous to their inference on $\bv
+l.183 ... was analogous to their inference on $\bv
                                                   _{j}$.
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -418,43 +418,43 @@ and I'll forget about whatever was undefined.
 [4]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 272.
+(hyperref)                removing `math shift' on input line 273.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 272.
+(hyperref)                removing `math shift' on input line 273.
 
 
-./MashNobase.tex:553: LaTeX Error: \begin{itemize} on input line 120 ended by \
+./MashNobase.tex:554: LaTeX Error: \begin{itemize} on input line 120 ended by \
 end{document}.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.553 \end{document}
+l.554 \end{document}
                     
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
 or  <return>  to continue without it.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 553.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 554.
 [5]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 553.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 554.
  (./MashNobase.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 553.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 553.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 554.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 554.
 Package rerunfilecheck Info: File `MashNobase.out' has not changed.
 (rerunfilecheck)             Checksum: 1467602205E76EBB7F8F95D3937349B3;398.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 553.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 554.
  )
 (\end occurred inside a group at level 1)
 
 ### semi simple group (level 1) entered at line 120 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 6640 strings out of 493089
- 95546 string characters out of 6134842
+ 6641 strings out of 493089
+ 95552 string characters out of 6134842
  187898 words of memory out of 5000000
  9999 multiletter control sequences out of 15000+600000
  24785 words of font info for 93 fonts, out of 8000000 for 9000
@@ -477,10 +477,10 @@ b></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb><
 /usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></
 usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on MashNobase.pdf (5 pages, 181413 bytes).
+Output written on MashNobase.pdf (5 pages, 181663 bytes).
 PDF statistics:
- 160 PDF objects out of 1000 (max. 8388607)
- 134 compressed objects within 2 object streams
- 33 named destinations out of 1000 (max. 500000)
+ 161 PDF objects out of 1000 (max. 8388607)
+ 135 compressed objects within 2 object streams
+ 34 named destinations out of 1000 (max. 500000)
  57 words of extra memory for PDF output out of 10000 (max. 10000000)
 

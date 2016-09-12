@@ -1,9 +1,7 @@
 ---
-title: "withgtexconfig"
+title: "Testscriptsimulations"
 output: html_document
 ---
-
-
 
 ```{r setup, include=FALSE}
 library('knitr')
@@ -12,13 +10,16 @@ knitr::opts_chunk$set(cache=TRUE)
 
 
 ```{r}
+rm(list=ls())
 library('mash')
-
 set.seed(123)
-c=gtexchatsim(J = 10000,d = 44,betasd = 1,esd = 0.11,tspec = 0,n = 400)
+RNGkind("Mersenne-Twister")
+c=chat_sim_fact(n=10000,d=40,betasd=1,esd=0.1,K=10)
+
 identical(c$beta[1,]+c$mumat[1,],c$ceff[1,])
 identical(c$chat[1,],c$ceff[1,]+c$error[1,])
-saveRDS(c,"chatsimgtex.rds")
+
+saveRDS(c,"chatsimesd0.1.rds")
 t=c$t;b=c$chat;se=c$shat
 hist(t)
 hist(b)
@@ -29,13 +30,13 @@ s.j=se/se
 absmat=abs(t(L%*%t(c$t)))
 index=which(rowMeans(absmat)>1.1)
 length(index)
-mean(index<400)
+mean(index<1000)
 index2=which(rowSums(absmat>4)>0)
+mean(index2<1000)
 length(index2)
-mean(index2<400)
+#index=which(rowMeans(abs(t(L%*%t(c$t))))>1.3)##choose the associations with average deviation large.
 
-
-##show average deviations
+##show median deviations
 plot((rowMeans(abs(t(L%*%t(c$t))))))
 points(index,(rowMeans(abs(t(L%*%t(c$t)))))[index],col="red")
 plot(rowSums(absmat>4))
@@ -45,7 +46,7 @@ strongprojectedtsimulations=t(L%*%t(t[index,]))
 
 
 
-write.table(strongprojectedtsimulations,"strongprojectedtgtexsimulations.txt",col.names = FALSE,row.names=FALSE)
+write.table(strongprojectedtsimulations,"strongprojectedtsimulations.txt",col.names = FALSE,row.names=FALSE)
 
 ```
 
@@ -54,12 +55,11 @@ Now, we need to project into the centered space to estimate the covariance matri
 
 
 ```{r}
-system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtgtexsimulations.txt -g 234 -k 5 -n 44 i -o gtexsimulationsL')
-#system('sfa -gen strongprojectedtgtexsimulations.txt -g 234 -k 5 -n 44 i -o gtexsimulationsL')
-A="gtexsimulationsL"
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtsimulations.txt -g 737 -k 5 -n 40 i -o simulationsL')
+A="simulationsL"
 
-factor.mat=as.matrix(read.table("gtexsimulationsL_F.out"))
-lambda.mat=as.matrix(read.table("gtexsimulationsL_lambda.out"))
+factor.mat=as.matrix(read.table("simulationsL_F.out"))
+lambda.mat=as.matrix(read.table("simulationsL_lambda.out"))
 
 #recall here that w will now be the L[-1,]%*%t(t[strong,]), which is equivalent to removing the first column of the strong projected t. Thus the covariance of v is initated with the RxR matrices (strong projected t), and the model is trained on the strong projected t less the first column because the model has v_{rxr}|w_{r,r-1}
 
@@ -83,21 +83,20 @@ library("ashr")
 ash.pm=matrix(NA,ncol=dim(wfull)[2],nrow=dim(wfull)[1])
 ash.lfsr=matrix(NA,ncol=dim(wfull)[2],nrow=dim(wfull)[1])
 for(i in 1:ncol(wfull)){
- 
+
 a=ash(betahat=wfull[,i],sebetahat=sjmat[,i],mixcompdist="normal")
 ash.pm[,i]=a$PosteriorMean
 ash.lfsr[,i]=a$lfsr
 }
-write.table(ash.pm,"ashmeansgtex.txt")
-write.table(ash.lfsr,"ashlfsrgtex.txt")
+write.table(ash.pm,"ashmeans.txt")
+write.table(ash.lfsr,"ashlfsr.txt")
 ```
 
 Compute the likelihood without ED:
 ```{r}
-A="noedcovgtex"
-noedcov=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = strongprojectedt,lambda.mat = lambda.mat,P = 3,A = "noedcovgtex",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
+A="noedcov"
+noedcov=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = strongprojectedt,lambda.mat = lambda.mat,P = 3,A = "noedcov",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
 ```
-
 Check that all the matrices are correctly computed:
 ```{r}
 pca=svd(strongprojectedt);v=pca$v[,1:3];d=pca$d[1:3];u=pca$u[,1:3]
@@ -128,11 +127,10 @@ all.equal(as.numeric(cov.pc)/max(diag(cov.pc)),as.numeric(noedcov[[3]]/max(diag(
 
 ```
 
-Now, compute likelihood without ED:
-
+Now compute likelihood without ED:
 ```{r}
 w=data.frame(wfull)[,-1]
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = noedcov,A = "noedcovgtex",pen = 1,L = L[-1,])
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = noedcov,A = "noedcov",pen = 1,L = L[-1,])
 pis=readRDS(paste0("pis",A,".rds"))$pihat
 
 likmat=readRDS(paste0("liketrain",A,".rds"))
@@ -144,12 +142,11 @@ Now run with ED:
 ```{r}
 rm(A)
 rm(noedcov)
-#detach("package:ashr", unload=TRUE)
-#detach("package:REBayes", unload=TRUE)
+rm(pis)
 library("ExtremeDeconvolution")
 efunc=deconvolution.em.with.bovy.with.L(t.stat = strongprojectedt,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvllist,P = 3,L = L[-1,],Q = 5,w = strongprojectedt[,-1])
 
-A="simulationsLgtex"
+A="simulationsL"
 
 max.step=efunc
 edcov=compute.hm.covmat.all.max.step(b.hat = wfull,se.hat = sjmat,t.stat = strongprojectedt,Q = 5,lambda.mat = lambda.mat,A=A,factor.mat = factor.mat,max.step = efunc,zero = T,power = 2)$cov
@@ -179,7 +176,7 @@ We can also compare our results to what we would get using the eqtlbma configs:
 ```{r}
 
 rm(A)
-A = "withbmaLgtex"
+A = "withbmaL"
 covbma=compute.covmat.with.heterogeneity.no.shrink(b.gp.hat = wfull,sebetahat = sjmat,A = A,zero = T,power = 2 )
 
 
@@ -195,12 +192,13 @@ total.quant.per.snp.no.baseline(j = j,covmat = covbma,b.gp.hat = w,se.gp.hat = s
 Compare RMSE and power:
 
 ```{r}
-bma.means=as.matrix(read.table("withbmaLgtexposterior.means.txt")[,-1])
-lfsr.bma=as.matrix(read.table("withbmaLgtexlfsr.txt"))[,-1]
-mash.means=as.matrix(read.table("simulationsLgtexposterior.means.txt")[,-1])
-lfsr.mash=as.matrix(read.table("simulationsLgtexlfsr.txt"))[,-1]
-ash.pm=as.matrix(read.table("ashmeansgtex.txt"))
-ash.lfsr=as.matrix(read.table("ashlfsrgtex.txt"))
+##now we read in computed means and lfsrs
+bma.means=as.matrix(read.table("withbmaLposterior.means.txt")[,-1])
+lfsr.bma=as.matrix(read.table("withbmaLlfsr.txt"))[,-1]
+mash.means=as.matrix(read.table("simulationsLposterior.means.txt")[,-1])
+lfsr.mash=as.matrix(read.table("simulationsLlfsr.txt"))[,-1]
+ash.pm=as.matrix(read.table("ashmeans.txt"))
+ash.lfsr=as.matrix(read.table("ashlfsr.txt"))
 mle=as.matrix(wfull)
 beta=as.matrix(c$beta)
 
@@ -210,15 +208,19 @@ sqrt(mean((bma.means-beta)^2))/standard
 sqrt(mean((mash.means-beta)^2))/standard
 sqrt(mean((ash.pm-beta)^2))/standard
 
-
+rmse.all.table=cbind(mash=sqrt(mean((beta-mash.means)^2))/standard,bmalite=sqrt(mean((beta-bma.means)^2))/standard,ash=sqrt(mean((beta-ash.pm)^2))/standard)
+barplot(as.numeric(rmse.all.table),main="Shared, Structured Effects",
+        ylab="RRMSE",xlab="Method",col=c("green","blue","red"),names=colnames(rmse.all.table),ylim=c(0,0.6),cex.main=1.5,cex.lab=1,cex.names=1.5)
+	
 sum(lfsr.mash<0.05)
 sum(lfsr.bma<0.05)
 sum(ash.lfsr<0.05)
-lfsr.ash=ash.lfsr
+
 ```
 
 Show ROC curves:
 ```{r}
+##now we generate curves
 mash.power=NULL
 bma.power=NULL
 ash.power=NULL
@@ -230,6 +232,7 @@ ash.fp=NULL
 sign.test.mash=as.matrix(c$beta)*mash.means
 sign.test.bma=as.matrix(c$beta)*bma.means
 sign.test.ash=as.matrix(c$beta)*ash.pm
+lfsr.ash=as.matrix(ash.lfsr)
 
 thresholds=seq(0.01,1,by=0.01)
 beta=as.matrix(c$beta)
@@ -253,7 +256,7 @@ ash.fp[s]=sum(beta==0&lfsr.ash<=thresh)/sum(beta==0)
 
 
 
-plot(mash.fp,mash.power,cex=0.5,pch=1,xlim=c(0,0.2),lwd=1,ylim=c(0,1),col="green",ylab="True Positive Rate",xlab="False Positive Rate",type="l",main="")
+plot(mash.fp,mash.power,cex=0.5,pch=1,xlim=c(0,1),lwd=1,ylim=c(0,1),col="green",ylab="True Positive Rate",xlab="False Positive Rate",type="l",main="")
 #title("True Positive vs False Positive",cex.main=1.5)
 lines(ash.fp,ash.power,cex=0.5,pch=1,ylim=c(0,1),col="red")
 lines(bma.fp,bma.power,cex=0.5,pch=1,ylim=c(0,1),col="blue")
@@ -263,6 +266,8 @@ legend("bottomright",legend = c("mash","bmalite","ash"),col=c("green","blue","re
 
 Test to show our calculations are accurate:
 ```{r}
+mash.means=as.matrix(read.table("simulationsLposterior.means.txt")[,-1])
+lfsr.mash=as.matrix(read.table("simulationsLlfsr.txt"))[,-1]
 j=10
 arrays=post.array.per.snp.no.baseline(j = 10,covmat = edcov,b.gp.hat = w,se.gp.hat = se,L = L[-1,])
 k=5
@@ -281,7 +286,7 @@ identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(ti
 
 log.lik.snp=log.lik.func(b.mle,LVL,LSigL_list)
 log.lik.minus.max=log.lik.snp-max(log.lik.snp)
-pis=readRDS("pissimulationsLgtex.rds")$pihat
+pis=readRDS("pissimulationsL.rds")$pihat
 exp.vec=exp(log.lik.minus.max)
 post.weights=t(exp.vec*pis/sum(exp.vec*pis))
 
