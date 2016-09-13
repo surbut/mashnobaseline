@@ -5,3 +5,4 @@
 \contentsline {section}{\numberline {4}Likelihood}{4}{section.4}
 \contentsline {section}{\numberline {5}Posteriors}{5}{section.5}
 \contentsline {section}{\numberline {6}Differences required over ${\tt mash}$ implementation}{5}{section.6}
+\contentsline {section}{\numberline {7}Simulation}{6}{section.7}

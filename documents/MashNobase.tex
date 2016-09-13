@@ -180,7 +180,7 @@ And thus we can use the Bovy et al algorithm invoked in both the Extreme Deconvo
 
 For each gene, and $w_{j} = L_{R-1,R} \chat_{j}$.
 
-Recall that our previous approach was simplified by the fact that $\bm{w}_{j}$ was simply $\hat{\bm{b}_{j}}$ and the projection matrix was simply the $I_{r}$ identity matrix. Our inference on $\bm{b}$ was analogous to their inference on $\bv_{j}$. 
+Recall that our previous approach was simplified by the fact that $\bm{w}_{j}$ was simply $\hat{\bm{b}_{j}}$ and the projection matrix was simply the $I_{r}$ identity matrix. Our inference on $\bm{b}$ was analogous to their inference on $\vb_{j}$. 
 
 
 As before, we are interested in returning the prior covariance $U_k$ matrices of the `true` deviations $\vb$, which we will then rescale by choosing a set of $\omega$ that are appropriate to $L \chat $ to comprise a set of $P = KxL$ prior covariance matrices $\Sigma$.
@@ -550,5 +550,55 @@ U^{1}_{jp} = \Sigma_{p} - \Sigma_p L_{R-1,R} ' T_{jp}^{-1} L_{R-1,R}  \Sigma_{p}
 %    B_{jk} = U_{k} \left( \hat{V}_{j}^{-1} U_{k} + I \right)^{-1}
 %    \end{aligned}
 %\end{equation}
+
+\section{Simulation}
+
+ In this simulation framework, there are 1000 real associations in 10000 null across 44 tissues.
+ 
+ Each 'real association' is simulated in the following manner:
+ 
+$\begin{verbatim}{function(n=1000,d=44,betasd=1,esd=0.1,K=10){
+  library("MASS")
+  library("mvtnorm")
+  J=0.10*n
+  
+  configs = matrix((rnorm(d*K)),byrow=T,ncol=d) # A matrix of K classes (patterns) across R subgroups 
+  F=as.matrix(configs);
+  covmat=lapply(seq(1:K),function(k){
+    A=F[k,]%*%$t(F[k,]);
+    A/max(diag(A))})
+  ## each entry of F is the the factor of decomposition of covariance of effect sizes
+  z = sample(K,J,replace=TRUE) # randomly sample factor to be loaded on for each real snp
+  
+  
+  mus=rnorm(n)  ###generate a list of n mus
+  mumat=matrix(rep(mus,d),ncol=d)##generate a matrix of mus for each gene
+  omega=abs(rnorm(J,mean=0,sd=betasd))##effect size variance can be big or small
+  beta=t(sapply(seq(1:J),function(j){
+    k=z[j]
+    mvrnorm(1,mu=rep(0,d),Sigma=omega[j]*covmat[[k]])
+    #rmvnorm(1,mean = rep(0,d),sigma=omega*covmat[[k]])
+  }))
+  
+  beta=rbind(beta,matrix(rep(0,(n-J)*d),ncol=d))
+  c=beta+mumat
+  sj=abs(matrix(rnorm(n*d,esd,0.001),ncol=d))##use uniform to simulate 'shrunken'
+  e=t(apply(sj,1,function(x){rmvnorm(1,mean=rep(0,d),sigma=diag(x)^2)}))
+  chat=c+e
+  t=chat/sj
+  return(list(beta=beta,chat=chat,covmat=covmat,components=z,t=t,mumat=mumat,
+  shat=sj,error=e,ceff=c,F=F,omega=omega))}\end{verbatim}}$
+  
+  
+Such that for every true associations a factor is chosen and 'standardized' such that the maximum value across the diagonal is one. The true effects are then simulated according to the assigned component, scaled by some factor $\omega$, and then and this scaling is added to a chosen mean for the gene, centered at o with $\sigma^{2}$ of 1. 
+
+The true $ceff$ is then computed as 
+$$ceff = \mu + \beta$$ 
+
+and
+$$chat = ceff + E$$ where $E \sim N(0,V)$ and V is diagonal.
+
+This function reports the true $\mu$, the true $\beta$ for the 1000 real genes and their associated componenent, as well as the standard error.
+
 
 \end{document}  
