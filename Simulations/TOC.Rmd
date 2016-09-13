@@ -1,0 +1,17 @@
+---
+title: "Index"
+output: html_document
+---
+
+
+**Last updated:** `r Sys.Date()`
+
+**Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
+
+## Notes
+Here I describe the html containedwithin:
+
+* [Simulating according to factor model](factorsim/fullsim.html)
+* [Simulating according to gtex model](gtexsimulations/gtexsimulationsscript.html)
+* [John's data at time point 18](../john/withbatchcorrects2.html)
+
