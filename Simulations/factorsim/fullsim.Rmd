@@ -12,7 +12,7 @@ knitr::opts_chunk$set(cache=TRUE)
  Each 'real association' is simulated in the following manner:
  
 ```{r echo=T}
-chat_sim_fact()
+chat_sim_fact
 ````
 Such that for every true associations a factor is chosen and 'standardized' such that the maximum value across the diagonal is one. The true effects are then simulated according to the assigned component, scaled by some factor $\omega$, and then and this scaling is added to a chosen mean for the gene, centered at o with $\sigma^{2}$ of 1. 
 
@@ -147,6 +147,39 @@ all.equal(as.numeric(cov.pc)/max(diag(cov.pc)),as.numeric(noedcov[[3]]/max(diag(
 
 ```
 
+$$Likelihood$$
+
+Now we will replace the RxR matrix $L$ with the $R-1xR$ matrix $L∗$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
+
+\section{Likelihood}
+
+Now we will replace the RxR matrix $L$ with the R-1xR matrix $L*$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
+
+Now for each gene J at each component k, integrating over $\vb$, 
+
+
+
+$$L_{R-1,R} \ceff \sim \Norm (0, L_{R-1,R} U_{k} L_{R-1,R} ') $$
+$$L_{R-1,R} \chat \sim \Norm (0, L_{R-1,R}  U_{k} L_{R-1,R} ' + L_{R-1,R} \hat{V} L_{R-1,R} ')$$ 
+
+And thus we can use the Bovy et al algorithm invoked in both the Extreme Deconvolution package and in `Sarah's MixEm' where the marginal variance at each component, $T_{jp}$:
+
+
+$$T_{jp} = L_{R-1,R} U_k L_{R-1,R}' + L_{R-1,R} \hat{V}_{j} L_{R-1,R}'$$
+
+
+For each gene, and $w_{j} = L_{R-1,R} \chat_{j}$.
+
+Recall that our previous approach was simplified by the fact that $\bm{w}_{j}$ was simply $\hat{\bm{b}_{j}}$ and the projection matrix was simply the $I_{r}$ identity matrix. Our inference on $\bm{b}$ was analogous to their inference on $\vb_{j}$. 
+
+
+As before, we are interested in returning the prior covariance $U_k$ matrices of the `true` deviations $\vb$, which we will then rescale by choosing a set of $\omega$ that are appropriate to $L \chat $ to comprise a set of $P = KxL$ prior covariance matrices $\Sigma$.
+
+and choose the set of $\pi$ that maximizes compute the following likelihood at each of the P components: 
+
+
+$$L_{R-1,R}  \chat _j \sim \Norm (0, L_{R-1,R}  \Sigma_{p} L_{R-1,R} ' + L_{R-1,R} \hat{V_j} L_{R-1,R} ') $$
+ 
 Now compute likelihood without ED:
 ```{r}
 w=data.frame(wfull)[,-1]
@@ -158,7 +191,12 @@ test=exp(likmat)
 sum(log(test%*%pis))
 ```
 
-Now run with ED:
+
+Now run with ED to show that 
+1) the likelihood improves
+2) we have successfully implemented an approach which allows us to input a list of residual variance matrices (as opposed to a matrix of vectors to be diagonalised).
+
+
 ```{r}
 rm(A)
 rm(noedcov)
@@ -173,7 +211,8 @@ edcov=compute.hm.covmat.all.max.step(b.hat = wfull,se.hat = sjmat,t.stat = stron
 length(edcov)
 ```
 
-Now, we switch to the projected (one lost rank) case:
+
+
 
 ```{r}
 
@@ -191,6 +230,8 @@ for(j in 1:nrow(w)){
 total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}
 
 ```
+As you can see, the likelihood is much better with ED.
+
 We can also compare our results to what we would get using the eqtlbma configs:
 
 ```{r}

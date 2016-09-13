@@ -120,11 +120,49 @@ $(document).ready(function () {
 
 
 <p>In this simulation framework, there are 1000 real associations in 10000 null across 44 tissues.</p>
+<p>Each ‘real association’ is simulated in the following manner:</p>
+<pre class="r"><code>chat_sim_fact</code></pre>
+<pre><code>## function(n=1000,d=44,betasd=1,esd=0.1,K=10){
+##   library(&quot;MASS&quot;)
+##   library(&quot;mvtnorm&quot;)
+##   J=0.10*n
+##   
+##   configs = matrix((rnorm(d*K)),byrow=T,ncol=d) # A matrix of K classes (patterns) across R subgroups 
+##   F=as.matrix(configs);
+##   covmat=lapply(seq(1:K),function(k){
+##     A=F[k,]%*%t(F[k,]);
+##     A/max(diag(A))})
+##   ## each entry of F is the the factor of decomposition of covariance of effect sizes
+##   z = sample(K,J,replace=TRUE) # randomly sample factor to be loaded on for each real snp
+##   
+##   
+##   mus=rnorm(n)  ###generate a list of n mus
+##   mumat=matrix(rep(mus,d),ncol=d)##generate a matrix of mus for each gene
+##   omega=abs(rnorm(J,mean=0,sd=betasd))##effect size variance can be big or small
+##   beta=t(sapply(seq(1:J),function(j){
+##     k=z[j]
+##     mvrnorm(1,mu=rep(0,d),Sigma=omega[j]*covmat[[k]])
+##     #rmvnorm(1,mean = rep(0,d),sigma=omega*covmat[[k]])
+##   }))
+##   
+##   beta=rbind(beta,matrix(rep(0,(n-J)*d),ncol=d))
+##   c=beta+mumat
+##   sj=abs(matrix(rnorm(n*d,esd,0.001),ncol=d))##use uniform to simulate 'shrunken'
+##   e=t(apply(sj,1,function(x){rmvnorm(1,mean=rep(0,d),sigma=diag(x)^2)}))
+##   chat=c+e
+##   t=chat/sj
+##   return(list(beta=beta,chat=chat,covmat=covmat,components=z,t=t,mumat=mumat,shat=sj,error=e,ceff=c,F=F,omega=omega))
+## }
+## &lt;environment: namespace:mash&gt;</code></pre>
+<p>Such that for every true associations a factor is chosen and ‘standardized’ such that the maximum value across the diagonal is one. The true effects are then simulated according to the assigned component, scaled by some factor <span class="math">\(\omega\)</span>, and then and this scaling is added to a chosen mean for the gene, centered at o with <span class="math">\(\sigma^{2}\)</span> of 1.</p>
+<p>The true <span class="math">\(ceff\)</span> is then computed as <span class="math">\[ceff = \mu + \beta\]</span></p>
+<p>and <span class="math">\[chat = ceff + E\]</span> where E is simulated N(0,V)$ and V is diagonal.</p>
+<p>This function reports the true <span class="math">\(\mu\)</span>, the true <span class="math">\(\beta\)</span> for the 1000 real genes and their associated componenent, as well as the standard error.</p>
+<p><strong><em>Running</em></strong></p>
+<p>Here, I want to show how to simulate and center. Recall that to center all t statistics, we need to use <span class="math">\(t(L_{RxR}t(T_{JxR})\)</span>. I show how choosing those that have a maximum average deviation of at least 1 or a maximum deviation of at least 4 produces similar results:</p>
 <pre class="r"><code>rm(list=ls())
-library('mash')</code></pre>
-<pre><code>## Loading required package: SQUAREM</code></pre>
-<pre><code>## Loading required package: mvtnorm</code></pre>
-<pre class="r"><code>set.seed(123)
+library('mash')
+set.seed(123)
 RNGkind(&quot;Mersenne-Twister&quot;)
 c=chat_sim_fact(n=10000,d=40,betasd=1,esd=0.1,K=10)
 
@@ -236,6 +274,19 @@ all.equal(as.numeric(a),as.numeric(noedcov[[9]]/max(diag(noedcov[[9]]))))</code>
 <pre><code>## [1] TRUE</code></pre>
 <pre class="r"><code>all.equal(as.numeric(cov.pc)/max(diag(cov.pc)),as.numeric(noedcov[[3]]/max(diag(noedcov[[3]]))))</code></pre>
 <pre><code>## [1] TRUE</code></pre>
+<p><span class="math">\[Likelihood\]</span></p>
+<p>Now we will replace the RxR matrix <span class="math">\(L\)</span> with the <span class="math">\(R-1xR\)</span> matrix <span class="math">\(L∗\)</span>, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of <span class="math">\(w\)</span> is guaranteed to be equal to the dimension of <span class="math">\(w\)</span>.</p>
+
+<p>Now we will replace the RxR matrix <span class="math">\(L\)</span> with the R-1xR matrix <span class="math">\(L*\)</span>, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of <span class="math">\(w\)</span> is guaranteed to be equal to the dimension of <span class="math">\(w\)</span>.</p>
+<p>Now for each gene J at each component k, integrating over <span class="math">\(\vb\)</span>,</p>
+<p><span class="math">\[L_{R-1,R} \ceff \sim \Norm (0, L_{R-1,R} U_{k} L_{R-1,R} ') \]</span> <span class="math">\[L_{R-1,R} \chat \sim \Norm (0, L_{R-1,R}  U_{k} L_{R-1,R} ' + L_{R-1,R} \hat{V} L_{R-1,R} ')\]</span></p>
+<p>And thus we can use the Bovy et al algorithm invoked in both the Extreme Deconvolution package and in `Sarah’s MixEm’ where the marginal variance at each component, <span class="math">\(T_{jp}\)</span>:</p>
+<p><span class="math">\[T_{jp} = L_{R-1,R} U_k L_{R-1,R}' + L_{R-1,R} \hat{V}_{j} L_{R-1,R}'\]</span></p>
+<p>For each gene, and <span class="math">\(w_{j} = L_{R-1,R} \chat_{j}\)</span>.</p>
+<p>Recall that our previous approach was simplified by the fact that <span class="math">\(\bm{w}_{j}\)</span> was simply <span class="math">\(\hat{\bm{b}_{j}}\)</span> and the projection matrix was simply the <span class="math">\(I_{r}\)</span> identity matrix. Our inference on <span class="math">\(\bm{b}\)</span> was analogous to their inference on <span class="math">\(\vb_{j}\)</span>.</p>
+<p>As before, we are interested in returning the prior covariance <span class="math">\(U_k\)</span> matrices of the <code>true</code> deviations <span class="math">\(\vb\)</span>, which we will then rescale by choosing a set of <span class="math">\(\omega\)</span> that are appropriate to $L $ to comprise a set of <span class="math">\(P = KxL\)</span> prior covariance matrices <span class="math">\(\Sigma\)</span>.</p>
+<p>and choose the set of <span class="math">\(\pi\)</span> that maximizes compute the following likelihood at each of the P components:</p>
+<p><span class="math">\[L_{R-1,R}  \chat _j \sim \Norm (0, L_{R-1,R}  \Sigma_{p} L_{R-1,R} ' + L_{R-1,R} \hat{V_j} L_{R-1,R} ') \]</span></p>
 <p>Now compute likelihood without ED:</p>
 <pre class="r"><code>w=data.frame(wfull)[,-1]
 compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = noedcov,A = &quot;noedcov&quot;,pen = 1,L = L[-1,])</code></pre>
@@ -247,7 +298,7 @@ likmat=readRDS(paste0(&quot;liketrain&quot;,A,&quot;.rds&quot;))
 test=exp(likmat)
 sum(log(test%*%pis))</code></pre>
 <pre><code>## [1] 348732.1</code></pre>
-<p>Now run with ED:</p>
+<p>Now run with ED to show that 1) the likelihood improves 2) we have successfully implemented an approach which allows us to input a list of residual variance matrices (as opposed to a matrix of vectors to be diagonalised).</p>
 <pre class="r"><code>rm(A)
 rm(noedcov)
 rm(pis)
@@ -260,7 +311,6 @@ max.step=efunc
 edcov=compute.hm.covmat.all.max.step(b.hat = wfull,se.hat = sjmat,t.stat = strongprojectedt,Q = 5,lambda.mat = lambda.mat,A=A,factor.mat = factor.mat,max.step = efunc,zero = T,power = 2)$cov
 length(edcov)</code></pre>
 <pre><code>## [1] 1151</code></pre>
-<p>Now, we switch to the projected (one lost rank) case:</p>
 <pre class="r"><code>w=data.frame(wfull)[,-1]
 
 compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])</code></pre>
@@ -274,6 +324,7 @@ sum(log(test%*%pis))</code></pre>
 <pre><code>## [1] 352909.8</code></pre>
 <pre class="r"><code>for(j in 1:nrow(w)){
 total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}</code></pre>
+<p>As you can see, the likelihood is much better with ED.</p>
 <p>We can also compare our results to what we would get using the eqtlbma configs:</p>
 <pre class="r"><code>rm(A)
 A = &quot;withbmaL&quot;
