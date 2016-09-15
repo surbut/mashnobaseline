@@ -11,18 +11,20 @@ knitr::opts_chunk$set(cache=TRUE)
  
  Each 'real association' is simulated in the following manner:
  
-```{r echo=T}
-chat_sim_fact
-````
-Such that for every true associations a factor is chosen and 'standardized' such that the maximum value across the diagonal is one. The true effects are then simulated according to the assigned component, scaled by some factor $\omega$, and then and this scaling is added to a chosen mean for the gene, centered at o with $\sigma^{2}$ of 1. 
+ Such that for every true associations a factor is chosen and 'standardized' such that the maximum value across the diagonal is one. The true effects are then simulated according to the assigned component, scaled by some factor $\omega$, and then and this scaling is added to a chosen mean for the gene, centered at o with $\sigma^{2}$ of 1. 
 
 The true $ceff$ is then computed as 
 $$ceff = \mu + \beta$$ 
 
 and
-$$chat = ceff + E$$ where E is simulated N(0,V)$ and V is diagonal.
+$$chat = ceff + E$$ where E is simulated $N(0,V)$ and V is diagonal.
 
 This function reports the true $\mu$, the true $\beta$ for the 1000 real genes and their associated componenent, as well as the standard error.
+ 
+```{r echo=T}
+chat_sim_fact
+````
+
 
 ***Running***
 
