@@ -121,6 +121,10 @@ $(document).ready(function () {
 
 <p>In this simulation framework, there are 1000 real associations in 10000 null across 44 tissues.</p>
 <p>Each ‘real association’ is simulated in the following manner:</p>
+<p>Such that for every true associations a factor is chosen and ‘standardized’ such that the maximum value across the diagonal is one. The true effects are then simulated according to the assigned component, scaled by some factor <span class="math">\(\omega\)</span>, and then and this scaling is added to a chosen mean for the gene, centered at o with <span class="math">\(\sigma^{2}\)</span> of 1.</p>
+<p>The true <span class="math">\(ceff\)</span> is then computed as <span class="math">\[ceff = \mu + \beta\]</span></p>
+<p>and <span class="math">\[chat = ceff + E\]</span> where E is simulated <span class="math">\(N(0,V)\)</span> and V is diagonal.</p>
+<p>This function reports the true <span class="math">\(\mu\)</span>, the true <span class="math">\(\beta\)</span> for the 1000 real genes and their associated componenent, as well as the standard error.</p>
 <pre class="r"><code>chat_sim_fact</code></pre>
 <pre><code>## function(n=1000,d=44,betasd=1,esd=0.1,K=10){
 ##   library(&quot;MASS&quot;)
@@ -154,10 +158,6 @@ $(document).ready(function () {
 ##   return(list(beta=beta,chat=chat,covmat=covmat,components=z,t=t,mumat=mumat,shat=sj,error=e,ceff=c,F=F,omega=omega))
 ## }
 ## &lt;environment: namespace:mash&gt;</code></pre>
-<p>Such that for every true associations a factor is chosen and ‘standardized’ such that the maximum value across the diagonal is one. The true effects are then simulated according to the assigned component, scaled by some factor <span class="math">\(\omega\)</span>, and then and this scaling is added to a chosen mean for the gene, centered at o with <span class="math">\(\sigma^{2}\)</span> of 1.</p>
-<p>The true <span class="math">\(ceff\)</span> is then computed as <span class="math">\[ceff = \mu + \beta\]</span></p>
-<p>and <span class="math">\[chat = ceff + E\]</span> where E is simulated N(0,V)$ and V is diagonal.</p>
-<p>This function reports the true <span class="math">\(\mu\)</span>, the true <span class="math">\(\beta\)</span> for the 1000 real genes and their associated componenent, as well as the standard error.</p>
 <p><strong><em>Running</em></strong></p>
 <p>Here, I want to show how to simulate and center. Recall that to center all t statistics, we need to use <span class="math">\(t(L_{RxR}t(T_{JxR})\)</span>. I show how choosing those that have a maximum average deviation of at least 1 or a maximum deviation of at least 4 produces similar results:</p>
 <pre class="r"><code>rm(list=ls())
