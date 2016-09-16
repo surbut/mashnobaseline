@@ -356,3 +356,67 @@ post.weights=t(exp.vec*pis/sum(exp.vec*pis))
 all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(mash.means[j,]))
 ```
 
+###COmpare with MASH##
+
+Now we can compare with mash. In this model, for each gene J:
+
+$$\chat |\mu, V = \mu + \beta + E$$
+
+$$\chat - \mu = \beta + E$$
+
+and $$E ~ N(0,V)$$
+while $$\beta  ~ \sum_{p} \pi_{p} N(0, U_{p})$$
+```{r}
+rm(list=ls())
+c=readRDS("chatsimesd0.1.rds")
+t=c$t;b=c$chat;se=c$shat;R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+wfull=t(L%*%t(b))
+##show that they sum to 0
+
+plot(rowSums(wfull),ylim=c(-1,1))
+```
+
+Now we proceed as in mash, selecting the strong t statistics:
+```{r}
+s.j=se/se
+
+absmat=abs(t(L%*%t(c$t)))
+index=which(rowMeans(absmat)>1.1)
+length(index)
+mean(index<1000)
+
+factor.mat=as.matrix(read.table("simulationsL_F.out"))
+lambda.mat=as.matrix(read.table("simulationsL_lambda.out"))
+
+
+##choose the strong projected T##
+library("ExtremeDeconvolution")
+strongprojectedtsimulations=t(L%*%t(t[index,]))
+max.step=deconvolution.em.with.bovy(t.stat = strongprojectedtsimulations,factor.mat = factor.mat,v.j = s.j,lambda.mat = lambda.mat,K = 3,3)
+
+##Show how the ranks is preserved
+apply(max.step$true.covs,1,function(x){qr(x)$rank})
+
+
+covmash=compute.hm.covmat.all.max.step(max.step = max.step,b.hat = wfull,se.hat = se,t.stat = strongprojectedtsimulations,Q = 5,lambda.mat = lambda.mat,A = "oldmash",factor.mat = factor.mat,zero = T,power = 2)$covmat
+
+all.equal(covmash[[2]]/max(diag(covmash[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
+all.equal(covmash[[3]]/max(diag(covmash[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
+all.equal(covmash[[9]]/max(diag(covmash[[9]])),max.step$true.covs[2,,]/max(diag(max.step$true.covs[2,,])))
+
+```
+
+Now, proceed as always, estimating likelihood and computing posteriors.
+
+```{r mashmethod}
+
+A="oldmash"
+
+compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covmash,A=A,pen=1)
+
+
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+b.test=t
+se.test=s.j
+weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covmash,b.gp.hat=wfull,se.gp.hat = se,pis,A=A,checkpoint = FALSE)})

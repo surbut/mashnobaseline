@@ -70,20 +70,20 @@ Here, the use of bold-face notation indicates a vector, while matrix quantities 
 %The purpose of this document is to express a way of selecting a set of covariance matrices for fitting a mixture of multivariate normals. Previously, we have used a fixed set of $U_k$ to represent the prior covariance matrices on the vector of `true` effects across tissues, $\bm{b}$. We then estimate the weights on each of these matrices $\pi$ hierarchically, using the EM algorithm. Here, we propose to estimates these covariance matrices simultaneously, thus reflecting the ideal patterns of covariance present in the data. We then rescale these matrices before, as in $\mash$. For the
 
 
-\section{Defining the Old Model}
+\section{Defining the Model}
 
-For a given gene-snp pair, $\bm{b}$ represents the $R$ vector of unknown standardized effect. We model the prior distribution from which $\bm{b}$ is drawn as a mixture of multivariate {\it Normals}.
- 
- \begin{equation}
-  \label{prior_b_mixt_grid}
-  \bm{b} | \bm{\pi},\bf{U} \sim \sum_{k,l} \pi_{k,l} \;{\it N}_R(\bm{0}, \omega_l U_{k})
-\end{equation}
-
-Furthermore, for a given gene-snp pair, the Likelihood on $\bm{b}$: 
-\begin{equation}
-  \label{new_lik}
-  \hat{\bm{b}} | \bm{b} \sim {\it N}_R(\bm{b}, \hat{V})
-\end{equation}
+%For a given gene-snp pair, $\bm{b}$ represents the $R$ vector of unknown standardized effect. We model the prior distribution from which $\bm{b}$ is drawn as a mixture of multivariate {\it Normals}.
+% 
+% \begin{equation}
+%  \label{prior_b_mixt_grid}
+%  \bm{b} | \bm{\pi},\bf{U} \sim \sum_{k,l} \pi_{k,l} \;{\it N}_R(\bm{0}, \omega_l U_{k})
+%\end{equation}
+%
+%Furthermore, for a given gene-snp pair, the Likelihood on $\bm{b}$: 
+%\begin{equation}
+%  \label{new_lik}
+%  \hat{\bm{b}} | \bm{b} \sim {\it N}_R(\bm{b}, \hat{V})
+%\end{equation}
 
 Now, we observe for each gene $j$ a vector of uncentered noisy average feature expression $\chat$ across R conditions:
 
@@ -112,7 +112,9 @@ $\vb$ is a zero-centered mixture of multivariate normals:
 Critically, our quantity of interest now, $\vb$  represents the true `deviations` from average gene expression across each condition and can be seen as the effects in $\mash$.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
 \section{Applications}
 
 We will again apply a two-step process to our selection of covariance matrices, where we select a set of denoised `pattern` matrices $U_{k}$ by using the EM algorithm on the max effects across conditions,
@@ -132,6 +134,7 @@ L is the $RxR$ centering matrix $L_{r}=I_{r}-{\tfrac  {1}{r}}{\mathbf  {1}}{\mat
 Then :
 
 \begin{equation}
+\label{model}
 \begin{aligned}
 L \ceff &= L \mu \bm{1}+ L \vb \\
 L \ceff &= 0 + L \vb \\
@@ -142,6 +145,29 @@ L \chat &= L \vb + E \\
 
 
 Where $E \sim \Norm (0, L\hat{V} L')$
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Previous Model}
+
+If we were to apply the old $\mash$ to data simulated as in (\ref{model}) in which we assumed the mean was known, we would write
+
+\begin{equation}
+\begin{aligned}
+\ceff | \mu, \vb  &= \mu \bm{1} + \vb \\
+\chat &= \mu + \vb + E \\
+\chat - \mu &= \vb + E \\
+\end{aligned}
+\end{equation}
+
+where $E \sim \Norm (0, V)$
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Comparing Models}
+
+
+In the new model, we incorporate the centering matrix L into our selection of covariance matrices by modeling L\chat = L \vb + E where E ~ N(0,LVL') and using old mash, we assume that the mean centered estimates directly approximate $\vb$, that is $\chat-\mu$ = $\vb + E $where $E ~ N(0,V)$. 
 
 
 \subsection{Selecting The Covariance Matrices}
