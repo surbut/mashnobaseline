@@ -1,47 +1,40 @@
 ---
-title: "Testscriptsimulations"
+title: "Untitled"
 output: html_document
 ---
+
 
 ```{r setup, include=FALSE}
 library('knitr')
 knitr::opts_chunk$set(cache=TRUE)
 ```
- In this simulation framework, there are 1000 real associations in 10000 null across 44 tissues.
- 
- Each 'real association' is simulated in the following manner:
- 
- Such that for every true associations a factor is chosen and 'standardized' such that the maximum value across the diagonal is one. The true effects are then simulated according to the assigned component, scaled by some factor $\omega$, and then and this scaling is added to a chosen mean for the gene, centered at o with $\sigma^{2}$ of 1. 
-
-The true $ceff$ is then computed as 
-$$ceff = \mu + \beta$$ 
-
-and
-$$chat = ceff + E$$ where E is simulated $N(0,V)$ and V is diagonal.
-
-This function reports the true $\mu$, the true $\beta$ for the 1000 real genes and their associated componenent, as well as the standard error.
- 
-```{r echo=T}
-chat_sim_fact
-````
 
 
-***Running***
+Now we're going to simulate data across 8 subgroups according to 5 factors:
 
-Here, I want to show how to simulate and center. Recall that to center all t statistics, we need to use $t(L_{RxR}t(T_{JxR})$. I show how choosing those that have a maximum average deviation of at least 1 or a maximum deviation of at least 4 produces similar results:
 
 
 ```{r}
 rm(list=ls())
 library('mash')
-set.seed(123)
+source("~/matrix_ash/R/simulationswithmean.R")
+set.seed(1)
 RNGkind("Mersenne-Twister")
-c=chat_sim_fact(n=10000,d=40,betasd=1,esd=0.1,K=10)
+c=chat_sim_fsimple(n=10000,d=8,betasd=1,esd=0.1,K=3)
+
+
+par(mfrow=c(2,3))
+apply(c$factors,1,function(x){barplot(x)})
+lapply(c$covmat,function(x){barplot(rowSums(x)!=0)})
 
 identical(c$beta[1,]+c$mumat[1,],c$ceff[1,])
 identical(c$chat[1,],c$ceff[1,]+c$error[1,])
+```
 
-saveRDS(c,"chatsimesd0.1.rds")
+Now, let's do our analysis:
+
+```{r}
+saveRDS(c,"chatsimesparsef.rds")
 t=c$t;b=c$chat;se=c$shat
 hist(t)
 hist(b)
@@ -50,25 +43,21 @@ L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
 
 absmat=abs(t(L%*%t(c$t)))
-index=which(rowMeans(absmat)>1.1)
+index=which(rowSums(absmat>4)>0)
 length(index)
 mean(index<1000)
-index2=which(rowSums(absmat>4)>0)
-mean(index2<1000)
-length(index2)
+
 #index=which(rowMeans(abs(t(L%*%t(c$t))))>1.3)##choose the associations with average deviation large.
 
-##show median deviations
-plot((rowMeans(abs(t(L%*%t(c$t))))))
-points(index,(rowMeans(abs(t(L%*%t(c$t)))))[index],col="red")
+##show deviations
 plot(rowSums(absmat>4))
-points(index2,rowSums(absmat>4)[index2],col="blue")
+points(index,rowSums(absmat>4)[index],col="blue")
 
-strongprojectedtsimulations=t(L%*%t(t[index,]))
+sparsestrongt=t(L%*%t(t[index,]))
 
 
 
-write.table(strongprojectedtsimulations,"strongprojectedtsimulations.txt",col.names = FALSE,row.names=FALSE)
+write.table(sparsestrongt,"sparsestrongt.txt",col.names = FALSE,row.names=FALSE)
 
 ```
 
@@ -77,15 +66,15 @@ Now, we need to project into the centered space to estimate the covariance matri
 
 
 ```{r}
-system('/Users/sarahurbut/miniconda3/bin/sfa -gen strongprojectedtsimulations.txt -g 737 -k 5 -n 40 i -o simulationsL')
-A="simulationsL"
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen sparsestrongt.txt -g 506 -k 5 -n 8 i -o sparseF')
+A="sparseF"
 
-factor.mat=as.matrix(read.table("simulationsL_F.out"))
-lambda.mat=as.matrix(read.table("simulationsL_lambda.out"))
+factor.mat=as.matrix(read.table("sparseF_F.out"))
+lambda.mat=as.matrix(read.table("sparseF_lambda.out"))
 
 #recall here that w will now be the L[-1,]%*%t(t[strong,]), which is equivalent to removing the first column of the strong projected t. Thus the covariance of v is initated with the RxR matrices (strong projected t), and the model is trained on the strong projected t less the first column because the model has v_{rxr}|w_{r,r-1}
 
-strongprojectedt=strongprojectedtsimulations
+strongprojectedt=sparsestrongt
 
 
 lvllist=genlvllist(s.j[index,],L = L[-1,])
@@ -99,25 +88,10 @@ dim(sjmat)
 
 ```
 
-Now, first run ash. We have to run this separately because we have OpenMP conflicts.
-```{r,eval=FALSE}
-library("ashr")
-ash.pm=matrix(NA,ncol=dim(wfull)[2],nrow=dim(wfull)[1])
-ash.lfsr=matrix(NA,ncol=dim(wfull)[2],nrow=dim(wfull)[1])
-for(i in 1:ncol(wfull)){
-
-a=ash(betahat=wfull[,i],sebetahat=sjmat[,i],mixcompdist="normal")
-ash.pm[,i]=a$PosteriorMean
-ash.lfsr[,i]=a$lfsr
-}
-write.table(ash.pm,"ashmeans.txt")
-write.table(ash.lfsr,"ashlfsr.txt")
-```
-
 Compute the likelihood without ED:
 ```{r}
-A="noedcov"
-noedcov=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = strongprojectedt,lambda.mat = lambda.mat,P = 3,A = "noedcov",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
+A="noedcovsparse"
+noedcov=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = strongprojectedt,lambda.mat = lambda.mat,P = 3,A = "noedcovsparse",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
 ```
 Check that all the matrices are correctly computed:
 ```{r}
@@ -185,7 +159,9 @@ $$L_{R-1,R}  \chat _j \sim \Norm (0, L_{R-1,R}  \Sigma_{p} L_{R-1,R} ' + L_{R-1,
 Now compute likelihood without ED:
 ```{r}
 w=data.frame(wfull)[,-1]
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = noedcov,A = "noedcov",pen = 1,L = L[-1,])
+
+A="noedcovsparse"
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = noedcov,A,pen = 1,L = L[-1,])
 pis=readRDS(paste0("pis",A,".rds"))$pihat
 
 likmat=readRDS(paste0("liketrain",A,".rds"))
@@ -202,22 +178,27 @@ Now run with ED to show that
 ```{r}
 rm(A)
 rm(noedcov)
-rm(pis)
+
 library("ExtremeDeconvolution")
 efunc=deconvolution.em.with.bovy.with.L(t.stat = strongprojectedt,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvllist,P = 3,L = L[-1,],Q = 5,w = strongprojectedt[,-1])
 
-A="simulationsL"
+A="sparseL"
+
+
+apply(efunc$true.covs,1,function(x){qr(x)$rank})
 
 max.step=efunc
 edcov=compute.hm.covmat.all.max.step(b.hat = wfull,se.hat = sjmat,t.stat = strongprojectedt,Q = 5,lambda.mat = lambda.mat,A=A,factor.mat = factor.mat,max.step = efunc,zero = T,power = 2)$cov
 length(edcov)
+
+all.equal(edcov[[2]]/max(diag(edcov[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
+all.equal(edcov[[3]]/max(diag(edcov[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
+all.equal(edcov[[9]]/max(diag(edcov[[9]])),max.step$true.covs[2,,]/max(diag(max.step$true.covs[2,,])))
+
 ```
 
-
-
-
 ```{r}
-
+A="sparseL"
 w=data.frame(wfull)[,-1]
 
 compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
@@ -234,103 +215,11 @@ total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se
 ```
 As you can see, the likelihood is much better with ED.
 
-We can also compare our results to what we would get using the eqtlbma configs:
-
+##Test to show our calculations are accurate:
 ```{r}
-
-rm(A)
-A = "withbmaL"
-covbma=compute.covmat.with.heterogeneity.no.shrink(b.gp.hat = wfull,sebetahat = sjmat,A = A,zero = T,power = 2 )
-
-
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = covbma,A = A,pen = 1,L = L[-1,])
-pis=readRDS(paste0("pis",A,".rds"))$pihat
-
-
-for(j in 1:nrow(w)){
-total.quant.per.snp.no.baseline(j = j,covmat = covbma,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}
-
-```
-
-Compare RMSE and power:
-
-```{r}
-##now we read in computed means and lfsrs
-bma.means=as.matrix(read.table("withbmaLposterior.means.txt")[,-1])
-lfsr.bma=as.matrix(read.table("withbmaLlfsr.txt"))[,-1]
-mash.means=as.matrix(read.table("simulationsLposterior.means.txt")[,-1])
-lfsr.mash=as.matrix(read.table("simulationsLlfsr.txt"))[,-1]
-ash.pm=as.matrix(read.table("ashmeans.txt"))
-ash.lfsr=as.matrix(read.table("ashlfsr.txt"))
-mle=as.matrix(wfull)
-beta=as.matrix(c$beta)
-
-
-standard=sqrt(mean((beta-mle)^2))
-sqrt(mean((bma.means-beta)^2))/standard
-sqrt(mean((mash.means-beta)^2))/standard
-sqrt(mean((ash.pm-beta)^2))/standard
-
-rmse.all.table=cbind(mash=sqrt(mean((beta-mash.means)^2))/standard,bmalite=sqrt(mean((beta-bma.means)^2))/standard,ash=sqrt(mean((beta-ash.pm)^2))/standard)
-barplot(as.numeric(rmse.all.table),main="Shared, Structured Effects",
-        ylab="RRMSE",xlab="Method",col=c("green","blue","red"),names=colnames(rmse.all.table),ylim=c(0,0.6),cex.main=1.5,cex.lab=1,cex.names=1.5)
-	
-sum(lfsr.mash<0.05)
-sum(lfsr.bma<0.05)
-sum(ash.lfsr<0.05)
-
-```
-
-Show ROC curves:
-```{r}
-##now we generate curves
-mash.power=NULL
-bma.power=NULL
-ash.power=NULL
-
-mash.fp=NULL
-bma.fp=NULL
-ash.fp=NULL
-
-sign.test.mash=as.matrix(c$beta)*mash.means
-sign.test.bma=as.matrix(c$beta)*bma.means
-sign.test.ash=as.matrix(c$beta)*ash.pm
-lfsr.ash=as.matrix(ash.lfsr)
-
-thresholds=seq(0.01,1,by=0.01)
-beta=as.matrix(c$beta)
-for(s in 1:length(thresholds)){
-thresh=thresholds[s]
-
-##sign power is the proportion of true effects correctly signed at a given threshold
-mash.power[s]=sum(sign.test.mash>0&lfsr.mash<=thresh)/sum(beta!=0)
-bma.power[s]=sum(sign.test.bma>0&lfsr.bma<=thresh)/sum(beta!=0)
-ash.power[s]=sum(sign.test.ash>0&lfsr.ash<=thresh)/sum(beta!=0)
-
-
-##false positives is the proportion of null effects called at a given threshold
-mash.fp[s]=sum(beta==0&lfsr.mash<=thresh)/sum(beta==0)
-bma.fp[s]=sum(beta==0&lfsr.bma<=thresh)/sum(beta==0)
-ash.fp[s]=sum(beta==0&lfsr.ash<=thresh)/sum(beta==0)
-
-}
-
-
-
-
-
-plot(mash.fp,mash.power,cex=0.5,pch=1,xlim=c(0,1),lwd=1,ylim=c(0,1),col="green",ylab="True Positive Rate",xlab="False Positive Rate",type="l",main="")
-#title("True Positive vs False Positive",cex.main=1.5)
-lines(ash.fp,ash.power,cex=0.5,pch=1,ylim=c(0,1),col="red")
-lines(bma.fp,bma.power,cex=0.5,pch=1,ylim=c(0,1),col="blue")
-legend("bottomright",legend = c("mash","bmalite","ash"),col=c("green","blue","red"),pch=c(1,1,1))
-
-```
-
-Test to show our calculations are accurate:
-```{r}
-mash.means=as.matrix(read.table("simulationsLposterior.means.txt")[,-1])
-lfsr.mash=as.matrix(read.table("simulationsLlfsr.txt"))[,-1]
+mash.means=as.matrix(read.table("sparseLposterior.means.txt")[,-1])
+lfsr.mash=as.matrix(read.table("sparseLlfsr.txt"))[,-1]
+edcov=readRDS("covmatsparseL.rds")
 j=10
 arrays=post.array.per.snp.no.baseline(j = 10,covmat = edcov,b.gp.hat = w,se.gp.hat = se,L = L[-1,])
 k=5
@@ -349,7 +238,7 @@ identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(ti
 
 log.lik.snp=log.lik.func(b.mle,LVL,LSigL_list)
 log.lik.minus.max=log.lik.snp-max(log.lik.snp)
-pis=readRDS("pissimulationsL.rds")$pihat
+pis=readRDS("pissparseL.rds")$pihat
 exp.vec=exp(log.lik.minus.max)
 post.weights=t(exp.vec*pis/sum(exp.vec*pis))
 
@@ -368,7 +257,8 @@ and $$E ~ N(0,V)$$
 while $$\beta  ~ \sum_{p} \pi_{p} N(0, U_{p})$$
 ```{r}
 rm(list=ls())
-c=readRDS("chatsimesd0.1.rds")
+c=readRDS("chatsimesparsef.rds")
+
 t=c$t;b=c$chat;se=c$shat;R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 wfull=t(L%*%t(b))
@@ -382,16 +272,16 @@ Now we proceed as in mash, selecting the strong t statistics:
 
 s.j=se/se
 absmat=abs(t(L%*%t(c$t)))
-index=which(rowMeans(absmat)>1.1)
+
 length(index)
+index=which(rowSums(absmat>4)>0)
 mean(index<1000)
 
-factor.mat=as.matrix(read.table("simulationsL_F.out"))
-lambda.mat=as.matrix(read.table("simulationsL_lambda.out"))
+factor.mat=as.matrix(read.table("sparseF_F.out"))
+lambda.mat=as.matrix(read.table("sparseF_lambda.out"))
 
 
-##choose the strong projected T and compute the max step##
-##library("ExtremeDeconvolution")
+
 strongprojectedtsimulations=t(L%*%t(t[index,]))
 max.step=deconvolution.em.with.bovy(t.stat = strongprojectedtsimulations,factor.mat = factor.mat,v.j = s.j,lambda.mat = lambda.mat,K = 3,P = 3 )
 
@@ -399,7 +289,7 @@ max.step=deconvolution.em.with.bovy(t.stat = strongprojectedtsimulations,factor.
 apply(max.step$true.covs,1,function(x){qr(x)$rank})
 
 
-covmash=compute.hm.covmat.all.max.step(max.step = max.step,b.hat = wfull,se.hat = se,t.stat = strongprojectedtsimulations,Q = 5,lambda.mat = lambda.mat,A = "oldmashknit",factor.mat = factor.mat,zero = T,power = 2)$covmat
+covmash=compute.hm.covmat.all.max.step(max.step = max.step,b.hat = wfull,se.hat = se,t.stat = strongprojectedtsimulations,Q = 5,lambda.mat = lambda.mat,A = "sparseoldmash",factor.mat = factor.mat,zero = T,power = 2)$covmat
 
 all.equal(covmash[[2]]/max(diag(covmash[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
 all.equal(covmash[[3]]/max(diag(covmash[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
@@ -410,7 +300,7 @@ all.equal(covmash[[9]]/max(diag(covmash[[9]])),max.step$true.covs[2,,]/max(diag(
 Now, proceed as always, estimating likelihood and computing posteriors.
 
 ```{r mashmethod, eval=FALSE}
-A="oldmash"
+A="sparseoldmash"
 compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covmash,A=A,pen=1)
 
 
@@ -423,14 +313,15 @@ weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covma
 Test to show our calculations are accurate:
 
 ```{r}
-mash.means=as.matrix(read.table("oldmashposterior.means.txt")[,-1])
-lfsr.mash=as.matrix(read.table("oldmashlfsr.txt"))[,-1]
-cov=readRDS("covmatoldmashknit.rds")
-pis=readRDS("pisoldmash.rds")$pihat
+mash.means=as.matrix(read.table("sparseoldmashposterior.means.txt")[,-1])
+lfsr.mash=as.matrix(read.table("sparseoldmashlfsr.txt"))[,-1]
+cov=readRDS("covmatsparseoldmash.rds")
+pis=readRDS("pissparseoldmash.rds")$pihat
 w=data.frame(wfull)
+R=ncol(w)
 j=10
 
-arrays=post.array.per.snp.no.baseline(j = 10,covmat = cov,b.gp.hat = w,se.gp.hat = se,L = diag(1,40))
+arrays=post.array.per.snp.no.baseline(j = 10,covmat = cov,b.gp.hat = w,se.gp.hat = se,L = diag(1,R))
 mash.arrays=post.array.per.snp(j = 10,covmat = cov,b.gp.hat = w,se.gp.hat = se)
 ##show same algebra
 
@@ -442,8 +333,8 @@ V.gp.hat=diag(se[j,])^2
 b.mle = as.vector(w[j,])
 
 lapply(seq(1:5),function(x){all.equal(arrays[[x]],mash.arrays[[x]])})
-L=diag(1,40)
-LSigL=L%*%covmash[[k]]%*%t(L)
+L=diag(1,R)
+LSigL=L%*%cov[[k]]%*%t(L)
 LVL=L%*%V.gp.hat%*%t(L)
 
 LSigL_list=lapply(cov,function(x){L%*%x%*%t(L)})
@@ -463,8 +354,8 @@ all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(mash.means[j,]
 mle=as.matrix(wfull)
 beta=as.matrix(c$beta)
 
-mash.nobaselinemeans=as.matrix(read.table("simulationsLposterior.means.txt")[,-1])
-mash.means=as.matrix(read.table("oldmashposterior.means.txt")[,-1])
+mash.nobaselinemeans=as.matrix(read.table("sparseLposterior.means.txt")[,-1])
+mash.means=as.matrix(read.table("sparseoldmashposterior.means.txt")[,-1])
 
 
 standard=sqrt(mean((beta-mle)^2))
@@ -472,5 +363,6 @@ sqrt(mean((mash.means-beta)^2))/standard
 sqrt(mean((mash.nobaselinemeans-beta)^2))/standard
 ```
 
-As you can see, doesn't 'really' reduce the RMSE.
+
+
 

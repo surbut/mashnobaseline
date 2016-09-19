@@ -200,13 +200,19 @@ L_{R-1,R} \chat \sim \Norm (0, L_{R-1,R}  U_{k} L_{R-1,R} ' + L_{R-1,R} \hat{V} 
 \end{equation}
 
 
-And thus we can use the Bovy et al algorithm invoked in both the Extreme Deconvolution package and in `Sarah's MixEm' where:
-
-\begin{equation}
- T_{jp} = L_{R-1,R} U_k L_{R-1,R}' + L_{R-1,R} \hat{V}_{j} L_{R-1,R}'
-\end{equation}
+And thus we can use the Bovy et al algorithm invoked in both the Extreme Deconvolution package and in `Sarah's MixEm' where according to Bovy's language.
 
 For each gene, and $w_{j} = L_{R-1,R} \chat_{j}$.
+
+\begin{equation}
+\begin{aligned}
+\textbf{w} = L_{R-1,R} \chat \\
+\textbf{w} \sim \Norm (0, L_{R-1,R} \vb) \\
+  \vb | \bm{\pi},\bf{U} \sim \sum_{k,l} \pi_{k,l} \;{\it N}_R(\bm{0}, \omega_l U_{k})\\
+\end{aligned}
+\end{equation}
+
+
 
 Recall that our previous approach was simplified by the fact that $\bm{w}_{j}$ was simply $\hat{\bm{b}_{j}}$ and the projection matrix was simply the $I_{r}$ identity matrix. Our inference on $\bm{b}$ was analogous to their inference on $\vb_{j}$. 
 
@@ -216,9 +222,14 @@ As before, we are interested in returning the prior covariance $U_k$ matrices of
 and choose the set of $\pi$ that maximizes compute the following likelihood at each of the P components: 
 
 \begin{equation}
-L_{R-1,R}  \chat _j \sim \Norm (0, L_{R-1,R}  \Sigma_{p} L_{R-1,R} ' + L_{R-1,R} \hat{V_j} L_{R-1,R} ') 
+\begin{aligned}
+L_{R-1,R}  \chat _j \sim \Norm (0, L_{R-1,R}  \Sigma_{p} L_{R-1,R} ' + L_{R-1,R} \hat{V_j} L_{R-1,R} ') \\
+T_{jp} = L_{R-1,R} U_k L_{R-1,R}' + L_{R-1,R} \hat{V}_{j} L_{R-1,R}'\\
+L_{R-1,R}  \chat _j  \sim \Norm (0, T_{jp} )
+\end{aligned}
 \end{equation}
  
+
 
 \section{Posteriors}
 
