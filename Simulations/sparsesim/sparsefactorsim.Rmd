@@ -18,12 +18,12 @@ Now we're going to simulate data across 8 subgroups according to 5 factors:
 rm(list=ls())
 library('mash')
 source("~/matrix_ash/R/simulationswithmean.R")
-set.seed(1)
+set.seed(123)
 RNGkind("Mersenne-Twister")
-c=chat_sim_fsimple(n=10000,d=8,betasd=1,esd=0.1,K=3)
+c=chat_sim_fsimple(n=10000,d=8,betasd=1,esd=0.1,K=10)
 
 
-par(mfrow=c(2,3))
+par(mfrow=c(4,5))
 apply(c$factors,1,function(x){barplot(x)})
 lapply(c$covmat,function(x){barplot(rowSums(x)!=0)})
 
@@ -66,7 +66,7 @@ Now, we need to project into the centered space to estimate the covariance matri
 
 
 ```{r}
-system('/Users/sarahurbut/miniconda3/bin/sfa -gen sparsestrongt.txt -g 506 -k 5 -n 8 i -o sparseF')
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen sparsestrongt.txt -g 507 -k 5 -n 8 i -o sparseF')
 A="sparseF"
 
 factor.mat=as.matrix(read.table("sparseF_F.out"))
