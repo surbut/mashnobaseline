@@ -171,6 +171,8 @@ In the new model, we incorporate the centering matrix L into our selection of co
 
 Using old mash, we assume that the mean centered estimates directly approximate $\vb$, that is $\chat-\mu$ = $\vb + E$ where $E \sim N(0,V)$. 
 
+We want to estimate effects with no baseline, such that null effects aren't forced to be negative (by a competitive default, given that non-null effects are seen as positive, or vice versa). We hope that this method will simply shrink null effects to zero and recognize the direction of the non-null effects, instead of making both null and non-null positive (negative) relative to some intermediate average.
+
 
 \subsection{Selecting The Covariance Matrices}
 
