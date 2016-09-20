@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Sparse Sim"
 output: html_document
 ---
 
@@ -12,12 +12,15 @@ knitr::opts_chunk$set(cache=TRUE)
 
 Now we're going to simulate data across 8 subgroups according to 5 factors:
 
+```{r}
+library('mash')
+chat_sim_fsimple
+```
 
-
+You can see that the covariance matrices correspond to the factors:
 ```{r}
 rm(list=ls())
-library('mash')
-source("~/matrix_ash/R/simulationswithmean.R")
+
 set.seed(123)
 RNGkind("Mersenne-Twister")
 c=chat_sim_fsimple(n=10000,d=8,betasd=1,esd=0.1,K=10)
@@ -30,6 +33,19 @@ lapply(c$covmat,function(x){barplot(rowSums(x)!=0)})
 identical(c$beta[1,]+c$mumat[1,],c$ceff[1,])
 identical(c$chat[1,],c$ceff[1,]+c$error[1,])
 ```
+
+Furthermore, you can see that the components look like such:
+
+```{r}
+table(c$components)
+barplot(rowSums(c$covmat[[2]]))
+comptwoers=which(c$components==2)[1:5]
+
+c$beta[comptwoers,]
+
+(c$beta[comptwoers,])
+```
+
 
 Now, let's do our analysis:
 
@@ -342,6 +358,18 @@ LSigL_list=lapply(cov,function(x){L%*%x%*%t(L)})
 identical(LSigL_list[[k]],LSigL)
 identical(as.numeric(arrays$post.means[k,]),as.numeric(post.mean.with.proj(b.mle = t(b.mle),tinv = solve(LVL+L%*%cov[[k]]%*%t(L)),U.k = cov[[k]],L = L)))
 identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(tinv = solve(LVL+L%*%cov[[k]]%*%t(L)),U.k = cov[[k]],L = L))))
+
+
+
+
+b.mle=as.vector(t(w[j,]))##turn i into a R x 1 vector
+V.gp.hat=diag(se[j,])^2
+V.gp.hat.inv <- solve(V.gp.hat)
+U.gp1kl= (post.b.gpkl.cov(V.gp.hat.inv, cov[[k]]))
+  
+identical(as.numeric(mash.arrays$post.means[k,]),as.numeric(post.b.gpkl.mean(b.mle = b.mle,V.gp.hat.inv = V.gp.hat.inv,U.gp1kl = U.gp1kl)))
+
+identical(as.numeric(mash.arrays$post.covs[k,]),as.numeric(diag(U.gp1kl)))
 
 
 

@@ -533,6 +533,15 @@ identical(LSigL_list[[k]],LSigL)</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 <pre class="r"><code>identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(tinv = solve(LVL+L%*%cov[[k]]%*%t(L)),U.k = cov[[k]],L = L))))</code></pre>
 <pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>b.mle=as.vector(t(w[j,]))##turn i into a R x 1 vector
+V.gp.hat=diag(se[j,])^2
+V.gp.hat.inv &lt;- solve(V.gp.hat)
+U.gp1kl= (post.b.gpkl.cov(V.gp.hat.inv, cov[[k]]))
+  
+identical(as.numeric(mash.arrays$post.means[k,]),as.numeric(post.b.gpkl.mean(b.mle = b.mle,V.gp.hat.inv = V.gp.hat.inv,U.gp1kl = U.gp1kl)))</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>identical(as.numeric(mash.arrays$post.covs[k,]),as.numeric(diag(U.gp1kl)))</code></pre>
+<pre><code>## [1] TRUE</code></pre>
 <pre class="r"><code>log.lik.snp=log.lik.func(b.mle,LVL,LSigL_list)
 log.lik.minus.max=log.lik.snp-max(log.lik.snp)
 exp.vec=exp(log.lik.minus.max)
