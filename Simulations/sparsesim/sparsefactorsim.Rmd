@@ -392,6 +392,25 @@ sqrt(mean((mash.means-beta)^2))/standard
 sqrt(mean((mash.nobaselinemeans-beta)^2))/standard
 ```
 
+Let's look at a few examples:
+
+```{r}
+barplot(c$factors[2,])
+j=which(c$components==2)[2]
+
+par(mfrow=c(2,2))
+barplot(c$beta[j,])
+barplot(c$chat[j,]-mean(c$chat))
+barplot(mash.nobaselinemeans[j,])
+barplot(mash.means[j,])
+
+barplot(c$factors[3,])
+j=which(c$components==3)[4]
 
 
-
+par(mfrow=c(2,2))
+barplot(c$beta[j,])
+barplot(c$chat[j,]-mean(c$chat[j,]))
+barplot(mash.nobaselinemeans[j,])
+barplot(mash.means[j,])
+```
