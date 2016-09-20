@@ -414,3 +414,54 @@ barplot(c$chat[j,]-mean(c$chat[j,]))
 barplot(mash.nobaselinemeans[j,])
 barplot(mash.means[j,])
 ```
+
+```{r}
+
+standard=sqrt(mean((beta[1:1000,]-mle[1:1000,])^2))
+sqrt(mean((mash.means[1:1000,]-beta[1:1000,])^2))/standard
+sqrt(mean((mash.nobaselinemeans[1:1000,]-beta[1:1000,])^2))/standard
+
+```
+
+
+Show ROC curves:
+```{r}
+##now we generate curves
+mash.power=NULL
+mashnobase.power=NULL
+
+mash.fp=NULL
+mashnobase.fp=NULL
+
+sign.test.mash=as.matrix(c$beta)*mash.means
+sign.test.mashnobase=as.matrix(c$beta)*mash.nobaselinemeans
+
+lfsr.mash=as.matrix(read.table("sparseoldmashlfsr.txt"))[,-1]
+lfsr.nobase=as.matrix(read.table("sparseLlfsr.txt"))[,-1]
+
+thresholds=seq(0.01,1,by=0.01)
+beta=as.matrix(c$beta)
+for(s in 1:length(thresholds)){
+thresh=thresholds[s]
+
+##sign power is the proportion of true effects correctly signed at a given threshold
+mash.power[s]=sum(sign.test.mash>0&lfsr.mash<=thresh)/sum(beta!=0)
+mashnobase.power[s]=sum(sign.test.mashnobase>0&lfsr.nobase<=thresh)/sum(beta!=0)
+
+
+##false positives is the proportion of null effects called at a given threshold
+mash.fp[s]=sum(beta==0&lfsr.mash<=thresh)/sum(beta==0)
+mashnobase.fp[s]=sum(beta==0&lfsr.nobase<=thresh)/sum(beta==0)
+}
+
+
+
+
+
+plot(mash.fp,mash.power,cex=0.5,pch=1,xlim=c(0,1),lwd=1,ylim=c(0,1),col="green",ylab="True Positive Rate",xlab="False Positive Rate",type="l",main="")
+#title("True Positive vs False Positive",cex.main=1.5)
+lines(mashnobase.fp,mashnobase.power,cex=0.5,pch=1,ylim=c(0,1),col="blue")
+legend("bottomright",legend = c("mash","mashnobase"),col=c("green","blue"),pch=c(1,1))
+
+```
+
