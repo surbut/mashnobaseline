@@ -398,15 +398,15 @@ barplot(c$chat[j,]-mean(c$chat))
 barplot(mash.nobaselinemeans[j,])
 barplot(mash.means[j,])
 
-barplot(c$factors[3,])
-j=which(c$components==3)[4]
+barplot(c$factors[10,])
+j=which(c$components==10)[3]
 
 
 par(mfrow=c(2,2))
 barplot(c$beta[j,])
-barplot(c$chat[j,]-mean(c$chat[j,]))
-barplot(mash.nobaselinemeans[j,])
-barplot(mash.means[j,])
+barplot(c$chat[j,]-mean(c$chat[j,]),ylim=c(-1,1))
+barplot(mash.nobaselinemeans[j,],ylim=c(-1,1))
+barplot(mash.means[j,],ylim=c(-1,1))
 ```
 
 ```{r}
