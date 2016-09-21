@@ -31,11 +31,12 @@
 \newcommand{\chat}{\bm{\hat{C}}}
 \newcommand{\zhat}{\hat{Z}}
 \newcommand{\vb}{\bm{v}}
-
+\def\lstar{{\it L*}}
 
 \def\lfsr{{\it lfsr}}
 \def\lfdr{{\it lfdr}}
 \def\mash{{\tt mash}}
+\def\mnb{{\tt mashnobaseline}}
 \def\bnorm{\tilde{b}}
 \def\bhat{\hat{b}}
 \def\vbhat{\bm \bhat}
@@ -153,6 +154,7 @@ Where $E \sim \Norm (0, L\hat{V} L')$
 If we were to apply the old $\mash$ to data simulated as in (\ref{model}) in which we assumed the mean was known, we would write
 
 \begin{equation}
+\label{mashmodel}
 \begin{aligned}
 \ceff | \mu, \vb  &= \mu \bm{1} + \vb \\
 \chat &= \mu + \vb + E \\
@@ -161,6 +163,13 @@ If we were to apply the old $\mash$ to data simulated as in (\ref{model}) in whi
 \end{equation}
 
 where $E \sim \Norm (0, V)$
+
+So using our previous notation, 
+
+\begin{equation}
+\label{mashlik}
+L \chat \sim \Norm(\vb,V)
+\end{equation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -180,15 +189,15 @@ We initiate our set of covariance matrices for the denoising step as before in $
 
 \begin{enumerate}
 \item Here, L will be $RxR$ because we need $U_{k}$ to be RxR
-\item When denoising with Bovy, our previous approach used the matrix of maximum $T$ statistics $T_{Mxr}$ to both initialize and train the BovyEM. Now, we will initalize with the MXR matrix of t($L_{R,R}T')$ (or alternatively, $TL$) and train the EM on the MxR-1 matrix of maximum $t(L_{R-1,R}T')$
+\item When denoising with Bovy, our previous approach used the matrix of maximum $T$ statistics $T_{Mxr}$ to both initialize and train the BovyEM. Now, we will initalize with the MXR matrix of t($L_{R,R}T')$ (or alternatively, $TL$) and train the EM on the MxR-1 matrix of maximum $t($\lstar$T')$
 \item When choosing $\omega$, we will use the diagonal of $L V L'$, where $V$ is $D(s.j^2)$, and select from the MxR matrix of centered T statistics and their centered standard errors.
 \item We will choose the maxes as those that have a maximum centered t statistic of at least some threshold in at least one (or averaged across tissues) rather than those that satisfy an ash criteria in at least one tissue because we know that choosing uncorrelated $L V L'$ as the standard errors with which to input to ash  is incorrect.
 \end{enumerate}
 
 
-\section{Likelihood}
+\section{Likelihood with $\mnb$}
 
-Now we will replace the RxR matrix $L$ with the R-1xR matrix $L*$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
+With $\mnb$, we will replace the RxR matrix $L$ with the R-1xR matrix $\lstar$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
 
 Now for each gene J at each component k, integrating over $\vb$, 
 
@@ -196,20 +205,20 @@ Now for each gene J at each component k, integrating over $\vb$,
 \begin{equation}
 \begin{aligned}
 \label{maxlike}
-L_{R-1,R} \ceff \sim \Norm (0, L_{R-1,R} U_{k} L_{R-1,R} ') \\
-L_{R-1,R} \chat \sim \Norm (0, L_{R-1,R}  U_{k} L_{R-1,R} ' + L_{R-1,R} \hat{V} L_{R-1,R} ') 
+$\lstar$ \ceff \sim \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
+$\lstar$ \chat \sim \Norm (0, $\lstar$  U_{k} $\lstar$ ' + $\lstar$ \hat{V} $\lstar$ ') 
 \end{aligned}
 \end{equation}
 
 
 And thus we can use the Bovy et al algorithm invoked in both the Extreme Deconvolution package and in `Sarah's MixEm' where according to Bovy's language.
 
-For each gene, and $w_{j} = L_{R-1,R} \chat_{j}$.
+For each gene, and $w_{j} = $\lstar$ \chat_{j}$.
 
 \begin{equation}
 \begin{aligned}
-\textbf{w} = L_{R-1,R} \chat \\
-\textbf{w} \sim \Norm (0, L_{R-1,R} \vb) \\
+\textbf{w} = $\lstar$ \chat \\
+\textbf{w} \sim \Norm (0, $\lstar$ \vb) \\
   \vb | \bm{\pi},\bf{U} \sim \sum_{k,l} \pi_{k,l} \;{\it N}_R(\bm{0}, \omega_l U_{k})\\
 \end{aligned}
 \end{equation}
@@ -225,9 +234,9 @@ and choose the set of $\pi$ that maximizes compute the following likelihood at e
 
 \begin{equation}
 \begin{aligned}
-L_{R-1,R}  \chat _j \sim \Norm (0, L_{R-1,R}  \Sigma_{p} L_{R-1,R} ' + L_{R-1,R} \hat{V_j} L_{R-1,R} ') \\
-T_{jp} = L_{R-1,R} U_k L_{R-1,R}' + L_{R-1,R} \hat{V}_{j} L_{R-1,R}'\\
-L_{R-1,R}  \chat _j  \sim \Norm (0, T_{jp} )
+$\lstar$  \chat _j \sim \Norm (0, $\lstar$  \Sigma_{p} $\lstar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
+T_{jp} = $\lstar$ U_k $\lstar$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
+$\lstar$  \chat _j  \sim \Norm (0, T_{jp} )
 \end{aligned}
 \end{equation}
  
@@ -238,15 +247,15 @@ L_{R-1,R}  \chat _j  \sim \Norm (0, T_{jp} )
 Now, as before we can compute a posterior distribution such that:
 
 \begin{equation}
-\vb | L_{R-1,R}  \chat, \pi, \Sigma, \bm{s} \sim N(\mu^{1} , U^{1})
+\vb | $\lstar$  \chat, \pi, \Sigma, \bm{s} \sim N(\mu^{1} , U^{1})
 \end{equation}
 
 Where at each of the P components for each gene J 
 
 \begin{equation}
 \begin{aligned}
-\mu^{1}_{jp} = \Sigma_{p} L_{R-1,R} ' T_{jp}^{-1} L_{R-1,R}  \chat_{j} \\
-U^{1}_{jp} = \Sigma_{p} - \Sigma_p L_{R-1,R} ' T_{jp}^{-1} L_{R-1,R}  \Sigma_{p}
+\mu^{1}_{jp} = \Sigma_{p} $\lstar$ ' T_{jp}^{-1} $\lstar$  \chat_{j} \\
+U^{1}_{jp} = \Sigma_{p} - \Sigma_p $\lstar$ ' T_{jp}^{-1} $\lstar$  \Sigma_{p}
 \end{aligned}
 \end{equation}
 
@@ -322,8 +331,24 @@ U^{1}_{jp} = \Sigma_{p} - \Sigma_p L_{R-1,R} ' T_{jp}^{-1} L_{R-1,R}  \Sigma_{p}
 	\item compute our hierarchical weights, $\bm{\pi}_{p}$ as well as our posteriors. 
 \end{enumerate}
 \item It is critical to note that here \textbf{L will need to be RxR because $U_{k}$ must be RxR}
-\item The new distribution we seek to estimate for each j is then $v | L_{R-1,R} \chat , \bm{s}_{j}$
+\item The new distribution we seek to estimate for each j is then $v | $\lstar$ \chat , \bm{s}_{j}$
 \item To choose the maxes, I think we ought to use a $w_{j}$ cutoff since computing the univariate lfsr on $w_{j}$ and the diagonal of $LVL'$ assumes that $LVL'$ is diagonal when we know it cannot be.
+\end{itemize}
+
+\section{ $\mash$ implementation}
+
+\begin{itemize}
+\item We will now work with a matrix of observed column-centered gene averages, $L \hat{C} '$ in order to:
+\begin{enumerate}
+	\item initialize our choice of $U_{k}$;
+	\item  choose the maxes by which to denoise, 
+	\item choose our set of scales, $\omega_{l}$
+	\item compute our hierarchical weights, $\bm{\pi}_{p}$ as well as our posteriors. 
+\end{enumerate}
+\item It is critical to note that here \textbf{L will need to be RxR because $U_{k}$ must be RxR}
+\item Now, we ignore $\lstar$ and continue with L because we see that \ref{mashlik} only requires the matrix of centered average gene expression
+\item The new distribution we seek to estimate for each j is then $v | L \chat , \bm{s}_{j}$
+\item We proceed as before and as in $\mnb$, feeding in the matrix of centered summary statistics and this time, the matrix of standard errors (rather than the list of $\lstar$ V $\lstar$' arrays)
 \end{itemize}
 
 %Some questions:
@@ -333,7 +358,7 @@ U^{1}_{jp} = \Sigma_{p} - \Sigma_p L_{R-1,R} ' T_{jp}^{-1} L_{R-1,R}  \Sigma_{p}
 %\item  I think it is because we are now broadly incorporating the centering information into our prior on $L \ceff$ as well, such that at each component for each gene, $L \ceff_{j} \sim \Norm (0, L \Sigma_{jp} L')$.
 %\item If this is the case, we will probably need to denoise all of the initiation matrices (not just the multirank Uk) since previously our projection matrix was the Identity
 %\item Since our input will still be that matrix   $\hat{C}$  of uncentered noisy averages and their standard errors, our scaling parameter $\omega$ ought to be chosen consistent with $L \hat C$, and not $\hat C$, since this will tend to scale with the true deviations $\vb_{j}$. 
-%\item In practice, it probably won't matter if we use the $L_{R-1,R} $ or $L_{R,R}$ to choose the scaling factors, but it becomes a bit tricky when we specify the standard errors as the diagonal of $L_{R-1,R} V L_{R-1,R} '$, since we know this marginal covariance is not really diagonal.
+%\item In practice, it probably won't matter if we use the $$\lstar$ $ or $L_{R,R}$ to choose the scaling factors, but it becomes a bit tricky when we specify the standard errors as the diagonal of $$\lstar$ V $\lstar$ '$, since we know this marginal covariance is not really diagonal.
 %\end{itemize}
 
 %\subsection{E-Step}
