@@ -394,7 +394,7 @@ j=which(c$components==2)[2]
 
 par(mfrow=c(2,2))
 barplot(c$beta[j,])
-barplot(c$chat[j,]-mean(c$chat))
+barplot(c$chat[j,]-mean(c$chat[j,]))
 barplot(mash.nobaselinemeans[j,])
 barplot(mash.means[j,])
 
