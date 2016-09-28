@@ -1,5 +1,5 @@
 ---
-title: "sparseforty"
+title: "sparsethirty"
 output: html_document
 ---
 
@@ -9,7 +9,7 @@ knitr::opts_chunk$set(cache=TRUE)
 ```
 
 
-Now we're going to simulate data across 40 subgroups according to 5 factors:
+Now we're going to simulate data across 30 subgroups according to 5 factors:
 
 ```{r}
 library('mash')
@@ -21,7 +21,7 @@ You can see that the covariance matrices correspond to the factors:
 rm(list=ls())
 set.seed(123)
 RNGkind("Mersenne-Twister")
-c=chat_sim_fsimple(n=10000,d=40,betasd=1,esd=0.1,K=10)
+c=chat_sim_fsimple(n=10000,d=30,betasd=1,esd=0.1,K=10)
 
 c$factors
 
@@ -43,7 +43,7 @@ comptwoers=which(c$components==2)[1:5]
 Now, let's do our analysis:
 
 ```{r}
-saveRDS(c,"chatsimesparsefforty.rds")
+saveRDS(c,"chatsimesparsefthirty.rds")
 t=c$t;b=c$chat;se=c$shat
 hist(t)
 hist(b)
@@ -66,7 +66,7 @@ sparsestrongt=t(L%*%t(t[index,]))
 
 
 
-write.table(sparsestrongt,"sparsestrong_forty.txt",col.names = FALSE,row.names=FALSE)
+write.table(sparsestrongt,"sparsestrong_thirty.txt",col.names = FALSE,row.names=FALSE)
 
 ```
 
@@ -75,11 +75,11 @@ Now, we need to project into the centered space to estimate the covariance matri
 
 
 ```{r}
-system('/Users/sarahurbut/miniconda3/bin/sfa -gen sparsestrong_forty.txt -g 557 -k 5 -n 40 i -o sparsestrong_forty')
-A="sparsestrongforty"
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen sparsestrong_thirty.txt -g 557 -k 5 -n 30 i -o sparsestrong_thirty')
+A="sparsestrongthirty"
 
-factor.mat=as.matrix(read.table("sparsestrong_forty_F.out"))
-lambda.mat=as.matrix(read.table("sparsestrong_forty_lambda.out"))
+factor.mat=as.matrix(read.table("sparsestrong_thirty_F.out"))
+lambda.mat=as.matrix(read.table("sparsestrong_thirty_lambda.out"))
 
 #recall here that w will now be the L[-1,]%*%t(t[strong,]), which is equivalent to removing the first column of the strong projected t. Thus the covariance of v is initated with the RxR matrices (strong projected t), and the model is trained on the strong projected t less the first column because the model has v_{rxr}|w_{r,r-1}
 
@@ -99,7 +99,7 @@ dim(sjmat)
 
 Compute the likelihood without ED:
 ```{r}
-A="noedcovsparseforty"
+A="noedcovsparsethirty"
 noedcov=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = strongprojectedt,lambda.mat = lambda.mat,P = 3,A = A,factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
 ```
 Check that all the matrices are correctly computed:
@@ -169,7 +169,7 @@ Now compute likelihood without ED:
 ```{r}
 w=data.frame(wfull)[,-1]
 
-A="noedcovsparseforty"
+A="noedcovsparsethirty"
 compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = noedcov,A,pen = 1,L = L[-1,])
 pis=readRDS(paste0("pis",A,".rds"))$pihat
 
@@ -191,7 +191,7 @@ rm(noedcov)
 library("ExtremeDeconvolution")
 efunc=deconvolution.em.with.bovy.with.L(t.stat = strongprojectedt,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvllist,P = 3,L = L[-1,],Q = 5,w = strongprojectedt[,-1])
 
-A="sparseLforty"
+A="sparseLthirty"
 
 
 apply(efunc$true.covs,1,function(x){qr(x)$rank})
@@ -207,7 +207,7 @@ all.equal(edcov[[9]]/max(diag(edcov[[9]])),max.step$true.covs[2,,]/max(diag(max.
 ```
 
 ```{r}
-A="sparseLforty"
+A="sparseLthirty"
 w=data.frame(wfull)[,-1]
 
 compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
@@ -226,9 +226,9 @@ As you can see, the likelihood is much better with ED.
 
 ##Test to show our calculations are accurate:
 ```{r}
-mash.means=as.matrix(read.table("sparseLfortyposterior.means.txt")[,-1])
-lfsr.mash=as.matrix(read.table("sparseLfortylfsr.txt"))[,-1]
-edcov=readRDS("covmatsparseLforty.rds")
+mash.means=as.matrix(read.table("sparseLthirtyposterior.means.txt")[,-1])
+lfsr.mash=as.matrix(read.table("sparseLthirtylfsr.txt"))[,-1]
+edcov=readRDS("covmatsparseLthirty.rds")
 j=10
 arrays=post.array.per.snp.no.baseline(j = 10,covmat = edcov,b.gp.hat = w,se.gp.hat = se,L = L[-1,])
 k=5
@@ -247,7 +247,7 @@ identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(ti
 
 log.lik.snp=log.lik.func(b.mle,LVL,LSigL_list)
 log.lik.minus.max=log.lik.snp-max(log.lik.snp)
-pis=readRDS("pissparseLforty.rds")$pihat
+pis=readRDS("pissparseLthirty.rds")$pihat
 exp.vec=exp(log.lik.minus.max)
 post.weights=t(exp.vec*pis/sum(exp.vec*pis))
 
@@ -266,7 +266,7 @@ and $$E ~ N(0,V)$$
 while $$\beta  ~ \sum_{p} \pi_{p} N(0, U_{p})$$
 ```{r}
 rm(list=ls())
-c=readRDS("chatsimesparsefforty.rds")
+c=readRDS("chatsimesparsefthirty.rds")
 
 t=c$t;b=c$chat;se=c$shat;R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
@@ -287,8 +287,8 @@ index=which(rowSums(absmat>4)>0)
 length(index)
 mean(index<1000)
 
-factor.mat=as.matrix(read.table("sparsestrong_forty_F.out"))
-lambda.mat=as.matrix(read.table("sparsestrong_forty_lambda.out"))
+factor.mat=as.matrix(read.table("sparsestrong_thirty_F.out"))
+lambda.mat=as.matrix(read.table("sparsestrong_thirty_lambda.out"))
 
 
 
@@ -299,7 +299,7 @@ max.step=deconvolution.em.with.bovy(t.stat = strongprojectedtsimulations,factor.
 apply(max.step$true.covs,1,function(x){qr(x)$rank})
 
 
-covmash=compute.hm.covmat.all.max.step(max.step = max.step,b.hat = wfull,se.hat = se,t.stat = strongprojectedtsimulations,Q = 5,lambda.mat = lambda.mat,A = "sparseoldmashforty",factor.mat = factor.mat,zero = T,power = 2)$covmat
+covmash=compute.hm.covmat.all.max.step(max.step = max.step,b.hat = wfull,se.hat = se,t.stat = strongprojectedtsimulations,Q = 5,lambda.mat = lambda.mat,A = "sparseoldmashthirty",factor.mat = factor.mat,zero = T,power = 2)$covmat
 
 all.equal(covmash[[2]]/max(diag(covmash[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
 all.equal(covmash[[3]]/max(diag(covmash[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
@@ -310,7 +310,7 @@ all.equal(covmash[[9]]/max(diag(covmash[[9]])),max.step$true.covs[2,,]/max(diag(
 Now, proceed as always, estimating likelihood and computing posteriors.
 
 ```{r mashmethod, eval=T}
-A="sparseoldmashforty"
+A="sparseoldmashthirty"
 compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covmash,A=A,pen=1)
 
 
@@ -323,10 +323,10 @@ weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covma
 Test to show our calculations are accurate:
 
 ```{r}
-mash.means=as.matrix(read.table("sparseoldmashfortyposterior.means.txt")[,-1])
-lfsr.mash=as.matrix(read.table("sparseoldmashfortylfsr.txt"))[,-1]
-cov=readRDS("covmatsparseoldmashforty.rds")
-pis=readRDS("pissparseoldmashforty.rds")$pihat
+mash.means=as.matrix(read.table("sparseoldmashthirtyposterior.means.txt")[,-1])
+lfsr.mash=as.matrix(read.table("sparseoldmashthirtylfsr.txt"))[,-1]
+cov=readRDS("covmatsparseoldmashthirty.rds")
+pis=readRDS("pissparseoldmashthirty.rds")$pihat
 w=data.frame(wfull)
 R=ncol(w)
 j=10
@@ -376,8 +376,8 @@ all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(mash.means[j,]
 mle=as.matrix(wfull)
 beta=as.matrix(c$beta)
 
-mash.nobaselinemeans=as.matrix(read.table("sparseLfortyposterior.means.txt")[,-1])
-mash.means=as.matrix(read.table("sparseoldmashfortyposterior.means.txt")[,-1])
+mash.nobaselinemeans=as.matrix(read.table("sparseLthirtyposterior.means.txt")[,-1])
+mash.means=as.matrix(read.table("sparseoldmashthirtyposterior.means.txt")[,-1])
 
 
 standard=sqrt(mean((beta-mle)^2))
@@ -429,8 +429,8 @@ mashnobase.fp=NULL
 sign.test.mash=as.matrix(c$beta)*mash.means
 sign.test.mashnobase=as.matrix(c$beta)*mash.nobaselinemeans
 
-lfsr.mash=as.matrix(read.table("sparseoldmashfortylfsr.txt"))[,-1]
-lfsr.nobase=as.matrix(read.table("sparseLfortylfsr.txt"))[,-1]
+lfsr.mash=as.matrix(read.table("sparseoldmashthirtylfsr.txt"))[,-1]
+lfsr.nobase=as.matrix(read.table("sparseLthirtylfsr.txt"))[,-1]
 
 thresholds=seq(0.01,1,by=0.01)
 beta=as.matrix(c$beta)
