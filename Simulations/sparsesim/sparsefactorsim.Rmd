@@ -546,17 +546,80 @@ sqrt(mean((mash.means[1:1000,]-beta[1:1000,])^2))/standard
 And let's also do this with the mash framework:
 
 ```{r}
-rm(A)
+rm(list=ls())
+c=readRDS("~/mashnobaseline/Simulations/sparsesim/chatsimesparsef.rds")
+source("~/matrix_ash/R/truthscripts.R")
+t=c$t;b=c$chat;se=c$shat
+
+R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+wfull=t(L%*%t(b))
+sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is 
+covs=compute.covmat.using.truth(b.gp.hat = wfull,sebetahat = sjmat,A="test",zero=TRUE,covlist=c$covmat,power=2)
+
 A="mashtruth"
+covs=readRDS("covmattest.rds")
 compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covs,A=A,pen=1)
 
 
 pis=readRDS(paste0("pis",A,".rds"))$pihat
-b.test=t
-se.test=s.j
-weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covmash,b.gp.hat=wfull,se.gp.hat = se,pis,A=A,checkpoint = FALSE)})
 
 
+weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covs,b.gp.hat=wfull,se.gp.hat = se,pis,A=A,checkpoint = FALSE)})
+
+
+```
+
+And test to see if calculations are accurate:
+
+```{r}
+```{r}
+mash.means=as.matrix(read.table("mashtruth.txt")[,-1])
+w=data.frame(wfull)
+R=ncol(w)
+j=10
+
+arrays=post.array.per.snp.no.baseline(j = 10,covmat = cov,b.gp.hat = w,se.gp.hat = se,L = diag(1,R))
+mash.arrays=post.array.per.snp(j = 10,covmat = cov,b.gp.hat = w,se.gp.hat = se)
+##show same algebra
+
+
+k=5
+
+V.gp.hat=diag(se[j,])^2
+
+b.mle = as.vector(w[j,])
+
+lapply(seq(1:5),function(x){all.equal(arrays[[x]],mash.arrays[[x]])})
+L=diag(1,R)
+LSigL=L%*%cov[[k]]%*%t(L)
+LVL=L%*%V.gp.hat%*%t(L)
+
+LSigL_list=lapply(cov,function(x){L%*%x%*%t(L)})
+identical(LSigL_list[[k]],LSigL)
+identical(as.numeric(arrays$post.means[k,]),as.numeric(post.mean.with.proj(b.mle = t(b.mle),tinv = solve(LVL+L%*%cov[[k]]%*%t(L)),U.k = cov[[k]],L = L)))
+identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(tinv = solve(LVL+L%*%cov[[k]]%*%t(L)),U.k = cov[[k]],L = L))))
+
+
+
+
+b.mle=as.vector(t(w[j,]))##turn i into a R x 1 vector
+V.gp.hat=diag(se[j,])^2
+V.gp.hat.inv <- solve(V.gp.hat)
+U.gp1kl= (post.b.gpkl.cov(V.gp.hat.inv, cov[[k]]))
+  
+identical(as.numeric(mash.arrays$post.means[k,]),as.numeric(post.b.gpkl.mean(b.mle = b.mle,V.gp.hat.inv = V.gp.hat.inv,U.gp1kl = U.gp1kl)))
+
+identical(as.numeric(mash.arrays$post.covs[k,]),as.numeric(diag(U.gp1kl)))
+
+
+
+log.lik.snp=log.lik.func(b.mle,LVL,LSigL_list)
+log.lik.minus.max=log.lik.snp-max(log.lik.snp)
+exp.vec=exp(log.lik.minus.max)
+post.weights=t(exp.vec*pis/sum(exp.vec*pis))
+
+all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(mash.means[j,]))
 ```
 
 Let's compare the learned matrices which receive the most weighting in mash and mashnobaseline. First, let' look at the dsitribution of matrices>
