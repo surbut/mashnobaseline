@@ -42,7 +42,7 @@ identical(c$chat[1,],c$ceff[1,]+c$error[1,])
 Furthermore, you can see that the components look like such:
 
 ```{r}
-table(c$components)
+t(sapply(c$covmat,function(x){diag(x)}))
 barplot(rowSums(c$covmat[[2]]))
 comptwoers=which(c$components==2)[1:5]
 
@@ -239,7 +239,7 @@ total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se
 As you can see, the likelihood is much better with ED.
 
 ##Test to show our calculations are accurate:
-```{r,eval=F}
+```{r,eval=F,echo=F}
 mash.means=as.matrix(read.table("sparseLposterior.means.txt")[,-1])
 lfsr.mash=as.matrix(read.table("sparseLlfsr.txt"))[,-1]
 edcov=readRDS("covmatsparseL.rds")
@@ -343,8 +343,8 @@ pi.mat.old.mash=matrix(pis[-length(pis)],ncol=18,byrow=TRUE)
 pisnobase=readRDS("pissparseL.rds")$pihat
 pi.mat.nobase=matrix(pisnobase[-length(pisnobase)],ncol=18,byrow=TRUE)
 par(mfrow=c(1,2))
-barplot(colSums(pi.mat.old.mash),main="OldMash")
-barplot(colSums(pi.mat.nobase),main="NoBase")
+barplot(colSums(pi.mat.old.mash),main="OldMash",names=c("ID",rep(paste0("Uk",(2:9))),rep(paste0("bma",(1:8))),"ALL"),las=2)
+barplot(colSums(pi.mat.nobase),main="NoBase",names=c("ID",rep(paste0("UkM",(2:9))),rep(paste0("bma",(1:8))),"ALL"),las=2)
 ```
  
 It seems that _mashnobaseline_ puts more weight on the 'singleton configurations'.
@@ -380,7 +380,7 @@ for(i in 1:length(c$covmat)){
 
 Test to show our calculations are accurate:
 
-```{r,eval=F}
+```{r,eval=F,echo=F}
 mash.means=as.matrix(read.table("sparseoldmashposterior.means.txt")[,-1])
 lfsr.mash=as.matrix(read.table("sparseoldmashlfsr.txt"))[,-1]
 cov=readRDS("covmatsparseoldmash.rds")
@@ -573,7 +573,7 @@ total.quant.per.snp.no.baseline(j = j,covmat = covs,b.gp.hat = w,se.gp.hat = se,
 
 
 ##Test to show our calculations are accurate:
-```{r,eval=F}
+```{r,eval=F,echo=F}
 mash.means=as.matrix(read.table("sparseLwithtruthposterior.means.txt")[,-1])
 lfsr.mash=as.matrix(read.table("sparseLwithtruthlfsr.txt"))[,-1]
 edcov=readRDS("covmattest.rds")
@@ -634,7 +634,7 @@ weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covs,
 And test to see if calculations are accurate:
 
 
-```{r}
+```{r,eval=F,echo=F}
 cov=readRDS("covmattest.rds")
 mash.means=as.matrix(read.table("mashtruthposterior.means.txt")[,-1])
 w=data.frame(wfull)
