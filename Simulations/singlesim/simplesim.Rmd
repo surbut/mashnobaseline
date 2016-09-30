@@ -1,0 +1,694 @@
+---
+title: "supersimple"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+library('knitr')
+knitr::opts_chunk$set(cache=TRUE)
+```
+
+
+Now we're going to simulate data across 8 subgroups according to 5 factors:
+
+```{r}
+library('mash')
+chat_sim_fsimple
+```
+
+You can see that the covariance matrices correspond to the factors:
+```{r}
+rm(list=ls())
+
+set.seed(123)
+RNGkind("Mersenne-Twister")
+c=chat_sim_fsingle(n=10000,d=8,betasd=1,esd=0.1,K=10)
+
+
+identical(c$beta[1,]+c$mumat[1,],c$ceff[1,])
+identical(c$chat[1,],c$ceff[1,]+c$error[1,])
+```
+
+Now, let's do our analysis:
+
+```{r}
+saveRDS(c,"chatsimesparsef.rds")
+t=c$t;b=c$chat;se=c$shat
+#hist(t)
+#hist(b)
+R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+s.j=se/se
+
+absmat=abs(t(L%*%t(c$t)))
+index=which(rowSums(absmat>4)>0)
+length(index)
+mean(index<1000)
+
+#index=which(rowMeans(abs(t(L%*%t(c$t))))>1.3)##choose the associations with average deviation large.
+
+##show deviations
+#plot(rowSums(absmat>4))
+#points(index,rowSums(absmat>4)[index],col="blue")
+
+sparsestrongt=t(L%*%t(t[index,]))
+
+```
+
+```{r filewrite,eval=T}
+
+write.table(sparsestrongt,"sparsestrongt.txt",col.names = FALSE,row.names=FALSE)
+
+```
+
+
+Now, we need to project into the centered space to estimate the covariance matrix of the true deviations, using the full L since $v$ will be R, and not $R-1$.
+
+
+```{r}
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen sparsestrongt.txt -g 507 -k 5 -n 8 i -o sparseF')
+A="sparseF"
+
+factor.mat=as.matrix(read.table("sparseF_F.out"))
+lambda.mat=as.matrix(read.table("sparseF_lambda.out"))
+
+#recall here that w will now be the L[-1,]%*%t(t[strong,]), which is equivalent to removing the first column of the strong projected t. Thus the covariance of v is initated with the RxR matrices (strong projected t), and the model is trained on the strong projected t less the first column because the model has v_{rxr}|w_{r,r-1}
+
+strongprojectedt=sparsestrongt
+
+
+lvllist=genlvllist(s.j[index,],L = L[-1,])
+
+
+##w should represent transformed betahats using all R subgroups and j genes
+wfull=t(L%*%t(b))
+sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
+dim(wfull)
+dim(sjmat)
+
+```
+
+Compute the likelihood without ED:
+```{r}
+A="noedcovsparse"
+noedcov=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = strongprojectedt,lambda.mat = lambda.mat,P = 3,A = "noedcovsparse",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
+```
+Check that all the matrices are correctly computed:
+```{r,eval=T}
+pca=svd(strongprojectedt);v=pca$v[,1:3];d=pca$d[1:3];u=pca$u[,1:3]
+pcaprox=t(u%*%diag(d)%*%t(v))%*%(u%*%diag(d)%*%t(v))/max(diag(t(u%*%diag(d)%*%t(v))%*%(u%*%diag(d)%*%t(v))))
+
+
+P=3;X.c=apply(strongprojectedt,2,function(x) x-mean(x)) ##Column centered matrix of t statistics
+svd.X=svd(X.c)
+M=nrow(X.c)
+v=svd.X$v;u=svd.X$u;d=svd.X$d
+cov.pc=1/M*v[,1:P]%*%diag(d[1:P])%*%t(u[,1:P])%*%t(v[,1:P]%*%diag(d[1:P])%*%t(u[,1:P]))
+
+for(q in 1:5){
+load=as.matrix(lambda.mat[,q])
+fact=as.matrix(factor.mat[q,])
+rank.prox=load%*%t(fact)
+a=(1/(M-1)*(t(rank.prox)%*% rank.prox))/max(diag((1/(M-1)*(t(rank.prox)%*% rank.prox))))
+print(all.equal(as.numeric(a),as.numeric(noedcov[[3+q]]/max(diag(noedcov[[3+q]])))))}
+
+load=as.matrix(lambda.mat)
+fact=as.matrix(factor.mat)
+rank.prox=load%*%(fact)
+a=(1/(M-1)*(t(rank.prox)%*% rank.prox))/max(diag((1/(M-1)*(t(rank.prox)%*% rank.prox))))
+all.equal(as.numeric(a),as.numeric(noedcov[[9]]/max(diag(noedcov[[9]]))))
+
+all.equal(cov(strongprojectedt)/max(diag(cov(strongprojectedt))),noedcov[[2]]/max(diag(noedcov[[2]])))
+all.equal(as.numeric(cov.pc)/max(diag(cov.pc)),as.numeric(noedcov[[3]]/max(diag(noedcov[[3]]))))
+
+```
+
+$$Likelihood$$
+
+Now we will replace the RxR matrix $L$ with the $R-1xR$ matrix $L∗$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
+
+\section{Likelihood}
+
+Now we will replace the RxR matrix $L$ with the R-1xR matrix $L*$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
+
+Now for each gene J at each component k, integrating over $\beta$, 
+
+
+
+$$L_{R-1,R} ceff \sim N (0, L_{R-1,R} U_{k} L_{R-1,R} ') $$
+$$L_{R-1,R} chat \sim N (0, L_{R-1,R}  U_{k} L_{R-1,R} ' + L_{R-1,R} \hat{V} L_{R-1,R} ')$$ 
+
+And thus we can use the Bovy et al algorithm invoked in both the Extreme Deconvolution package and in `Sarah's MixEm' where the marginal variance at each component, $T_{jp}$:
+
+
+$$T_{jp} = L_{R-1,R} U_k L_{R-1,R}' + L_{R-1,R} \hat{V}_{j} L_{R-1,R}'$$
+
+
+For each gene, and $w_{j} = L_{R-1,R} chat_{j}$.
+
+Recall that our previous approach was simplified by the fact that ${w}_{j}$ was simply $\hat{{b}_{j}}$ and the projection matrix was simply the $I_{r}$ identity matrix. Our inference on ${b}$ was analogous to their inference on $\beta_{j}$. 
+
+
+As before, we are interested in returning the prior covariance $U_k$ matrices of the `true` deviations $\beta$, which we will then rescale by choosing a set of $\omega$ that are appropriate to $L chat $ to comprise a set of $P = KxL$ prior covariance matrices $\Sigma$.
+
+and choose the set of $\pi$ that maximizes compute the following likelihood at each of the P components: 
+
+
+$$L_{R-1,R}  chat _j \sim N (0, L_{R-1,R}  \Sigma_{p} L_{R-1,R} ' + L_{R-1,R} \hat{V_j} L_{R-1,R} ') $$
+ 
+Now compute likelihood without ED:
+```{r}
+w=data.frame(wfull)[,-1]
+
+A="noedcovsparse"
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = noedcov,A,pen = 1,L = L[-1,])
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+likmat=readRDS(paste0("liketrain",A,".rds"))
+test=exp(likmat)
+sum(log(test%*%pis))
+```
+
+
+Now run with ED to show that 
+1) the likelihood improves
+2) we have successfully implemented an approach which allows us to input a list of residual variance matrices (as opposed to a matrix of vectors to be diagonalised).
+
+
+```{r}
+rm(A)
+rm(noedcov)
+
+library("ExtremeDeconvolution")
+efunc=deconvolution.em.with.bovy.with.L(t.stat = strongprojectedt,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvllist,P = 3,L = L[-1,],Q = 5,w = strongprojectedt[,-1])
+
+A="sparseL"
+
+
+apply(efunc$true.covs,1,function(x){qr(x)$rank})
+
+max.step=efunc
+edcov=compute.hm.covmat.all.max.step(b.hat = wfull,se.hat = sjmat,t.stat = strongprojectedt,Q = 5,lambda.mat = lambda.mat,A=A,factor.mat = factor.mat,max.step = efunc,zero = T,power = 2)$cov
+length(edcov)
+
+all.equal(edcov[[2]]/max(diag(edcov[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
+all.equal(edcov[[3]]/max(diag(edcov[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
+all.equal(edcov[[9]]/max(diag(edcov[[9]])),max.step$true.covs[2,,]/max(diag(max.step$true.covs[2,,])))
+
+```
+
+```{r}
+A="sparseL"
+w=data.frame(wfull)[,-1]
+
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+likmat=readRDS(paste0("liketrain",A,".rds"))
+test=exp(likmat)
+sum(log(test%*%pis))
+
+
+for(j in 1:nrow(w)){
+total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}
+
+```
+As you can see, the likelihood is much better with ED.
+
+##Test to show our calculations are accurate:
+```{r,eval=T,echo=T}
+mash.means=as.matrix(read.table("sparseLposterior.means.txt")[,-1])
+lfsr.mash=as.matrix(read.table("sparseLlfsr.txt"))[,-1]
+edcov=readRDS("covmatsparseL.rds")
+j=10
+arrays=post.array.per.snp.no.baseline(j = 10,covmat = edcov,b.gp.hat = w,se.gp.hat = se,L = L[-1,])
+k=5
+
+V.gp.hat=diag(se[j,])^2
+
+b.mle = as.vector(w[j,])
+
+LSigL=L[-1,]%*%edcov[[k]]%*%t(L[-1,])
+LVL=L[-1,]%*%V.gp.hat%*%t(L[-1,])
+
+LSigL_list=lapply(edcov,function(x){L[-1,]%*%x%*%t(L[-1,])})
+identical(LSigL_list[[k]],LSigL)
+identical(as.numeric(arrays$post.means[k,]),as.numeric(post.mean.with.proj(b.mle = t(b.mle),tinv = solve(LVL+L[-1,]%*%edcov[[k]]%*%t(L[-1,])),U.k = edcov[[k]],L = L[-1,])))
+identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(tinv = solve(LVL+L[-1,]%*%edcov[[k]]%*%t(L[-1,])),U.k = edcov[[k]],L = L[-1,]))))
+
+log.lik.snp=log.lik.func(b.mle,LVL,LSigL_list)
+log.lik.minus.max=log.lik.snp-max(log.lik.snp)
+pis=readRDS("pissparseL.rds")$pihat
+exp.vec=exp(log.lik.minus.max)
+post.weights=t(exp.vec*pis/sum(exp.vec*pis))
+
+all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(mash.means[j,]))
+```
+
+###Compare with MASH##
+
+Now we can compare with mash. In this model, for each gene J:
+
+$$chat |\mu, V = \mu + \beta + E$$
+
+$$chat - \mu = \beta + E$$
+
+and $$E ~ N(0,V)$$
+while $$\beta  ~ \sum_{p} \pi_{p} N(0, U_{p})$$
+```{r}
+rm(list=ls())
+c=readRDS("chatsimesparsef.rds")
+
+t=c$t;b=c$chat;se=c$shat;R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+wfull=t(L%*%t(b))
+##show that they sum to 0
+
+plot(rowSums(wfull),ylim=c(-1,1))
+```
+
+Now we proceed as in mash, selecting the strong t statistics:
+```{r}
+
+s.j=se/se
+absmat=abs(t(L%*%t(c$t)))
+
+
+index=which(rowSums(absmat>4)>0)
+length(index)
+mean(index<1000)
+
+factor.mat=as.matrix(read.table("sparseF_F.out"))
+lambda.mat=as.matrix(read.table("sparseF_lambda.out"))
+
+
+
+strongprojectedtsimulations=t(L%*%t(t[index,]))
+max.step=deconvolution.em.with.bovy(t.stat = strongprojectedtsimulations,factor.mat = factor.mat,v.j = s.j,lambda.mat = lambda.mat,K = 3,P = 3 )
+
+##Show how the ranks is preserved
+apply(max.step$true.covs,1,function(x){qr(x)$rank})
+
+
+covmash=compute.hm.covmat.all.max.step(max.step = max.step,b.hat = wfull,se.hat = se,t.stat = strongprojectedtsimulations,Q = 5,lambda.mat = lambda.mat,A = "sparseoldmash",factor.mat = factor.mat,zero = T,power = 2)$covmat
+
+all.equal(covmash[[2]]/max(diag(covmash[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
+all.equal(covmash[[3]]/max(diag(covmash[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
+all.equal(covmash[[9]]/max(diag(covmash[[9]])),max.step$true.covs[2,,]/max(diag(max.step$true.covs[2,,])))
+
+```
+
+Now, proceed as always, estimating likelihood and computing posteriors.
+
+```{r mashmethod, eval=T}
+A="sparseoldmash"
+compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covmash,A=A,pen=1)
+
+
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+b.test=t
+se.test=s.j
+weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covmash,b.gp.hat=wfull,se.gp.hat = se,pis,A=A,checkpoint = FALSE)})
+```
+
+
+###Identifiability comparisons###
+
+```{r}
+pis=readRDS("pissparseoldmash.rds")$pihat
+pi.mat.old.mash=matrix(pis[-length(pis)],ncol=18,byrow=TRUE)
+pisnobase=readRDS("pissparseL.rds")$pihat
+pi.mat.nobase=matrix(pisnobase[-length(pisnobase)],ncol=18,byrow=TRUE)
+par(mfrow=c(1,2))
+barplot(colSums(pi.mat.old.mash),main="OldMash",names=c("ID",rep(paste0("Uk",(2:9))),rep(paste0("bma",(1:8))),"ALL"),las=2)
+barplot(colSums(pi.mat.nobase),main="NoBase",names=c("ID",rep(paste0("UkM",(2:9))),rep(paste0("bma",(1:8))),"ALL"),las=2)
+```
+ 
+It seems that _mashnobaseline_ puts more weight on the 'singleton configurations'.
+
+Let's look at the 'learned' covariance matrix of each as well as the true covariance matrices of each, and see how they comapre to the true configurations. Recall that the true configurations looked like this:
+
+```{r}
+c=readRDS("~/mashnobaseline/Simulations/singlesim/chatsimesparsef.rds")
+t(sapply(c$covmat,function(x){diag(x)}))
+```
+
+```{r}
+covmash=readRDS("covmatsparseoldmash.rds")
+coved=readRDS("covmatsparseL.rds")
+library('gplots')
+library('colorRamps')
+
+for(i in 2:9){
+  x=covmash[[i]]
+  heatmap.2(x/max(diag(x)),Rowv = NULL,Colv = NULL,dendrogram = "none",col=blue2green,density.info = "none",trace="none",main=paste0("CovMash",round(colSums(pi.mat.old.mash)[i],2)))}
+
+for(i in 2:9){
+  x=coved[[i]]
+  heatmap.2(x/max(diag(x)),Rowv = NULL,Colv = NULL,dendrogram = "none",col=blue2green,density.info = "none",trace="none",main=paste0("CovNobase",round(colSums(pi.mat.nobase)[i],2)))}
+
+x=c$covmat
+heatmap.2(x/max(diag(x)),Rowv = NULL,Colv = NULL,dendrogram = "none",col=blue2green,density.info = "none",trace="none",main="CovTruth")
+```
+
+
+Test to show our calculations are accurate:
+
+```{r,eval=T,echo=T}
+mash.means=as.matrix(read.table("sparseoldmashposterior.means.txt")[,-1])
+lfsr.mash=as.matrix(read.table("sparseoldmashlfsr.txt"))[,-1]
+cov=readRDS("covmatsparseoldmash.rds")
+pis=readRDS("pissparseoldmash.rds")$pihat
+pi.mat.old.mash=matrix(pis[-length(pis)],ncol=18,byrow=TRUE)
+pisnobase=readRDS("pissparseL.rds")$pihat
+pi.mat.nobase=matrix(pisnobase[-length(pisnobase)],ncol=18,byrow=TRUE)
+barplot(colSums(pi.mat.old.mash))
+barplot(colSums(pi.mat.nobase))
+
+w=data.frame(wfull)
+R=ncol(w)
+j=10
+
+arrays=post.array.per.snp.no.baseline(j = 10,covmat = cov,b.gp.hat = w,se.gp.hat = se,L = diag(1,R))
+mash.arrays=post.array.per.snp(j = 10,covmat = cov,b.gp.hat = w,se.gp.hat = se)
+##show same algebra
+
+
+k=5
+
+V.gp.hat=diag(se[j,])^2
+
+b.mle = as.vector(w[j,])
+
+lapply(seq(1:5),function(x){all.equal(arrays[[x]],mash.arrays[[x]])})
+L=diag(1,R)
+LSigL=L%*%cov[[k]]%*%t(L)
+LVL=L%*%V.gp.hat%*%t(L)
+
+LSigL_list=lapply(cov,function(x){L%*%x%*%t(L)})
+identical(LSigL_list[[k]],LSigL)
+identical(as.numeric(arrays$post.means[k,]),as.numeric(post.mean.with.proj(b.mle = t(b.mle),tinv = solve(LVL+L%*%cov[[k]]%*%t(L)),U.k = cov[[k]],L = L)))
+identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(tinv = solve(LVL+L%*%cov[[k]]%*%t(L)),U.k = cov[[k]],L = L))))
+
+
+
+
+b.mle=as.vector(t(w[j,]))##turn i into a R x 1 vector
+V.gp.hat=diag(se[j,])^2
+V.gp.hat.inv <- solve(V.gp.hat)
+U.gp1kl= (post.b.gpkl.cov(V.gp.hat.inv, cov[[k]]))
+  
+identical(as.numeric(mash.arrays$post.means[k,]),as.numeric(post.b.gpkl.mean(b.mle = b.mle,V.gp.hat.inv = V.gp.hat.inv,U.gp1kl = U.gp1kl)))
+
+identical(as.numeric(mash.arrays$post.covs[k,]),as.numeric(diag(U.gp1kl)))
+
+
+
+log.lik.snp=log.lik.func(b.mle,LVL,LSigL_list)
+log.lik.minus.max=log.lik.snp-max(log.lik.snp)
+exp.vec=exp(log.lik.minus.max)
+post.weights=t(exp.vec*pis/sum(exp.vec*pis))
+
+all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(mash.means[j,]))
+
+```
+
+Compare RMSE:
+
+```{r}
+
+mle=as.matrix(wfull)
+beta=as.matrix(c$beta)
+
+mash.nobaselinemeans=as.matrix(read.table("sparseLposterior.means.txt")[,-1])
+mash.means=as.matrix(read.table("sparseoldmashposterior.means.txt")[,-1])
+
+standard=sqrt(mean((beta-mle)^2))
+sqrt(mean((mash.means-beta)^2))/standard
+sqrt(mean((mash.nobaselinemeans-beta)^2))/standard
+```
+
+Let's look at a few examples:
+
+```{r}
+j=1
+
+
+par(mfrow=c(2,2))
+barplot(c$beta[j,])
+barplot(c$chat[j,]-mean(c$chat))
+barplot(mash.nobaselinemeans[j,])
+barplot(mash.means[j,])
+
+j=3
+
+par(mfrow=c(2,2))
+barplot(c$beta[j,])
+barplot(c$chat[j,]-mean(c$chat[j,]))
+barplot(mash.nobaselinemeans[j,])
+barplot(mash.means[j,])
+```
+
+
+Show ROC curves:
+```{r,echo=FALSE}
+##now we generate curves
+mash.power=NULL
+mashnobase.power=NULL
+
+mash.fp=NULL
+mashnobase.fp=NULL
+
+sign.test.mash=as.matrix(c$beta)*mash.means
+sign.test.mashnobase=as.matrix(c$beta)*mash.nobaselinemeans
+
+lfsr.mash=as.matrix(read.table("sparseoldmashlfsr.txt"))[,-1]
+lfsr.nobase=as.matrix(read.table("sparseLlfsr.txt"))[,-1]
+
+thresholds=seq(0.01,1,by=0.01)
+beta=as.matrix(c$beta)
+for(s in 1:length(thresholds)){
+thresh=thresholds[s]
+
+##sign power is the proportion of true effects correctly signed at a given threshold
+mash.power[s]=sum(sign.test.mash>0&lfsr.mash<=thresh)/sum(beta!=0)
+mashnobase.power[s]=sum(sign.test.mashnobase>0&lfsr.nobase<=thresh)/sum(beta!=0)
+
+
+##false positives is the proportion of null effects called at a given threshold
+mash.fp[s]=sum(beta==0&lfsr.mash<=thresh)/sum(beta==0)
+mashnobase.fp[s]=sum(beta==0&lfsr.nobase<=thresh)/sum(beta==0)
+}
+
+
+
+
+
+plot(mash.fp,mash.power,cex=0.5,pch=1,xlim=c(0,1),lwd=1,ylim=c(0,1),col="green",ylab="True Positive Rate",xlab="False Positive Rate",type="l",main="")
+#title("True Positive vs False Positive",cex.main=1.5)
+lines(mashnobase.fp,mashnobase.power,cex=0.5,pch=1,ylim=c(0,1),col="blue")
+legend("bottomright",legend = c("mash","mashnobase"),col=c("green","blue"),pch=c(1,1))
+
+```
+
+##Comparing with truth.
+
+Now, let's try this with the true prior. Here, we use the covariance matrices that were used to simulate the data as the output of _c$covmat_
+
+We can have a look at the them first:
+
+```{r}
+rm(list=ls())
+c=readRDS("~/mashnobaseline/Simulations/singlesim/chatsimesparsef.rds")
+diag(c$covmat)
+
+```
+
+
+```{r}
+
+c=readRDS("~/mashnobaseline/Simulations/singlesim/chatsimesparsef.rds")
+source("~/matrix_ash/R/truthscripts.R")
+t=c$t;b=c$chat;se=c$shat
+covl=list();covl[[1]]=c$covmat
+#hist(t)
+#hist(b)
+R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+wfull=t(L%*%t(b))
+sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is 
+covs=compute.covmat.using.truth(b.gp.hat = wfull,sebetahat = sjmat,A="test",zero=TRUE,covlist=covl,power=2)
+
+barplot(diag(covs[[2]]/max(diag(covs[[2]]))))
+w=data.frame(wfull)[,-1]
+```
+
+```{r,eval=T}
+A="sparseLwithtruth"
+
+
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = covs,A = A,pen = 1,L = L[-1,])
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+likmat=readRDS(paste0("liketrain",A,".rds"))
+test=exp(likmat)
+sum(log(test%*%pis))
+
+
+for(j in 1:nrow(w)){
+total.quant.per.snp.no.baseline(j = j,covmat = covs,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}
+
+```
+
+
+##Test to show our calculations are accurate:
+```{r,eval=T,echo=T}
+mash.means=as.matrix(read.table("sparseLwithtruthposterior.means.txt")[,-1])
+lfsr.mash=as.matrix(read.table("sparseLwithtruthlfsr.txt"))[,-1]
+edcov=readRDS("covmattest.rds")
+j=10
+arrays=post.array.per.snp.no.baseline(j = 10,covmat = edcov,b.gp.hat = w,se.gp.hat = se,L = L[-1,])
+k=5
+
+V.gp.hat=diag(se[j,])^2
+
+b.mle = as.vector(w[j,])
+
+LSigL=L[-1,]%*%edcov[[k]]%*%t(L[-1,])
+LVL=L[-1,]%*%V.gp.hat%*%t(L[-1,])
+
+LSigL_list=lapply(edcov,function(x){L[-1,]%*%x%*%t(L[-1,])})
+identical(LSigL_list[[k]],LSigL)
+identical(as.numeric(arrays$post.means[k,]),as.numeric(post.mean.with.proj(b.mle = t(b.mle),tinv = solve(LVL+L[-1,]%*%edcov[[k]]%*%t(L[-1,])),U.k = edcov[[k]],L = L[-1,])))
+identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(tinv = solve(LVL+L[-1,]%*%edcov[[k]]%*%t(L[-1,])),U.k = edcov[[k]],L = L[-1,]))))
+
+log.lik.snp=log.lik.func(b.mle,LVL,LSigL_list)
+log.lik.minus.max=log.lik.snp-max(log.lik.snp)
+pis=readRDS("pissparseLwithtruth.rds")$pihat
+exp.vec=exp(log.lik.minus.max)
+post.weights=t(exp.vec*pis/sum(exp.vec*pis))
+
+all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(mash.means[j,]))
+```
+
+And let's also do this with the mash framework:
+
+```{r}
+rm(list=ls())
+c=readRDS("chatsimesparsef.rds")
+covl=list();covl[[1]]=c$covmat
+t=c$t;b=c$chat;se=c$shat
+
+R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+wfull=t(L%*%t(b))
+sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is 
+covs=compute.covmat.using.truth(b.gp.hat = wfull,sebetahat = sjmat,A="test",zero=TRUE,covlist=covl,power=2)
+
+```
+
+```{r mashtruth,eval=T}
+A="mashtruth"
+covs=readRDS("covmattest.rds")
+compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covs,A=A,pen=1)
+
+
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+
+weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covs,b.gp.hat=wfull,se.gp.hat = se,pis,A=A,checkpoint = FALSE)})
+
+```
+
+And test to see if calculations are accurate:
+
+
+```{r,eval=T,echo=T}
+cov=readRDS("covmattest.rds")
+mash.means=as.matrix(read.table("mashtruthposterior.means.txt")[,-1])
+w=data.frame(wfull)
+R=ncol(w)
+j=10
+
+arrays=post.array.per.snp.no.baseline(j = 10,covmat = cov,b.gp.hat = w,se.gp.hat = se,L = diag(1,R))
+mash.arrays=post.array.per.snp(j = 10,covmat = cov,b.gp.hat = w,se.gp.hat = se)
+##show same algebra
+
+
+k=5
+
+V.gp.hat=diag(se[j,])^2
+
+b.mle = as.vector(w[j,])
+
+lapply(seq(1:5),function(x){all.equal(arrays[[x]],mash.arrays[[x]])})
+L=diag(1,R)
+LSigL=L%*%cov[[k]]%*%t(L)
+LVL=L%*%V.gp.hat%*%t(L)
+
+LSigL_list=lapply(cov,function(x){L%*%x%*%t(L)})
+identical(LSigL_list[[k]],LSigL)
+identical(as.numeric(arrays$post.means[k,]),as.numeric(post.mean.with.proj(b.mle = t(b.mle),tinv = solve(LVL+L%*%cov[[k]]%*%t(L)),U.k = cov[[k]],L = L)))
+identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(tinv = solve(LVL+L%*%cov[[k]]%*%t(L)),U.k = cov[[k]],L = L))))
+
+
+
+
+b.mle=as.vector(t(w[j,]))##turn i into a R x 1 vector
+V.gp.hat=diag(se[j,])^2
+V.gp.hat.inv <- solve(V.gp.hat)
+U.gp1kl= (post.b.gpkl.cov(V.gp.hat.inv, cov[[k]]))
+  
+identical(as.numeric(mash.arrays$post.means[k,]),as.numeric(post.b.gpkl.mean(b.mle = b.mle,V.gp.hat.inv = V.gp.hat.inv,U.gp1kl = U.gp1kl)))
+
+identical(as.numeric(mash.arrays$post.covs[k,]),as.numeric(diag(U.gp1kl)))
+
+
+pis=readRDS("pismashtruth.rds")$pihat
+log.lik.snp=log.lik.func(b.mle,LVL,LSigL_list)
+log.lik.minus.max=log.lik.snp-max(log.lik.snp)
+exp.vec=exp(log.lik.minus.max)
+post.weights=t(exp.vec*pis/sum(exp.vec*pis))
+
+all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(mash.means[j,]))
+
+
+mashnobase.means=as.matrix(read.table("sparseLwithtruthposterior.means.txt")[,-1])
+
+beta=as.matrix(c$beta)
+mle=as.matrix(wfull)
+mash.means=as.matrix(mash.means)
+standard=sqrt(mean((beta-mle)^2))
+sqrt(mean((mash.means-beta)^2))/standard
+sqrt(mean((mashnobase.means-beta)^2))/standard
+```
+
+Let's compare the learned matrices which receive the most weighting in mash and mashnobaseline. First, let' look at the dsitribution of matrices.
+
+Let's do the same thing comparing the pis using mash from the truth and from mashnobaseline:
+
+```{r}
+pimash=readRDS("pismashtruth.rds")$pihat
+pied=readRDS("pissparseLwithtruth.rds")$pihat
+par(mfrow=c(1,2))
+barplot(colSums(matrix(pied[-length(pied)],ncol=11,byrow=TRUE)),names=c("ID",rep(paste0("Comp",seq(1:10)))),las=2,main="Mashnobase")
+barplot(colSums(matrix(pimash[-length(pied)],ncol=11,byrow=TRUE)),names=c("ID",rep(paste0("Comp",seq(1:10)))),las=2,main="Mash")
+```
+
+We can see that using the same set of covariance matrices, _mashnobaseline_ is better able to emphasize the true configurations because the likelihood and posterior computations incorporate L. Recall, for mash:
+
+$$w_{j,R} ~ N(0,V+U)$$
+$$w_{j,R-1} ~ N(0,LVL' + LUL')$$ where L is the R-1 x R centering matrix.
+
+In both:
+
+$$c = \mu + \beta$$
+$$chat = c + E$$
+$$v \sim \sum_p N(0,Uk)$$
+$$E \sim N(0,V)$$
+
+So even if the Uks are different, the likelihood and corresponding $\pi$s will be different.
+
+
+
