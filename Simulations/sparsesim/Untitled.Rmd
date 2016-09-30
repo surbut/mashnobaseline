@@ -1,0 +1,50 @@
+---
+title: "tryingidentifiaibility"
+output: html_document
+---
+
+Now, we'll try with IDentifiability test
+
+
+```{r}
+library('mash')
+c=readRDS("chatsimesparsef.rds")
+t=c$t;b=c$chat;se=c$shat
+
+R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+s.j=se/se
+
+absmat=abs(t(L%*%t(c$t)))
+
+
+##w should represent transformed betahats using all R subgroups and j genes
+wfull=t(L%*%t(b))
+sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
+dim(wfull)
+dim(sjmat)
+
+```
+
+```{r}
+edcov=readRDS("covmatsparseL.rds")
+index=unlist(as.vector(t(matrix(seq(1:(length(edcov)-1)),byrow = T,ncol=18)[,2:9])))
+cov=edcov
+for(i in index){
+  cov[[i]]=edcov[[i]]+rep(1,R)%*%t(rep(1,R))
+}
+A="sparseLwithID"
+w=data.frame(wfull)[,-1]
+
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L = L[-1,])
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+likmat=readRDS(paste0("liketrain",A,".rds"))
+test=exp(likmat)
+sum(log(test%*%pis))
+
+
+for(j in 1:nrow(w)){
+total.quant.per.snp.no.baseline(j = j,covmat = cov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}
+```
+
