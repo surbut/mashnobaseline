@@ -14,7 +14,7 @@ Now we're going to simulate data across 8 subgroups according to 5 factors:
 
 ```{r}
 library('mash')
-chat_sim_fsimple
+chat_sim_fsingle
 ```
 
 You can see that the covariance matrices correspond to the factors:
@@ -672,8 +672,8 @@ Let's do the same thing comparing the pis using mash from the truth and from mas
 pimash=readRDS("pismashtruth.rds")$pihat
 pied=readRDS("pissparseLwithtruth.rds")$pihat
 par(mfrow=c(1,2))
-barplot(colSums(matrix(pied[-length(pied)],ncol=11,byrow=TRUE)),names=c("ID",rep(paste0("Comp",seq(1:10)))),las=2,main="Mashnobase")
-barplot(colSums(matrix(pimash[-length(pied)],ncol=11,byrow=TRUE)),names=c("ID",rep(paste0("Comp",seq(1:10)))),las=2,main="Mash")
+barplot(colSums(matrix(pied[-length(pied)],ncol=2,byrow=TRUE)),names=c("ID","Uk1"),las=2,main="Mashnobase")
+barplot(colSums(matrix(pimash[-length(pied)],ncol=2,byrow=TRUE)),names=c("ID","Uk1"),las=2,main="Mash")
 ```
 
 We can see that using the same set of covariance matrices, _mashnobaseline_ is better able to emphasize the true configurations because the likelihood and posterior computations incorporate L. Recall, for mash:

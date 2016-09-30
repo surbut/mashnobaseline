@@ -635,8 +635,8 @@ And test to see if calculations are accurate:
 
 
 ```{r,eval=F,echo=F}
-cov=readRDS("covmattest.rds")
-mash.means=as.matrix(read.table("mashtruthposterior.means.txt")[,-1])
+cov=readRDS("../sparsesim/covmattest.rds")
+mash.means=as.matrix(read.table("../sparsesim/mashtruthposterior.means.txt")[,-1])
 w=data.frame(wfull)
 R=ncol(w)
 j=10
@@ -684,7 +684,7 @@ post.weights=t(exp.vec*pis/sum(exp.vec*pis))
 all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(mash.means[j,]))
 
 
-mashnobase.means=as.matrix(read.table("sparseLwithtruthposterior.means.txt")[,-1])
+mashnobase.means=as.matrix(read.table("../sparsesim/sparseLwithtruthposterior.means.txt")[,-1])
 
 beta=as.matrix(c$beta)
 mle=as.matrix(wfull)
