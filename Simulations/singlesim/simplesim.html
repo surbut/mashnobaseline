@@ -120,33 +120,22 @@ $(document).ready(function () {
 
 
 <p>Now we’re going to simulate data across 8 subgroups according to 5 factors:</p>
-<pre class="r"><code>library('mash')</code></pre>
-<pre><code>## Loading required package: SQUAREM</code></pre>
-<pre><code>## Loading required package: mvtnorm</code></pre>
-<pre class="r"><code>chat_sim_fsimple</code></pre>
+<pre class="r"><code>library('mash')
+chat_sim_fsingle</code></pre>
 <pre><code>## function(n=1000,d=8,betasd=1,esd=0.1,K=10){
 ##   library(&quot;MASS&quot;)
 ##   library(&quot;mvtnorm&quot;)
 ##   J=0.10*n
-##   temp=rep(list(c(0,1)),d)
-##   configs = expand.grid(temp) # all possible 2^d combinations
-##   S=sample(seq(1:nrow(configs)),size = K,replace = FALSE)##which factors will be used
-##   F=as.matrix(configs[S,])
-##   covmat=lapply(seq(1:K),function(k){
-##     A=F[k,]%*%t(F[k,]);
-##     A/max(diag(A))})
-##   ## each entry of F is the the factor of decomposition of covariance of effect sizes
-##   z = sample(K,J,replace=TRUE) # randomly sample factor to be loaded on for each real snp
-##   
-##   
+##   config=rep(0,d)
+##   config[d]=1
+##   config[d-1]=1
 ##   mus=rnorm(n)  ###generate a list of n mus
+##   covmat=(config)%*%t(config)##only active in tissues d and d-1
 ##   mumat=matrix(rep(mus,d),ncol=d)##generate a matrix of mus for each gene
 ##   omega=abs(rnorm(J,mean=0,sd=betasd))##effect size variance can be big or small
 ##   beta=t(sapply(seq(1:J),function(j){
-##     k=z[j]
-##     mvrnorm(1,mu=rep(0,d),Sigma=omega[j]*covmat[[k]])
-##     #rmvnorm(1,mean = rep(0,d),sigma=omega*covmat[[k]])
-##   }))
+##     
+##     mvrnorm(1,mu=rep(0,d),Sigma=omega[j]*covmat)}))
 ##   
 ##   beta=rbind(beta,matrix(rep(0,(n-J)*d),ncol=d))
 ##   c=beta+mumat
@@ -154,7 +143,7 @@ $(document).ready(function () {
 ##   e=t(apply(sj,1,function(x){rmvnorm(1,mean=rep(0,d),sigma=diag(x)^2)}))
 ##   chat=c+e
 ##   t=chat/sj
-##   return(list(beta=beta,chat=chat,covmat=covmat,components=z,factors=F,t=t,mumat=mumat,shat=sj,error=e,ceff=c,omega=omega))
+##   return(list(beta=beta,chat=chat,covmat=covmat,t=t,mumat=mumat,shat=sj,error=e,ceff=c,omega=omega))
 ## }
 ## &lt;environment: namespace:mash&gt;</code></pre>
 <p>You can see that the covariance matrices correspond to the factors:</p>
