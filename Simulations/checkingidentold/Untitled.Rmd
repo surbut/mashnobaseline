@@ -1,0 +1,248 @@
+---
+title: "tryingidentifiaibility"
+output: html_document
+---
+
+
+
+Now we're going to simulate data across 8 subgroups according to 5 factors:
+
+```{r}
+library('mash')
+
+```
+
+You can see that the covariance matrices correspond to the factors:
+```{r}
+rm(list=ls())
+
+set.seed(123)
+RNGkind("Mersenne-Twister")
+c=chat_sim_fsimple(n=10000,d=8,betasd=1,esd=0.1,K=10)
+
+
+par(mfrow=c(4,5))
+for(i in 1:nrow(c$factors)){
+  x=c$factors[i,]
+  barplot(x)}
+for(i in 1:length(c$covmat)){
+  x=c$covmat[[i]]
+    barplot(rowSums(x)!=0)
+  }
+
+identical(c$beta[1,]+c$mumat[1,],c$ceff[1,])
+identical(c$chat[1,],c$ceff[1,]+c$error[1,])
+```
+
+Furthermore, you can see that the components look like such:
+
+```{r}
+t(sapply(c$covmat,function(x){diag(x)}))
+barplot(rowSums(c$covmat[[2]]))
+comptwoers=which(c$components==2)[1:5]
+
+c$beta[comptwoers,]
+
+(c$beta[comptwoers,])
+```
+
+
+Now, let's do our analysis:
+
+```{r}
+saveRDS(c,"chatsimesparsef.rds")
+t=c$t;b=c$chat;se=c$shat
+#hist(t)
+#hist(b)
+R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+s.j=se/se
+
+absmat=abs(t(L%*%t(c$t)))
+index=which(rowSums(absmat>4)>0)
+length(index)
+mean(index<1000)
+
+#index=which(rowMeans(abs(t(L%*%t(c$t))))>1.3)##choose the associations with average deviation large.
+
+##show deviations
+plot(rowSums(absmat>4))
+points(index,rowSums(absmat>4)[index],col="blue")
+
+sparsestrongt=t(L%*%t(t[index,]))
+
+```
+
+```{r filewrite,eval=T}
+
+write.table(sparsestrongt,"sparsestrongt.txt",col.names = FALSE,row.names=FALSE)
+
+```
+
+
+Now, we need to project into the centered space to estimate the covariance matrix of the true deviations, using the full L since $v$ will be R, and not $R-1$.
+
+
+```{r}
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen sparsestrongt.txt -g 507 -k 5 -n 8 i -o sparseF')
+A="sparseF"
+
+factor.mat=as.matrix(read.table("sparseF_F.out"))
+lambda.mat=as.matrix(read.table("sparseF_lambda.out"))
+
+#recall here that w will now be the L[-1,]%*%t(t[strong,]), which is equivalent to removing the first column of the strong projected t. Thus the covariance of v is initated with the RxR matrices (strong projected t), and the model is trained on the strong projected t less the first column because the model has v_{rxr}|w_{r,r-1}
+
+strongprojectedt=sparsestrongt
+
+
+lvllist=genlvllist(s.j[index,],L = L[-1,])
+
+
+##w should represent transformed betahats using all R subgroups and j genes
+wfull=t(L%*%t(b))
+sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
+dim(wfull)
+dim(sjmat)
+
+```
+
+\section{Likelihood}
+
+Now we will replace the RxR matrix $L$ with the R-1xR matrix $L*$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
+
+Now for each gene J at each component k, integrating over $\beta$, 
+
+
+
+$$L_{R-1,R} ceff \sim N (0, L_{R-1,R} U_{k} L_{R-1,R} ') $$
+$$L_{R-1,R} chat \sim N (0, L_{R-1,R}  U_{k} L_{R-1,R} ' + L_{R-1,R} \hat{V} L_{R-1,R} ')$$ 
+
+And thus we can use the Bovy et al algorithm invoked in both the Extreme Deconvolution package and in `Sarah's MixEm' where the marginal variance at each component, $T_{jp}$:
+
+
+$$T_{jp} = L_{R-1,R} U_k L_{R-1,R}' + L_{R-1,R} \hat{V}_{j} L_{R-1,R}'$$
+
+
+For each gene, and $w_{j} = L_{R-1,R} chat_{j}$.
+
+Recall that our previous approach was simplified by the fact that ${w}_{j}$ was simply $\hat{{b}_{j}}$ and the projection matrix was simply the $I_{r}$ identity matrix. Our inference on ${b}$ was analogous to their inference on $\beta_{j}$. 
+
+
+As before, we are interested in returning the prior covariance $U_k$ matrices of the `true` deviations $\beta$, which we will then rescale by choosing a set of $\omega$ that are appropriate to $L chat $ to comprise a set of $P = KxL$ prior covariance matrices $\Sigma$.
+
+and choose the set of $\pi$ that maximizes compute the following likelihood at each of the P components: 
+
+
+$$L_{R-1,R}  chat _j \sim N (0, L_{R-1,R}  \Sigma_{p} L_{R-1,R} ' + L_{R-1,R} \hat{V_j} L_{R-1,R} ') $$
+
+```{r}
+w=data.frame(wfull)[,-1]
+```
+
+
+Now run with ED to show that 
+1) the likelihood improves
+2) we have successfully implemented an approach which allows us to input a list of residual variance matrices (as opposed to a matrix of vectors to be diagonalised).
+
+
+```{r}
+rm(A)
+
+
+library("ExtremeDeconvolution")
+efunc=deconvolution.em.with.bovy.with.L(t.stat = strongprojectedt,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvllist,P = 3,L = L[-1,],Q = 5,w = strongprojectedt[,-1])
+
+A="sparseLwithED"
+
+
+apply(efunc$true.covs,1,function(x){qr(x)$rank})
+
+max.step=efunc
+edcov=compute.hm.covmat.all.max.step(b.hat = wfull,se.hat = sjmat,t.stat = strongprojectedt,Q = 5,lambda.mat = lambda.mat,A=A,factor.mat = factor.mat,max.step = efunc,zero = T,power = 2)$cov
+length(edcov)
+
+all.equal(edcov[[2]]/max(diag(edcov[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
+all.equal(edcov[[3]]/max(diag(edcov[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
+all.equal(edcov[[9]]/max(diag(edcov[[9]])),max.step$true.covs[2,,]/max(diag(max.step$true.covs[2,,])))
+
+```
+
+```{r}
+w=data.frame(wfull)[,-1]
+
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+likmat=readRDS(paste0("liketrain",A,".rds"))
+test=exp(likmat)
+sum(log(test%*%pis))
+
+for(j in 1:nrow(w)){
+total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}
+
+```
+
+Now, we'll try with IDentifiability test
+
+
+```{r}
+rm(list=ls())
+c=readRDS("chatsimesparsef.rds")
+t=c$t;b=c$chat;se=c$shat
+
+R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+s.j=se/se
+
+absmat=abs(t(L%*%t(c$t)))
+
+
+##w should represent transformed betahats using all R subgroups and j genes
+wfull=t(L%*%t(b))
+sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
+dim(wfull)
+dim(sjmat)
+```
+
+```{r}
+edcov=readRDS("covmatsparseLwithED.rds")
+index=unlist(as.vector(t(matrix(seq(1:(length(edcov)-1)),byrow = T,ncol=18)[,2:9])))
+cov=edcov
+for(i in index){
+  cov[[i]]=edcov[[i]]+rep(1,R)%*%t(rep(1,R))
+}
+A="sparseLwithID"
+w=data.frame(wfull)[,-1]
+
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L = L[-1,])
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+likmat=readRDS(paste0("liketrain",A,".rds"))
+test=exp(likmat)
+sum(log(test%*%pis))
+
+
+```
+
+
+Minus ID:
+
+```{r}
+edcov=readRDS("covmatsparseLwithED.rds")
+index=unlist(as.vector(t(matrix(seq(1:(length(edcov)-1)),byrow = T,ncol=18)[,2:9])))
+cov=edcov
+for(i in index){
+  cov[[i]]=edcov[[i]]-rep(1,R)%*%t(rep(1,R))*min(edcov[[i]])
+}
+sapply(cov,function(x){sum(a<0)})
+A="sparseLminusmin"
+w=data.frame(wfull)[,-1]
+
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L = L[-1,])
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+likmat=readRDS(paste0("liketrain",A,".rds"))
+test=exp(likmat)
+sum(log(test%*%pis))
+```
+
