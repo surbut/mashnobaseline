@@ -306,33 +306,43 @@ cov=edcov
 for(i in index){
   cov[[i]]=edcov[[i]]-rep(1,R)%*%t(rep(1,R))*min(edcov[[i]])
 }
-sapply(cov,function(a){sum(a&lt;0)})</code></pre>
-<pre><code>##   [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-##  [36] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-##  [71] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-## [106] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-## [141] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-## [176] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-## [211] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-## [246] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-## [281] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-## [316] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-## [351] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-## [386] 0 0 0 0 0 0 0 0 0 0 0 0</code></pre>
-<pre class="r"><code>A=&quot;sparseLminusmin&quot;
+sapply(cov,function(a){sum(a&lt;0)})
+A=&quot;sparseLminusmin&quot;
 w=data.frame(wfull)[,-1]
 
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L = L[-1,])</code></pre>
-<pre><code>## quartz_off_screen 
-##                 2</code></pre>
-<pre class="r"><code>pis=readRDS(paste0(&quot;pis&quot;,A,&quot;.rds&quot;))$pihat
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L = L[-1,])
+pis=readRDS(paste0(&quot;pis&quot;,A,&quot;.rds&quot;))$pihat
 
 likmat=readRDS(paste0(&quot;liketrain&quot;,A,&quot;.rds&quot;))
 test=exp(likmat)
-sum(log(test%*%pis))</code></pre>
-<pre><code>## [1] 64907.01</code></pre>
-<pre class="r"><code>for(j in 1:nrow(w)){
+sum(log(test%*%pis))
+
+
+
+for(j in 1:nrow(w)){
 total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}</code></pre>
+<p>RMSE:</p>
+<pre class="r"><code>mle=as.matrix(wfull)
+beta=as.matrix(c$beta)
+
+mash.nobaselinemeans=as.matrix(read.table(&quot;sparseLwithEDposterior.means.txt&quot;)[,-1])
+mash.withmin=as.matrix(read.table(&quot;sparseLminusminposterior.means.txt&quot;)[,-1])
+
+standard=sqrt(mean((beta-mle)^2))
+sqrt(mean((mash.nobaselinemeans-beta)^2))/standard</code></pre>
+<pre><code>## [1] 0.8508868</code></pre>
+<pre class="r"><code>sqrt(mean((mash.withmin-beta)^2))/standard</code></pre>
+<pre><code>## [1] 0.8508867</code></pre>
+<p>Test to show correct:</p>
+<div id="test-to-show-our-calculations-are-accurate" class="section level2">
+<h2>Test to show our calculations are accurate:</h2>
+<pre><code>## [1] 10000     8</code></pre>
+<pre><code>## [1] 10000     8</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+</div>
 
 
 
