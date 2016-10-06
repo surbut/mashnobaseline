@@ -256,16 +256,14 @@ length(edcov)</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 <pre class="r"><code>w=data.frame(wfull)[,-1]
 
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])</code></pre>
-<pre><code>## quartz_off_screen 
-##                 2</code></pre>
-<pre class="r"><code>pis=readRDS(paste0(&quot;pis&quot;,A,&quot;.rds&quot;))$pihat
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
+pis=readRDS(paste0(&quot;pis&quot;,A,&quot;.rds&quot;))$pihat
 
 likmat=readRDS(paste0(&quot;liketrain&quot;,A,&quot;.rds&quot;))
 test=exp(likmat)
-sum(log(test%*%pis))</code></pre>
-<pre><code>## [1] 64906.85</code></pre>
-<pre class="r"><code>for(j in 1:nrow(w)){
+sum(log(test%*%pis))
+
+for(j in 1:nrow(w)){
 total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}</code></pre>
 <p>Now, we’ll try with IDentifiability test</p>
 <pre class="r"><code>rm(list=ls())
@@ -295,6 +293,35 @@ for(i in index){
 A=&quot;sparseLwithID&quot;
 w=data.frame(wfull)[,-1]
 
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L = L[-1,])
+pis=readRDS(paste0(&quot;pis&quot;,A,&quot;.rds&quot;))$pihat
+
+likmat=readRDS(paste0(&quot;liketrain&quot;,A,&quot;.rds&quot;))
+test=exp(likmat)
+sum(log(test%*%pis))</code></pre>
+<p>Minus ID:</p>
+<pre class="r"><code>edcov=readRDS(&quot;covmatsparseLwithED.rds&quot;)
+index=unlist(as.vector(t(matrix(seq(1:(length(edcov)-1)),byrow = T,ncol=18)[,2:9])))
+cov=edcov
+for(i in index){
+  cov[[i]]=edcov[[i]]-rep(1,R)%*%t(rep(1,R))*min(edcov[[i]])
+}
+sapply(cov,function(a){sum(a&lt;0)})</code></pre>
+<pre><code>##   [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+##  [36] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+##  [71] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+## [106] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+## [141] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+## [176] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+## [211] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+## [246] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+## [281] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+## [316] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+## [351] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+## [386] 0 0 0 0 0 0 0 0 0 0 0 0</code></pre>
+<pre class="r"><code>A=&quot;sparseLminusmin&quot;
+w=data.frame(wfull)[,-1]
+
 compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L = L[-1,])</code></pre>
 <pre><code>## quartz_off_screen 
 ##                 2</code></pre>
@@ -303,7 +330,9 @@ compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = cov,A = A,pen = 1,L
 likmat=readRDS(paste0(&quot;liketrain&quot;,A,&quot;.rds&quot;))
 test=exp(likmat)
 sum(log(test%*%pis))</code></pre>
-<pre><code>## [1] 64907.02</code></pre>
+<pre><code>## [1] 64907.01</code></pre>
+<pre class="r"><code>for(j in 1:nrow(w)){
+total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}</code></pre>
 
 
 

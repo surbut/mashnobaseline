@@ -204,7 +204,7 @@ dim(wfull)
 dim(sjmat)
 ```
 
-```{r}
+```{r, eval=FALSE}
 edcov=readRDS("covmatsparseLwithED.rds")
 index=unlist(as.vector(t(matrix(seq(1:(length(edcov)-1)),byrow = T,ncol=18)[,2:9])))
 cov=edcov
@@ -244,5 +244,11 @@ pis=readRDS(paste0("pis",A,".rds"))$pihat
 likmat=readRDS(paste0("liketrain",A,".rds"))
 test=exp(likmat)
 sum(log(test%*%pis))
+
+
+
+for(j in 1:nrow(w)){
+total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se,pis = pis,A = A,checkpoint = F,L = L[-1,])}
+
 ```
 
