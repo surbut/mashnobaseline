@@ -64,7 +64,7 @@ lfsr.mash=as.matrix(read.table("withfixedomegamnblfsr.txt"))[,-1]
 edcov=readRDS("covmatwithfixedomega.rds")
 j=10
 arrays=post.array.per.snp.no.baseline(j = 10,covmat = edcov,b.gp.hat = w,se.gp.hat = se,L = L[-1,])
-k=5
+k=2
 
 V.gp.hat=diag(se[j,])^2
 
@@ -80,7 +80,7 @@ identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(ti
 
 log.lik.snp=log.lik.func(b.mle,LVL,LSigL_list)
 log.lik.minus.max=log.lik.snp-max(log.lik.snp)
-pis=readRDS("pissparseLwithtruth.rds")$pihat
+pis=readRDS("piswithfixedomegamnb.rds")$pihat
 exp.vec=exp(log.lik.minus.max)
 post.weights=t(exp.vec*pis/sum(exp.vec*pis))
 
@@ -91,7 +91,7 @@ And let's also do this with the mash framework:
 
 ```{r}
 rm(list=ls())
-c=readRDS("chatsimesparsef.rds")
+c=readRDS("chatfixedomega.rds")
 covl=list();covl[[1]]=c$covmat
 t=c$t;b=c$chat;se=c$shat
 
@@ -131,7 +131,7 @@ mash.arrays=post.array.per.snp(j = 10,covmat = cov,b.gp.hat = w,se.gp.hat = se)
 ##show same algebra
 
 
-k=5
+k=2
 
 V.gp.hat=diag(se[j,])^2
 
