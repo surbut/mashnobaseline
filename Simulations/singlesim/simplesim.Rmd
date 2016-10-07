@@ -10,7 +10,7 @@ knitr::opts_chunk$set(cache=TRUE)
 ```
 
 
-Now we're going to simulate data across 8 subgroups according to 5 factors:
+Now we're going to simulate data across 8 subgroups according to just one factors:
 
 ```{r}
 library('mash')
@@ -437,7 +437,7 @@ j=1
 
 par(mfrow=c(2,2))
 barplot(c$beta[j,])
-barplot(c$chat[j,]-mean(c$chat),main="MLE")
+barplot(c$chat[j,]-mean(c$chat[j,]),main="MLE")
 barplot(mash.nobaselinemeans[j,],main="MashNOBaseline")
 barplot(mash.means[j,],main="MASH")
 
@@ -445,7 +445,7 @@ j=3
 
 par(mfrow=c(2,2))
 barplot(c$beta[j,])
-barplot(c$chat[j,]-mean(c$chat),main="MLE")
+barplot(c$chat[j,]-mean(c$chat[j,]),main="MLE")
 barplot(mash.nobaselinemeans[j,],main="MashNOBaseline")
 barplot(mash.means[j,],main="MASH")
 ```
