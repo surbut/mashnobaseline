@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  21 SEP 2016 09:35
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  13 OCT 2016 18:36
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -283,20 +283,20 @@ Package: parskip 2001/04/09 non-zero parskip adjustments
 (./MashNobase.aux)
 \openout1 = `MashNobase.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -361,7 +361,7 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
 \AtBeginShipoutBox=\box29
-Package hyperref Info: Link coloring OFF on input line 59.
+Package hyperref Info: Link coloring OFF on input line 61.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
@@ -371,20 +371,20 @@ Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 )
 \c@section@level=\count119
 )
-LaTeX Info: Redefining \ref on input line 59.
-LaTeX Info: Redefining \pageref on input line 59.
-LaTeX Info: Redefining \nameref on input line 59.
+LaTeX Info: Redefining \ref on input line 61.
+LaTeX Info: Redefining \pageref on input line 61.
+LaTeX Info: Redefining \nameref on input line 61.
 
 (./MashNobase.out) (./MashNobase.out)
 \@outlinefile=\write3
 \openout3 = `MashNobase.out'.
 
-LaTeX Font Info:    Try loading font information for U+msa on input line 61.
+LaTeX Font Info:    Try loading font information for U+msa on input line 63.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 61.
+LaTeX Font Info:    Try loading font information for U+msb on input line 63.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -396,28 +396,27 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
  [1
 
 {/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 124.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 126.
 
  (/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 124.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 126.
 
-[2] [3]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 198.
-
+[2]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 198.
+(hyperref)                removing `math shift' on input line 156.
 
-[4]
-./MashNobase.tex:208: Missing } inserted.
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 156.
+
+./MashNobase.tex:166: Missing } inserted.
 <inserted text> 
                 }
-l.208 $
+l.166 $
        \lstar$ \ceff \sim \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -425,34 +424,34 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:208: Incomplete \ifodd; all text was ignored after line 208.
+./MashNobase.tex:166: Incomplete \ifodd; all text was ignored after line 166.
 <inserted text> 
                 \fi 
-l.208 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
+l.166 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
                                                   
 A forbidden control sequence occurred in skipped text.
 This kind of error happens when you say `\if...' and forget
 the matching `\fi'. I've inserted a `\fi'; this might work.
 
-./MashNobase.tex:208: Missing $ inserted.
+./MashNobase.tex:166: Missing $ inserted.
 <inserted text> 
                 $
-l.208 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
+l.166 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
                                                   
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./MashNobase.tex:208: Extra \fi.
+./MashNobase.tex:166: Extra \fi.
 \math@cr@@@ ...ef \next@ {&\kern -\alignsep@ }\fi 
                                                   \next@ \cr 
-l.208 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
+l.166 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
                                                   
 I'm ignoring this; it doesn't match any \if.
 
-./MashNobase.tex:208: Undefined control sequence.
+./MashNobase.tex:166: Undefined control sequence.
 \math@cr@@@ ...t@ {&\kern -\alignsep@ }\fi \next@ 
                                                   \cr 
-l.208 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
+l.166 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
                                                   
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -460,19 +459,19 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-./MashNobase.tex:208: Missing { inserted.
+./MashNobase.tex:166: Missing { inserted.
 <inserted text> 
                 {
-l.208 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
+l.166 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
                                                   
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-./MashNobase.tex:209: Missing } inserted.
+./MashNobase.tex:167: Missing } inserted.
 <inserted text> 
                 }
-l.209 $
+l.167 $
        \lstar$ \chat \sim \Norm (0, $\lstar$  U_{k} $\lstar$ ' + $\lstar$ \h...
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -480,19 +479,19 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:210: Missing { inserted.
+./MashNobase.tex:168: Missing { inserted.
 <inserted text> 
                 {
-l.210 \end{aligned}
+l.168 \end{aligned}
                    
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-./MashNobase.tex:220: Missing } inserted.
+./MashNobase.tex:179: Missing } inserted.
 <inserted text> 
                 }
-l.220 \textbf{w} = $
+l.179 \textbf{w} = $
                     \lstar$ \chat \\
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -500,34 +499,34 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:220: Incomplete \ifodd; all text was ignored after line 220.
+./MashNobase.tex:179: Incomplete \ifodd; all text was ignored after line 179.
 <inserted text> 
                 \fi 
-l.220 \textbf{w} = $\lstar$ \chat \\
+l.179 \textbf{w} = $\lstar$ \chat \\
                                     
 A forbidden control sequence occurred in skipped text.
 This kind of error happens when you say `\if...' and forget
 the matching `\fi'. I've inserted a `\fi'; this might work.
 
-./MashNobase.tex:220: Missing $ inserted.
+./MashNobase.tex:179: Missing $ inserted.
 <inserted text> 
                 $
-l.220 \textbf{w} = $\lstar$ \chat \\
+l.179 \textbf{w} = $\lstar$ \chat \\
                                     
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./MashNobase.tex:220: Extra \fi.
+./MashNobase.tex:179: Extra \fi.
 \math@cr@@@ ...ef \next@ {&\kern -\alignsep@ }\fi 
                                                   \next@ \cr 
-l.220 \textbf{w} = $\lstar$ \chat \\
+l.179 \textbf{w} = $\lstar$ \chat \\
                                     
 I'm ignoring this; it doesn't match any \if.
 
-./MashNobase.tex:220: Undefined control sequence.
+./MashNobase.tex:179: Undefined control sequence.
 \math@cr@@@ ...t@ {&\kern -\alignsep@ }\fi \next@ 
                                                   \cr 
-l.220 \textbf{w} = $\lstar$ \chat \\
+l.179 \textbf{w} = $\lstar$ \chat \\
                                     
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -535,74 +534,164 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-./MashNobase.tex:220: Missing { inserted.
+./MashNobase.tex:179: Missing { inserted.
 <inserted text> 
                 {
-l.220 \textbf{w} = $\lstar$ \chat \\
+l.179 \textbf{w} = $\lstar$ \chat \\
                                     
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-./MashNobase.tex:221: Missing } inserted.
+./MashNobase.tex:180: Missing } inserted.
 <inserted text> 
                 }
-l.221 \textbf{w} \sim \Norm (0, $
-                                 \lstar$ \vb) \\
+l.180 \textbf{w} | \vb, \hat{V} \sim \Norm ($
+                                             \lstar$ \vb, $\lstar$ \hat{V}  ...
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
 With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:221: Incomplete \ifodd; all text was ignored after line 221.
+./MashNobase.tex:180: Incomplete \ifodd; all text was ignored after line 180.
 <inserted text> 
                 \fi 
-l.221 \textbf{w} \sim \Norm (0, $\lstar$ \vb) \\
-                                                
+l.180 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
+                                                  
 A forbidden control sequence occurred in skipped text.
 This kind of error happens when you say `\if...' and forget
 the matching `\fi'. I've inserted a `\fi'; this might work.
 
-./MashNobase.tex:221: Missing $ inserted.
+./MashNobase.tex:180: Missing $ inserted.
 <inserted text> 
                 $
-l.221 \textbf{w} \sim \Norm (0, $\lstar$ \vb) \\
-                                                
+l.180 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
+                                                  
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./MashNobase.tex:221: Extra \fi.
+./MashNobase.tex:180: Extra \fi.
 \math@cr@@@ ...ef \next@ {&\kern -\alignsep@ }\fi 
                                                   \next@ \cr 
-l.221 \textbf{w} \sim \Norm (0, $\lstar$ \vb) \\
-                                                
+l.180 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
+                                                  
 I'm ignoring this; it doesn't match any \if.
 
-./MashNobase.tex:221: Undefined control sequence.
+./MashNobase.tex:180: Undefined control sequence.
 \math@cr@@@ ...t@ {&\kern -\alignsep@ }\fi \next@ 
                                                   \cr 
-l.221 \textbf{w} \sim \Norm (0, $\lstar$ \vb) \\
-                                                
+l.180 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
+                                                  
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
 misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-./MashNobase.tex:221: Missing { inserted.
+./MashNobase.tex:180: Missing { inserted.
 <inserted text> 
                 {
-l.221 \textbf{w} \sim \Norm (0, $\lstar$ \vb) \\
-                                                
+l.180 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
+                                                  
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-./MashNobase.tex:237: Missing } inserted.
+[3]
+./MashNobase.tex:209: Undefined control sequence.
+l.209 L(\pi) &:= p(\textbf{w} | \bpi
+                                    , V, \Sigma  \\
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+./MashNobase.tex:216: Missing $ inserted.
+<inserted text> 
+                $
+l.216 
+      
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:216: Missing } inserted.
 <inserted text> 
                 }
-l.237 $
+l.216 
+      
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:216: Display math should end with $$.
+<to be read again> 
+                   \@@par 
+l.216 
+      
+The `$' that I just saw supposedly matches a previous `$$'.
+So I shall assume that you typed `$$' both times.
+
+./MashNobase.tex:216: Extra }, or forgotten \endgroup.
+\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.216 
+      
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+
+./MashNobase.tex:217: LaTeX Error: Bad math environment delimiter.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.217 \end{equation}
+                    
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./MashNobase.tex:217: You can't use `\eqno' in vertical mode.
+\endmathdisplay@a ...\df@tag \@empty \else \veqno 
+                                                  \alt@tag \df@tag \fi \ifx ...
+l.217 \end{equation}
+                    
+Sorry, but I'm not programmed to handle this case;
+I'll just pretend that you didn't ask for it.
+If you're in the wrong mode, you might be able to
+return to the right one by typing `I}' or `I$' or `I\par'.
+
+./MashNobase.tex:217: Missing $ inserted.
+<inserted text> 
+                $
+l.217 \end{equation}
+                    
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:217: Display math should end with $$.
+<to be read again> 
+                   \endgroup 
+l.217 \end{equation}
+                    
+The `$' that I just saw supposedly matches a previous `$$'.
+So I shall assume that you typed `$$' both times.
+
+./MashNobase.tex:230: Missing } inserted.
+<inserted text> 
+                }
+l.230 $
        \lstar$  \chat _j \sim \Norm (0, $\lstar$  \Sigma_{p} $\lstar$ ' + $\...
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -610,34 +699,34 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:237: Incomplete \ifodd; all text was ignored after line 237.
+./MashNobase.tex:230: Incomplete \ifodd; all text was ignored after line 230.
 <inserted text> 
                 \fi 
-l.237 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
+l.230 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
                                                   
 A forbidden control sequence occurred in skipped text.
 This kind of error happens when you say `\if...' and forget
 the matching `\fi'. I've inserted a `\fi'; this might work.
 
-./MashNobase.tex:237: Missing $ inserted.
+./MashNobase.tex:230: Missing $ inserted.
 <inserted text> 
                 $
-l.237 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
+l.230 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
                                                   
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./MashNobase.tex:237: Extra \fi.
+./MashNobase.tex:230: Extra \fi.
 \math@cr@@@ ...ef \next@ {&\kern -\alignsep@ }\fi 
                                                   \next@ \cr 
-l.237 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
+l.230 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
                                                   
 I'm ignoring this; it doesn't match any \if.
 
-./MashNobase.tex:237: Undefined control sequence.
+./MashNobase.tex:230: Undefined control sequence.
 \math@cr@@@ ...t@ {&\kern -\alignsep@ }\fi \next@ 
                                                   \cr 
-l.237 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
+l.230 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
                                                   
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -645,54 +734,54 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-./MashNobase.tex:237: Missing { inserted.
+./MashNobase.tex:230: Missing { inserted.
 <inserted text> 
                 {
-l.237 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
+l.230 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
                                                   
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-./MashNobase.tex:238: Missing } inserted.
+./MashNobase.tex:231: Missing } inserted.
 <inserted text> 
                 }
-l.238 T_{jp} = $
-                \lstar$ U_k $\lstar$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
+l.231 T_{jp} = $
+                \lstar$ \Sigma_{p}  $\lstar$' + $\lstar$ \hat{V}_{j} $\lstar...
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
 With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:238: Incomplete \ifodd; all text was ignored after line 238.
+./MashNobase.tex:231: Incomplete \ifodd; all text was ignored after line 231.
 <inserted text> 
                 \fi 
-l.238 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
+l.231 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
                                                   
 A forbidden control sequence occurred in skipped text.
 This kind of error happens when you say `\if...' and forget
 the matching `\fi'. I've inserted a `\fi'; this might work.
 
-./MashNobase.tex:238: Missing $ inserted.
+./MashNobase.tex:231: Missing $ inserted.
 <inserted text> 
                 $
-l.238 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
+l.231 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
                                                   
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./MashNobase.tex:238: Extra \fi.
+./MashNobase.tex:231: Extra \fi.
 \math@cr@@@ ...ef \next@ {&\kern -\alignsep@ }\fi 
                                                   \next@ \cr 
-l.238 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
+l.231 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
                                                   
 I'm ignoring this; it doesn't match any \if.
 
-./MashNobase.tex:238: Undefined control sequence.
+./MashNobase.tex:231: Undefined control sequence.
 \math@cr@@@ ...t@ {&\kern -\alignsep@ }\fi \next@ 
                                                   \cr 
-l.238 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
+l.231 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
                                                   
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -700,19 +789,19 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-./MashNobase.tex:238: Missing { inserted.
+./MashNobase.tex:231: Missing { inserted.
 <inserted text> 
                 {
-l.238 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
+l.231 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
                                                   
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-./MashNobase.tex:239: Missing } inserted.
+./MashNobase.tex:232: Missing } inserted.
 <inserted text> 
                 }
-l.239 $
+l.232 $
        \lstar$  \chat _j  \sim \Norm (0, T_{jp} )
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -720,149 +809,46 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:240: Missing { inserted.
+./MashNobase.tex:233: Missing { inserted.
 <inserted text> 
                 {
-l.240 \end{aligned}
+l.233 \end{aligned}
                    
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-[5]
-./MashNobase.tex:250: Display math should end with $$.
-<to be read again> 
-                   {
-l.250 \vb | $\lstar
-                   $  \chat, \pi, \Sigma, \bm{s} \sim N(\mu^{1} , U^{1})
-The `$' that I just saw supposedly matches a previous `$$'.
-So I shall assume that you typed `$$' both times.
+[4] [5]
 
-./MashNobase.tex:251: You can't use `\eqno' in math mode.
-\endmathdisplay@a ...\df@tag \@empty \else \veqno 
-                                                  \alt@tag \df@tag \fi \ifx ...
-l.251 \end{equation}
-                    
-Sorry, but I'm not programmed to handle this case;
-I'll just pretend that you didn't ask for it.
-If you're in the wrong mode, you might be able to
-return to the right one by typing `I}' or `I$' or `I\par'.
-
-./MashNobase.tex:251: Missing $ inserted.
-<inserted text> 
-                $
-l.251 \end{equation}
-                    
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-./MashNobase.tex:257: Missing } inserted.
-<inserted text> 
-                }
-l.257 \mu^{1}_{jp} = \Sigma_{p} $
-                                 \lstar$ ' T_{jp}^{-1} $\lstar$  \chat_{j} \\
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-./MashNobase.tex:257: Incomplete \ifodd; all text was ignored after line 257.
-<inserted text> 
-                \fi 
-l.257 ...tar$ ' T_{jp}^{-1} $\lstar$  \chat_{j} \\
-                                                  
-A forbidden control sequence occurred in skipped text.
-This kind of error happens when you say `\if...' and forget
-the matching `\fi'. I've inserted a `\fi'; this might work.
-
-./MashNobase.tex:257: Missing $ inserted.
-<inserted text> 
-                $
-l.257 ...tar$ ' T_{jp}^{-1} $\lstar$  \chat_{j} \\
-                                                  
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-./MashNobase.tex:257: Extra \fi.
-\math@cr@@@ ...ef \next@ {&\kern -\alignsep@ }\fi 
-                                                  \next@ \cr 
-l.257 ...tar$ ' T_{jp}^{-1} $\lstar$  \chat_{j} \\
-                                                  
-I'm ignoring this; it doesn't match any \if.
-
-./MashNobase.tex:257: Undefined control sequence.
-\math@cr@@@ ...t@ {&\kern -\alignsep@ }\fi \next@ 
-                                                  \cr 
-l.257 ...tar$ ' T_{jp}^{-1} $\lstar$  \chat_{j} \\
-                                                  
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-./MashNobase.tex:257: Missing { inserted.
-<inserted text> 
-                {
-l.257 ...tar$ ' T_{jp}^{-1} $\lstar$  \chat_{j} \\
-                                                  
-I've put in what seems to be necessary to fix
-the current column of the current alignment.
-Try to go on, since this might almost work.
-
-./MashNobase.tex:258: Missing } inserted.
-<inserted text> 
-                }
-l.258 U^{1}_{jp} = \Sigma_{p} - \Sigma_p $
-                                          \lstar$ ' T_{jp}^{-1} $\lstar$  \S...
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-./MashNobase.tex:259: Missing { inserted.
-<inserted text> 
-                {
-l.259 \end{aligned}
-                   
-I've put in what seems to be necessary to fix
-the current column of the current alignment.
-Try to go on, since this might almost work.
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 379.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 323.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 323.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 338.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 338.
+(hyperref)                removing `math shift' on input line 379.
 
 [6]
-./MashNobase.tex:626: Missing $ inserted.
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 394.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 394.
+
+[7]
+./MashNobase.tex:682: Missing $ inserted.
 <inserted text> 
                 $
-l.626 $\begin{verbatim}
+l.682 $\begin{verbatim}
                        {function(n=1000,d=44,betasd=1,esd=0.1,K=10){
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./MashNobase.tex:626: Missing } inserted.
+./MashNobase.tex:682: Missing } inserted.
 <inserted text> 
                 }
-l.626 $\begin{verbatim}
+l.682 $\begin{verbatim}
                        {function(n=1000,d=44,betasd=1,esd=0.1,K=10){
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -870,10 +856,10 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:626: Missing \endgroup inserted.
+./MashNobase.tex:682: Missing \endgroup inserted.
 <inserted text> 
                 \endgroup 
-l.626 $\begin{verbatim}
+l.682 $\begin{verbatim}
                        {function(n=1000,d=44,betasd=1,esd=0.1,K=10){
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -881,10 +867,10 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:626: Extra }, or forgotten \endgroup.
+./MashNobase.tex:682: Extra }, or forgotten \endgroup.
 \@par ... \@noitemerr {\@@par }\fi \else {\@@par }
                                                   \fi 
-l.626 $\begin{verbatim}
+l.682 $\begin{verbatim}
                        {function(n=1000,d=44,betasd=1,esd=0.1,K=10){
 I've deleted a group-closing symbol because it seems to be
 spurious, as in `$x}$'. But perhaps the } is legitimate and
@@ -893,136 +879,135 @@ the way to recover is to insert both the forgotten and the
 deleted material, e.g., by typing `I$}'.
 
 
-Overfull \hbox (177.9879pt too wide) in paragraph at lines 656--656
+Overfull \hbox (177.9879pt too wide) in paragraph at lines 712--712
  []  \OT1/cmtt/m/n/10.95 configs = matrix((rnorm(d*K)),byrow=T,ncol=d) # A matr
 ix of K classes (patterns) across R subgroups[] 
  []
 
 
-Overfull \hbox (86.0089pt too wide) in paragraph at lines 656--656
+Overfull \hbox (86.0089pt too wide) in paragraph at lines 712--712
  []  \OT1/cmtt/m/n/10.95 ## each entry of F is the the factor of decomposition 
 of covariance of effect sizes[] 
  []
 
 
-Overfull \hbox (109.00365pt too wide) in paragraph at lines 656--656
+Overfull \hbox (109.00365pt too wide) in paragraph at lines 712--712
  []  \OT1/cmtt/m/n/10.95 z = sample(K,J,replace=TRUE) # randomly sample factor 
 to be loaded on for each real snp[] 
  []
 
 
-Overfull \hbox (17.02464pt too wide) in paragraph at lines 656--656
+Overfull \hbox (17.02464pt too wide) in paragraph at lines 712--712
  []  \OT1/cmtt/m/n/10.95 mumat=matrix(rep(mus,d),ncol=d)##generate a matrix of 
 mus for each gene[] 
  []
 
 
-Overfull \hbox (57.26546pt too wide) in paragraph at lines 656--656
+Overfull \hbox (57.26546pt too wide) in paragraph at lines 712--712
  []  \OT1/cmtt/m/n/10.95 omega=abs(rnorm(J,mean=0,sd=betasd))##effect size vari
 ance can be big or small[] 
  []
 
-[7]
-Overfull \hbox (63.01414pt too wide) in paragraph at lines 656--656
+
+Overfull \hbox (63.01414pt too wide) in paragraph at lines 712--712
  []  \OT1/cmtt/m/n/10.95 sj=abs(matrix(rnorm(n*d,esd,0.001),ncol=d))##use unifo
 rm to simulate 'shrunken'[] 
  []
 
 
-Overfull \hbox (11.27596pt too wide) in paragraph at lines 656--656
+Overfull \hbox (11.27596pt too wide) in paragraph at lines 712--712
  []  \OT1/cmtt/m/n/10.95 e=t(apply(sj,1,function(x){rmvnorm(1,mean=rep(0,d),sig
 ma=diag(x)^2)}))[] 
  []
 
 
-Overfull \hbox (40.0194pt too wide) in paragraph at lines 656--656
+Overfull \hbox (40.0194pt too wide) in paragraph at lines 712--712
  []  \OT1/cmtt/m/n/10.95 return(list(beta=beta,chat=chat,covmat=covmat,componen
 ts=z,t=t,mumat=mumat,[] 
  []
 
 
-./MashNobase.tex:656: LaTeX Error: \begin{itemize} on input line 123 ended by \
+./MashNobase.tex:712: LaTeX Error: \begin{itemize} on input line 125 ended by \
 end{verbatim}.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.656 ...e,ceff=c,F=F,omega=omega))}\end{verbatim}
+l.712 ...e,ceff=c,F=F,omega=omega))}\end{verbatim}
                                                   }$
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
 or  <return>  to continue without it.
 
-./MashNobase.tex:656: Too many }'s.
-l.656 ...,ceff=c,F=F,omega=omega))}\end{verbatim}}
+./MashNobase.tex:712: Too many }'s.
+l.712 ...,ceff=c,F=F,omega=omega))}\end{verbatim}}
                                                   $
 You've closed more groups than you opened.
 Such booboos are generally harmless, so keep going.
 
-./MashNobase.tex:657: Missing $ inserted.
+./MashNobase.tex:713: Missing $ inserted.
 <inserted text> 
                 $
-l.657 
+l.713 
       
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
 [8]
-Overfull \hbox (58.63383pt too wide) in paragraph at lines 704--704
+Overfull \hbox (58.63383pt too wide) in paragraph at lines 760--760
 []  \OT1/cmtt/m/n/10.95 S=sample(seq(1:nrow(configs)),size = K,replace = FALSE)
 ##which factors will be used[] 
  []
 
 
-Overfull \hbox (58.63383pt too wide) in paragraph at lines 704--704
+Overfull \hbox (58.63383pt too wide) in paragraph at lines 760--760
 []  \OT1/cmtt/m/n/10.95 ## each entry of F is the the factor of decomposition o
 f covariance of effect sizes[] 
  []
 
 
-Overfull \hbox (81.62859pt too wide) in paragraph at lines 704--704
+Overfull \hbox (81.62859pt too wide) in paragraph at lines 760--760
 []  \OT1/cmtt/m/n/10.95 z = sample(K,J,replace=TRUE) # randomly sample factor t
 o be loaded on for each real snp[] 
  []
 
 
-Overfull \hbox (29.8904pt too wide) in paragraph at lines 704--704
+Overfull \hbox (29.8904pt too wide) in paragraph at lines 760--760
 []  \OT1/cmtt/m/n/10.95 omega=abs(rnorm(J,mean=0,sd=betasd))##effect size varia
 nce can be big or small[] 
  []
 
-
-Overfull \hbox (35.63908pt too wide) in paragraph at lines 704--704
+[9]
+Overfull \hbox (35.63908pt too wide) in paragraph at lines 760--760
 []  \OT1/cmtt/m/n/10.95 sj=abs(matrix(rnorm(n*d,esd,0.001),ncol=d))##use unifor
 m to simulate 'shrunken'[] 
  []
 
 
-Overfull \hbox (288.58134pt too wide) in paragraph at lines 704--704
+Overfull \hbox (288.58134pt too wide) in paragraph at lines 760--760
 []  \OT1/cmtt/m/n/10.95 return(list(beta=beta,chat=chat,covmat=covmat,component
 s=z,factors=F,t=t,mumat=mumat,shat=sj,error=e,ceff=c,omega=omega))}}[] 
  []
 
-[9]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 722.
- [10]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 722.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 778.
+[10]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 778.
  (./MashNobase.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 722.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 722.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 778.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 778.
 Package rerunfilecheck Info: File `MashNobase.out' has not changed.
-(rerunfilecheck)             Checksum: 1FF38A6800A535EBCC9335333CA1E513;672.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 722.
+(rerunfilecheck)             Checksum: D645BA1BFCD8C75B99F9A2D2047E60D2;672.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 778.
  ) 
 Here is how much of TeX's memory you used:
- 6662 strings out of 493089
- 95719 string characters out of 6134842
- 187943 words of memory out of 5000000
- 10006 multiletter control sequences out of 15000+600000
+ 6668 strings out of 493089
+ 95782 string characters out of 6134842
+ 189048 words of memory out of 5000000
+ 10009 multiletter control sequences out of 15000+600000
  24785 words of font info for 93 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 29i,9n,31p,607b,525s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 29i,9n,31p,607b,505s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></
@@ -1040,10 +1025,10 @@ texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/te
 xlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/tex
 live/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texl
 ive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on MashNobase.pdf (10 pages, 203541 bytes).
+Output written on MashNobase.pdf (10 pages, 205683 bytes).
 PDF statistics:
- 218 PDF objects out of 1000 (max. 8388607)
- 187 compressed objects within 2 object streams
- 48 named destinations out of 1000 (max. 500000)
+ 223 PDF objects out of 1000 (max. 8388607)
+ 192 compressed objects within 2 object streams
+ 51 named destinations out of 1000 (max. 500000)
  97 words of extra memory for PDF output out of 10000 (max. 10000000)
 

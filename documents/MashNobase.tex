@@ -28,10 +28,12 @@
 \newcommand{\Lik}{{\mathcal{L}}} % symbol for likelihood
 \newcommand{\beff}{\bm{b}}
 \newcommand{\ceff}{\bm{C}}
+\newcommand{\onemat}{\bm{1}\bm{1}'}
 \newcommand{\chat}{\bm{\hat{C}}}
 \newcommand{\zhat}{\hat{Z}}
 \newcommand{\vb}{\bm{v}}
-\def\lstar{{\it L*}}
+%\def\lstar{{\it L*}}
+\def\lstar{\text{ L}}
 
 \def\lfsr{{\it lfsr}}
 \def\lfdr{{\it lfdr}}
@@ -148,6 +150,136 @@ L \chat &= L \vb + E \\
 Where $E \sim \Norm (0, L\hat{V} L')$
 
 
+
+
+
+\section{Likelihood with $\mnb$}
+
+With $\mnb$, we will replace the RxR matrix $L$ with the R-1xR matrix $\lstar$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
+
+Now for each gene J at each component k, integrating over $\vb$, 
+
+
+\begin{equation}
+\begin{aligned}
+\label{maxlike}
+$\lstar$ \ceff \sim \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
+$\lstar$ \chat \sim \Norm (0, $\lstar$  U_{k} $\lstar$ ' + $\lstar$ \hat{V} $\lstar$ ') 
+\end{aligned}
+\end{equation}
+
+
+And thus we can use the Bovy et al algorithm invoked in both the Extreme Deconvolution package and in `Sarah's MixEm' where according to Bovy's language we observe a noisy estimate of uncentered averages $\chat$ and can center them to and $w_{j} = $\lstar$ \chat_{j}$.
+
+Then we can apply Bovy:
+
+\begin{equation}
+\begin{aligned}
+%\Lik \pi
+\textbf{w} = $\lstar$ \chat \\
+\textbf{w} | \vb, \hat{V} \sim \Norm ($\lstar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
+  \vb | \bm{\pi},\bf{U} \sim \sum_{k,l} \pi_{k,l} \;{\it N}_R(\bm{0}, \omega_l U_{k})\\
+\end{aligned}
+\end{equation}
+%
+%
+%
+%Recall that our previous approach was simplified by the fact that $\bm{w}_{j}$ was simply $\hat{\bm{b}_{j}}$ and the projection matrix was simply the $I_{r}$ identity matrix. Our inference on $\bm{b}$ was analogous to their inference on $\vb_{j}$. 
+%
+
+As before, we are interested in returning the prior covariance $U_k$ matrices of the `true' deviations $\vb$ that maximizes (\ref{cdllone}):
+
+\begin{equation}
+\begin{aligned}
+L(\theta ) &:= p(\textbf{w} | \pi, V, U_k) \\
+ &= \prod_{j=1}^J p(\textbf{w}_j | \pi, V, U_k) \\
+%&= p(\hat{\bm{b}} | \bm{s},\bpi) \\
+%&= \prod_{j=1}^J \sum_{p}^{P} \pi_{p} P(\hat{\bm{b}}_{j} | \hat{\bm{s}}_{j}, z_{j}=p)\\
+&=  \prod_{j=1}^J \sum_{k}^{K} \pi_{k} {\it N}_R(\textbf{w}_j; \bm{0}, \lstar U_k \lstar '+ \lstar V_{j} \lstar ').\\
+\label{cdllone}
+\end{aligned}
+\end{equation}
+
+Identical to the framework in Bovy. 
+
+We will then rescale each of the $U_k$ by choosing a set of $\omega$ that are appropriate to $L \chat $ to comprise a set of $P = KxL$ prior covariance matrices $\Sigma$ that maximizes :
+
+\begin{equation}
+\begin{aligned}
+L(\pi) &:= p(\textbf{w} | \bpi, V, \Sigma  \\
+ &= \prod_{j=1}^J p(\textbf{w}_j | \pi, V, \Sigma ) \\
+%&= p(\hat{\bm{b}} | \bm{s},\bpi) \\
+%&= \prod_{j=1}^J \sum_{p}^{P} \pi_{p} P(\hat{\bm{b}}_{j} | \hat{\bm{s}}_{j}, z_{j}=p)\\
+&=  \prod_{j=1}^J \sum_{p}^{P} \pi_{p} {\it N}_R(\textbf{w}_j; \bm{0}, \lstar \Sigma_{p} \lstar '+ \lstar V_{j} \lstar ').
+\label{eq:cdll}
+\end{aligned}
+
+\end{equation}
+%
+%and choose the set of $\pi$ and covariance matrices $ that maximizes:
+%
+%
+%\begin{equation}
+%
+%\Lik 
+%\end{equation}
+We assemble a matrix of likelihoods that will compute the following likelihood at each of the P components: 
+
+\begin{equation}
+\begin{aligned}
+$\lstar$  \chat _j \sim \Norm (0, $\lstar$  \Sigma_{p} $\lstar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
+T_{jp} = $\lstar$ \Sigma_{p}  $\lstar$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
+$\lstar$  \chat _j  \sim \Norm (0, T_{jp} )
+\end{aligned}
+\end{equation}
+ 
+
+
+\section{Posteriors}
+
+Now, as before we can compute a posterior distribution such that:
+
+\begin{equation}
+\vb | \lstar \chat, \pi, \Sigma, \bm{s} \sim N(\mu^{1} , U^{1})
+\end{equation}
+
+Where at each of the P components for each gene J 
+
+\begin{equation}
+\begin{aligned}
+\mu^{1}_{jp} = \Sigma_{p} \lstar ' T_{jp}^{-1} \lstar  \chat_{j} \\
+U^{1}_{jp} = \Sigma_{p} - \Sigma_p \lstar ' T_{jp}^{-1} \lstar  \Sigma_{p}
+\end{aligned}
+\end{equation}
+
+Analogous to Bovy et al equation 13 and 14, because our $\vb_{jk}$ is centered at 0 (and so their $\bf{m}_j$ is effectively 0 for all components. 
+
+Our question is, if you were to add the matrix of 1s (i.e., $\onemat$ ) to each $\Sigma_p$,  $\mu^{1}_{jp}$ doesn't change. 
+
+\begin{equation}
+\begin{aligned}
+\mu^{1}_{jp} ( \Sigma_p ) = \Sigma_{p} \lstar ' T_{jp}^{-1} \lstar  \chat_{j} \\
+\mu^{1}_{jp} ( \Sigma_p + \onemat) = \Sigma_{p} \lstar ' T_{jp}^{-1} \lstar  \chat_{j} +  \onemat \lstar ' T_{jp}^{-1} \lstar  \chat_{j}  \\
+\mu^{1}_{jp} ( \Sigma_p + \onemat) = \Sigma_{p} \lstar ' T_{jp}^{-1} \lstar  \chat_{j} +  \bm{0}' T_{jp}^{-1} \lstar  \chat_{j}  \\
+\mu^{1}_{jp} ( \Sigma_p + \onemat) = \Sigma_{p} \lstar ' T_{jp}^{-1} \lstar  \chat_{j}  \\
+\end{aligned}
+\end{equation}
+
+
+And thus we see that $\mu^{1}_{jp} ( \Sigma_p ) =  mu^{1}_{jp} ( \Sigma_p + \onemat)$ if the projection matrix is equal to the centering matrix $\lstar$. But this result seems strange!
+
+\subsection{Selecting The Covariance Matrices}
+
+We initiate our set of covariance matrices for the denoising step as before in $\mash$, where now we compute the empirical covariance matrices and a variety of dimensional reductions on the feature-centered JxR \textit{matrix} of maximum average, $L \hat{C}' $ instead of $\hat{C}$ alone. In practice, we actually use the matrix of maximum uncentered $T$ statistics. Three critical things to note:
+
+\begin{enumerate}
+\item Here, L will be $RxR$ because we need $U_{k}$ to be RxR
+\item When denoising with Bovy, our previous approach used the matrix of maximum $T$ statistics $T_{Mxr}$ to both initialize and train the BovyEM. Now, we will initalize with the MXR matrix of t($L_{R,R}T')$ (or alternatively, $TL$) and train the EM on the MxR-1 matrix of maximum $t($\lstar$T')$
+\item When choosing $\omega$, we will use the diagonal of $L V L'$, where $V$ is $D(s.j^2)$, and select from the MxR matrix of centered T statistics and their centered standard errors.
+\item We will choose the maxes as those that have a maximum centered t statistic of at least some threshold in at least one (or averaged across tissues) rather than those that satisfy an ash criteria in at least one tissue because we know that choosing uncorrelated $L V L'$ as the standard errors with which to input to ash  is incorrect.
+\end{enumerate}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Previous Model}
 
@@ -182,82 +314,6 @@ Using old mash, we assume that the mean centered estimates directly approximate 
 
 We want to estimate effects with no baseline, such that null effects aren't forced to be negative (by a competitive default, given that non-null effects are seen as positive, or vice versa). We hope that this method will simply shrink null effects to zero and recognize the direction of the non-null effects, instead of making both null and non-null positive (negative) relative to some intermediate average.
 
-
-\subsection{Selecting The Covariance Matrices}
-
-We initiate our set of covariance matrices for the denoising step as before in $\mash$, where now we compute the empirical covariance matrices and a variety of dimensional reductions on the feature-centered JxR \textit{matrix} of maximum average, $L \hat{C}' $ instead of $\hat{C}$ alone. In practice, we actually use the matrix of maximum uncentered $T$ statistics. Three critical things to note:
-
-\begin{enumerate}
-\item Here, L will be $RxR$ because we need $U_{k}$ to be RxR
-\item When denoising with Bovy, our previous approach used the matrix of maximum $T$ statistics $T_{Mxr}$ to both initialize and train the BovyEM. Now, we will initalize with the MXR matrix of t($L_{R,R}T')$ (or alternatively, $TL$) and train the EM on the MxR-1 matrix of maximum $t($\lstar$T')$
-\item When choosing $\omega$, we will use the diagonal of $L V L'$, where $V$ is $D(s.j^2)$, and select from the MxR matrix of centered T statistics and their centered standard errors.
-\item We will choose the maxes as those that have a maximum centered t statistic of at least some threshold in at least one (or averaged across tissues) rather than those that satisfy an ash criteria in at least one tissue because we know that choosing uncorrelated $L V L'$ as the standard errors with which to input to ash  is incorrect.
-\end{enumerate}
-
-
-\section{Likelihood with $\mnb$}
-
-With $\mnb$, we will replace the RxR matrix $L$ with the R-1xR matrix $\lstar$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
-
-Now for each gene J at each component k, integrating over $\vb$, 
-
-
-\begin{equation}
-\begin{aligned}
-\label{maxlike}
-$\lstar$ \ceff \sim \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
-$\lstar$ \chat \sim \Norm (0, $\lstar$  U_{k} $\lstar$ ' + $\lstar$ \hat{V} $\lstar$ ') 
-\end{aligned}
-\end{equation}
-
-
-And thus we can use the Bovy et al algorithm invoked in both the Extreme Deconvolution package and in `Sarah's MixEm' where according to Bovy's language.
-
-For each gene, and $w_{j} = $\lstar$ \chat_{j}$.
-
-\begin{equation}
-\begin{aligned}
-\textbf{w} = $\lstar$ \chat \\
-\textbf{w} \sim \Norm (0, $\lstar$ \vb) \\
-  \vb | \bm{\pi},\bf{U} \sim \sum_{k,l} \pi_{k,l} \;{\it N}_R(\bm{0}, \omega_l U_{k})\\
-\end{aligned}
-\end{equation}
-
-
-
-Recall that our previous approach was simplified by the fact that $\bm{w}_{j}$ was simply $\hat{\bm{b}_{j}}$ and the projection matrix was simply the $I_{r}$ identity matrix. Our inference on $\bm{b}$ was analogous to their inference on $\vb_{j}$. 
-
-
-As before, we are interested in returning the prior covariance $U_k$ matrices of the `true` deviations $\vb$, which we will then rescale by choosing a set of $\omega$ that are appropriate to $L \chat $ to comprise a set of $P = KxL$ prior covariance matrices $\Sigma$.
-
-and choose the set of $\pi$ that maximizes compute the following likelihood at each of the P components: 
-
-\begin{equation}
-\begin{aligned}
-$\lstar$  \chat _j \sim \Norm (0, $\lstar$  \Sigma_{p} $\lstar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
-T_{jp} = $\lstar$ U_k $\lstar$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
-$\lstar$  \chat _j  \sim \Norm (0, T_{jp} )
-\end{aligned}
-\end{equation}
- 
-
-
-\section{Posteriors}
-
-Now, as before we can compute a posterior distribution such that:
-
-\begin{equation}
-\vb | $\lstar$  \chat, \pi, \Sigma, \bm{s} \sim N(\mu^{1} , U^{1})
-\end{equation}
-
-Where at each of the P components for each gene J 
-
-\begin{equation}
-\begin{aligned}
-\mu^{1}_{jp} = \Sigma_{p} $\lstar$ ' T_{jp}^{-1} $\lstar$  \chat_{j} \\
-U^{1}_{jp} = \Sigma_{p} - \Sigma_p $\lstar$ ' T_{jp}^{-1} $\lstar$  \Sigma_{p}
-\end{aligned}
-\end{equation}
 
 %In our old code, L was just the identity:
 %

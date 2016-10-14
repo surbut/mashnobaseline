@@ -1,11 +1,11 @@
 \BOOKMARK [1][-]{section.1}{Purpose}{}% 1
 \BOOKMARK [1][-]{section.2}{Defining the Model}{}% 2
 \BOOKMARK [1][-]{section.3}{Applications}{}% 3
-\BOOKMARK [1][-]{section.4}{Previous Model}{}% 4
-\BOOKMARK [1][-]{section.5}{Comparing Models}{}% 5
+\BOOKMARK [1][-]{section.4}{Likelihood with mashnobaseline}{}% 4
+\BOOKMARK [1][-]{section.5}{Posteriors}{}% 5
 \BOOKMARK [2][-]{subsection.5.1}{Selecting The Covariance Matrices}{section.5}% 6
-\BOOKMARK [1][-]{section.6}{Likelihood with mashnobaseline}{}% 7
-\BOOKMARK [1][-]{section.7}{Posteriors}{}% 8
+\BOOKMARK [1][-]{section.6}{Previous Model}{}% 7
+\BOOKMARK [1][-]{section.7}{Comparing Models}{}% 8
 \BOOKMARK [1][-]{section.8}{Differences required over mash implementation}{}% 9
 \BOOKMARK [1][-]{section.9}{ mash implementation}{}% 10
 \BOOKMARK [1][-]{section.10}{Simulation}{}% 11
