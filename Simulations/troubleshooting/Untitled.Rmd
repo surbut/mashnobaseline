@@ -1,0 +1,211 @@
+---
+title: "troubleshooting"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library('knitr')
+knitr::opts_chunk$set(cache=TRUE)
+```
+
+```{r}
+rm(list=ls())
+library('mash')
+library("ExtremeDeconvolution")
+c=readRDS("chatfixedomega.rds")
+
+t=c$t;b=c$chat;se=c$shat;R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+wfull=t(L%*%t(b))
+##show that they sum to 0
+
+#plot(rowSums(wfull),ylim=c(-1,1))
+```
+
+Now we proceed as in mash, selecting the strong t statistics:
+```{r}
+
+s.j=se/se
+absmat=abs(t(L%*%t(c$t)))
+
+
+index=which(rowSums(absmat>4)>0)
+length(index)
+mean(index<1000)
+
+factor.mat=as.matrix(read.table("sparseF_F.out"))
+lambda.mat=as.matrix(read.table("sparseF_lambda.out"))
+
+
+
+strongprojectedtsimulations=t(L%*%t(t[index,]))
+set.seed(123)
+max.step=deconvolution.em.with.bovy(t.stat = strongprojectedtsimulations,factor.mat = factor.mat,v.j = s.j,lambda.mat = lambda.mat,K = 3,P = 3 )
+
+##Show how the ranks is preserved
+apply(max.step$true.covs,1,function(x){qr(x)$rank})
+
+
+covmash=compute.hm.covmat.all.max.step(max.step = max.step,b.hat = wfull,se.hat = se,t.stat = strongprojectedtsimulations,Q = 5,lambda.mat = lambda.mat,A = "sparseoldmash",factor.mat = factor.mat,zero = T,power = 2)$covmat
+
+all.equal(covmash[[2]]/max(diag(covmash[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
+all.equal(covmash[[3]]/max(diag(covmash[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
+all.equal(covmash[[9]]/max(diag(covmash[[9]])),max.step$true.covs[2,,]/max(diag(max.step$true.covs[2,,])))
+
+```
+
+Now, proceed as always, estimating likelihood and computing posteriors.
+
+```{r mashmethod, eval=T}
+A="sparseoldmash"
+compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covmash,A=A,pen=1)
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+rm(list=ls())
+c=readRDS("chatfixedomega.rds")
+
+t=c$t;b=c$chat;se=c$shat;R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+wfull=t(L%*%t(b))
+##show that they sum to 0
+
+#plot(rowSums(wfull),ylim=c(-1,1))
+```
+
+Now we proceed as in mash, selecting the strong t statistics:
+```{r}
+
+s.j=se/se
+absmat=abs(t(L%*%t(c$t)))
+
+
+index=which(rowSums(absmat>4)>0)
+length(index)
+mean(index<1000)
+
+factor.mat=as.matrix(read.table("sparseF_F.out"))
+lambda.mat=as.matrix(read.table("sparseF_lambda.out"))
+
+
+
+strongprojectedtsimulations=t(L%*%t(t[index,]))
+set.seed(123)
+ms=deconvolution.em.with.bovy(t.stat = strongprojectedtsimulations,factor.mat = factor.mat,v.j = s.j,lambda.mat = lambda.mat,K = 3,P = 3 )
+
+##Show how the ranks is preserved
+apply(max.step$true.covs,1,function(x){qr(x)$rank})
+
+###but show how Bovy not consistent
+
+all.equal(max.step,ms)
+identical(max.step,ms)
+
+#covmash=compute.hm.covmat.all.max.step(max.step = max.step,b.hat = wfull,se.hat = se,t.stat = strongprojectedtsimulations,Q = 5,lambda.mat = lambda.mat,A = "sparseoldmashtwo",factor.mat = factor.mat,zero = T,power = 2)$covmat
+
+covmash=readRDS("covmatsparseoldmash.rds")
+
+```
+
+Now, proceed as always, estimating likelihood and computing posteriors.
+
+```{r mashmethodtwo, eval=T}
+
+A="sparseoldmashtwo"
+compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covmash,A=A,pen=1)
+```
+
+```{r mashmethodtwothree, eval=F}
+likone=readRDS("liketrainsparseoldmash.rds")
+liketwo=readRDS("liketrainsparseoldmashtwo.rds")
+pisone=readRDS("pissparseoldmash.rds")$pihat
+pistwo=readRDS("pissparseoldmashtwo.rds")$pihat
+all.equal(likone,liketwo)
+all.equal(pisone,pistwo)
+```
+
+
+Let's test the stability of mixEM:
+
+```{r}
+
+likone=readRDS("liketrainsparseoldmash.rds")
+liketwo=readRDS("liketrainsparseoldmashtwo.rds")
+
+
+pisone=readRDS("pissparseoldmash.rds")$pihat
+pistwo=readRDS("pissparseoldmashtwo.rds")$pihat
+all.equal(likone,liketwo)
+all.equal(pisone,pistwo)
+train=t(apply(likone,1,function(x){
+    e=exp(x-max(x))
+    return(e)}
+  ))
+
+pen=1
+
+pisone=mixEM(matrix_lik=train,prior=c(rep(1,ncol(train)-1),pen))
+saveRDS(pisone,"pisone.rds")
+
+
+rm(train)
+
+train=t(apply(liketwo,1,function(x){
+    e=exp(x-max(x))
+    return(e)}
+  ))
+
+pen=1
+pistwo=mixEM(matrix_lik=train,prior=c(rep(1,ncol(train)-1),pen))
+saveRDS(pistwo,"pistwo.rds")
+all.equal(pisone,pistwo)
+```
+
+Ahh, but if we look at the likelihoods they are all equal but not identical!
+
+```{r}
+all.equal(likone,liketwo)
+identical(likone,liketwo)
+```
+
+Show that this occurs in Bovy's e step, not in any of the other steps in deconvolution.em.with.Bovy
+
+```{r}
+t.stat = strongprojectedtsimulations;factor.mat = factor.mat;v.j = s.j;lambda.mat = lambda.mat;K = 3;P = 3
+
+R=ncol(t.stat)
+
+init.cov=init.covmat(t.stat=t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,K=K,P=P)
+init.cov.list=list()
+for(i in 1:K){init.cov.list[[i]]=init.cov[i,,]}
+
+
+init.cov2=init.covmat(t.stat=t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,K=K,P=P)
+init.cov.list2=list()
+for(i in 1:K){init.cov.list2[[i]]=init.cov2[i,,]}
+all.equal(init.cov.list,init.cov.list2)
+identical(init.cov.list,init.cov.list2)
+
+
+mean.mat=matrix(rep(0,ncol(t.stat)*nrow(t.stat)),ncol=ncol(t.stat),nrow=nrow(t.stat))
+ydata=  t.stat
+xamp= rep(1/K,K)
+xcovar= init.cov.list
+fixmean= TRUE
+ycovar=  v.j
+xmean=   mean.mat
+projection= list();for(l in 1:nrow(t.stat)){projection[[l]]=diag(1,R)}
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+true.covs=array(dim=c(K,R,R))
+for(i in 1:K){true.covs[i,,]=e$xcovar[[i]]}
+
+
+###run again##
+
+e2=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+true.covs2=array(dim=c(K,R,R))
+for(i in 1:K){true.covs2[i,,]=e2$xcovar[[i]]}
+all.equal(true.covs,true.covs2)
+identical(true.covs,true.covs2)

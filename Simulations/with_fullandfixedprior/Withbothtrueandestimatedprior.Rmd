@@ -15,6 +15,7 @@ Let's simulate data with one covariance matrix, and $\omega$ fixed at 2.
 We can have a look at the them first:
 
 ```{r}
+
 rm(list=ls())
 library('mash')
 set.seed(123)
@@ -83,6 +84,49 @@ dim(sjmat)
 
 ```
 
+```{r}
+w=data.frame(wfull)[,-1]
+```
+
+Compute the likelihood without ED:
+```{r}
+A="noedcovsparse"
+noedcov=compute.covmat(b.gp.hat = wfull,sebetahat = sjmat,Q = 5,t.stat = strongprojectedt,lambda.mat = lambda.mat,P = 3,A = "noedcovsparse",factor.mat = factor.mat,bma = T,zero = T,power = 2)$cov
+```
+Check that all the matrices are correctly computed:
+```{r,eval=T}
+pca=svd(strongprojectedt);v=pca$v[,1:3];d=pca$d[1:3];u=pca$u[,1:3]
+pcaprox=t(u%*%diag(d)%*%t(v))%*%(u%*%diag(d)%*%t(v))/max(diag(t(u%*%diag(d)%*%t(v))%*%(u%*%diag(d)%*%t(v))))
+
+
+P=3;X.c=apply(strongprojectedt,2,function(x) x-mean(x)) ##Column centered matrix of t statistics
+svd.X=svd(X.c)
+M=nrow(X.c)
+v=svd.X$v;u=svd.X$u;d=svd.X$d
+cov.pc=1/M*v[,1:P]%*%diag(d[1:P])%*%t(u[,1:P])%*%t(v[,1:P]%*%diag(d[1:P])%*%t(u[,1:P]))
+
+for(q in 1:5){
+load=as.matrix(lambda.mat[,q])
+fact=as.matrix(factor.mat[q,])
+rank.prox=load%*%t(fact)
+a=(1/(M-1)*(t(rank.prox)%*% rank.prox))/max(diag((1/(M-1)*(t(rank.prox)%*% rank.prox))))
+print(all.equal(as.numeric(a),as.numeric(noedcov[[3+q]]/max(diag(noedcov[[3+q]])))))}
+
+load=as.matrix(lambda.mat)
+fact=as.matrix(factor.mat)
+rank.prox=load%*%(fact)
+a=(1/(M-1)*(t(rank.prox)%*% rank.prox))/max(diag((1/(M-1)*(t(rank.prox)%*% rank.prox))))
+all.equal(as.numeric(a),as.numeric(noedcov[[9]]/max(diag(noedcov[[9]]))))
+
+all.equal(cov(strongprojectedt)/max(diag(cov(strongprojectedt))),noedcov[[2]]/max(diag(noedcov[[2]])))
+all.equal(as.numeric(cov.pc)/max(diag(cov.pc)),as.numeric(noedcov[[3]]/max(diag(noedcov[[3]]))))
+
+```
+
+$$Likelihood$$
+
+Now we will replace the RxR matrix $L$ with the $R-1xR$ matrix $L∗$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
+
 \section{Likelihood}
 
 Now we will replace the RxR matrix $L$ with the R-1xR matrix $L*$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
@@ -111,50 +155,22 @@ and choose the set of $\pi$ that maximizes compute the following likelihood at e
 
 
 $$L_{R-1,R}  chat _j \sim N (0, L_{R-1,R}  \Sigma_{p} L_{R-1,R} ' + L_{R-1,R} \hat{V_j} L_{R-1,R} ') $$
-
+ 
+Now compute likelihood without ED:
 ```{r}
 w=data.frame(wfull)[,-1]
+
+A="noedcovsparse"
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = noedcov,A,pen = 1,L = L[-1,])
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+likmat=readRDS(paste0("liketrain",A,".rds"))
+test=exp(likmat)
+sum(log(test%*%pis))
 ```
 
 
-Now run with ED to show that 
-1) the likelihood improves
-2) we have successfully implemented an approach which allows us to input a list of residual variance matrices (as opposed to a matrix of vectors to be diagonalised).
 
-
-
-\section{Likelihood}
-
-Now we will replace the RxR matrix $L$ with the R-1xR matrix $L*$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of $w$ is guaranteed to be equal to the dimension of $w$.
-
-Now for each gene J at each component k, integrating over $\beta$, 
-
-
-
-$$L_{R-1,R} ceff \sim N (0, L_{R-1,R} U_{k} L_{R-1,R} ') $$
-$$L_{R-1,R} chat \sim N (0, L_{R-1,R}  U_{k} L_{R-1,R} ' + L_{R-1,R} \hat{V} L_{R-1,R} ')$$ 
-
-And thus we can use the Bovy et al algorithm invoked in both the Extreme Deconvolution package and in `Sarah's MixEm' where the marginal variance at each component, $T_{jp}$:
-
-
-$$T_{jp} = L_{R-1,R} U_k L_{R-1,R}' + L_{R-1,R} \hat{V}_{j} L_{R-1,R}'$$
-
-
-For each gene, and $w_{j} = L_{R-1,R} chat_{j}$.
-
-Recall that our previous approach was simplified by the fact that ${w}_{j}$ was simply $\hat{{b}_{j}}$ and the projection matrix was simply the $I_{r}$ identity matrix. Our inference on ${b}$ was analogous to their inference on $\beta_{j}$. 
-
-
-As before, we are interested in returning the prior covariance $U_k$ matrices of the `true` deviations $\beta$, which we will then rescale by choosing a set of $\omega$ that are appropriate to $L chat $ to comprise a set of $P = KxL$ prior covariance matrices $\Sigma$.
-
-and choose the set of $\pi$ that maximizes compute the following likelihood at each of the P components: 
-
-
-$$L_{R-1,R}  chat _j \sim N (0, L_{R-1,R}  \Sigma_{p} L_{R-1,R} ' + L_{R-1,R} \hat{V_j} L_{R-1,R} ') $$
-
-```{r}
-w=data.frame(wfull)[,-1]
-```
 
 
 Now run with ED to show that 
@@ -175,14 +191,23 @@ A="sparseLwithED"
 apply(efunc$true.covs,1,function(x){qr(x)$rank})
 
 max.step=efunc
-edcov=compute.hm.covmat.all.max.step(b.hat = wfull,se.hat = sjmat,t.stat = strongprojectedt,Q = 5,lambda.mat = lambda.mat,A=A,factor.mat = factor.mat,max.step = efunc,zero = T,power = 2)$cov
+edcov=compute.hm.covmat.all.max.step.withQ(b.hat = wfull,se.hat = sjmat,t.stat = strongprojectedt,Q = 5,lambda.mat = lambda.mat,A=A,factor.mat = factor.mat,max.step = efunc,zero = T,power = 2)$cov
+
+
 length(edcov)
 
 all.equal(edcov[[2]]/max(diag(edcov[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
 all.equal(edcov[[3]]/max(diag(edcov[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
+all.equal(edcov[[4]]/max(diag(edcov[[4]])),max.step$true.covs[4,,]/max(diag(max.step$true.covs[4,,])))
+all.equal(edcov[[5]]/max(diag(edcov[[5]])),max.step$true.covs[5,,]/max(diag(max.step$true.covs[5,,])))
+all.equal(edcov[[6]]/max(diag(edcov[[6]])),max.step$true.covs[6,,]/max(diag(max.step$true.covs[6,,])))
+all.equal(edcov[[7]]/max(diag(edcov[[7]])),max.step$true.covs[7,,]/max(diag(max.step$true.covs[7,,])))
+all.equal(edcov[[8]]/max(diag(edcov[[8]])),max.step$true.covs[8,,]/max(diag(max.step$true.covs[8,,])))
 all.equal(edcov[[9]]/max(diag(edcov[[9]])),max.step$true.covs[2,,]/max(diag(max.step$true.covs[2,,])))
 
 ```
+
+Now let's compute the likelihood with ED:
 
 ```{r eval=T}
 w=data.frame(wfull)[,-1]
@@ -200,6 +225,37 @@ total.quant.per.snp.no.baseline(j = j,covmat = edcov,b.gp.hat = w,se.gp.hat = se
 ```
 
 
+##Test to show our calculations are accurate:
+```{r,eval=T,echo=T}
+mash.means=as.matrix(read.table("sparseLwithEDposterior.means.txt")[,-1])
+lfsr.mash=as.matrix(read.table("sparseLwithEDlfsr.txt"))[,-1]
+edcov=readRDS("covmatsparseLwithED.rds")
+j=10
+arrays=post.array.per.snp.no.baseline(j = 10,covmat = edcov,b.gp.hat = w,se.gp.hat = se,L = L[-1,])
+k=5
+
+V.gp.hat=diag(se[j,])^2
+
+b.mle = as.vector(w[j,])
+
+LSigL=L[-1,]%*%edcov[[k]]%*%t(L[-1,])
+LVL=L[-1,]%*%V.gp.hat%*%t(L[-1,])
+
+LSigL_list=lapply(edcov,function(x){L[-1,]%*%x%*%t(L[-1,])})
+identical(LSigL_list[[k]],LSigL)
+identical(as.numeric(arrays$post.means[k,]),as.numeric(post.mean.with.proj(b.mle = t(b.mle),tinv = solve(LVL+L[-1,]%*%edcov[[k]]%*%t(L[-1,])),U.k = edcov[[k]],L = L[-1,])))
+identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(tinv = solve(LVL+L[-1,]%*%edcov[[k]]%*%t(L[-1,])),U.k = edcov[[k]],L = L[-1,]))))
+
+log.lik.snp=log.lik.func(b.mle,LVL,LSigL_list)
+log.lik.minus.max=log.lik.snp-max(log.lik.snp)
+pis=readRDS("pissparseLwithED.rds")$pihat
+exp.vec=exp(log.lik.minus.max)
+post.weights=t(exp.vec*pis/sum(exp.vec*pis))
+
+all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(mash.means[j,]))
+```
+
+
 
 
 ###Compare with MASH##
@@ -214,7 +270,7 @@ and $$E \sim N(0,V)$$
 while $$\beta  ~ \sum_{p} \pi_{p} N(0, U_{p})$$
 ```{r}
 rm(list=ls())
-c=readRDS("chatfixedomega.rds.rds")
+c=readRDS("chatfixedomega.rds")
 
 t=c$t;b=c$chat;se=c$shat;R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
@@ -274,7 +330,7 @@ weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covma
 ```{r}
 pis=readRDS("pissparseoldmash.rds")$pihat
 pi.mat.old.mash=matrix(pis[-length(pis)],ncol=18,byrow=TRUE)
-pisnobase=readRDS("pissparseL.rds")$pihat
+pisnobase=readRDS("pissparseLwithED.rds")$pihat
 pi.mat.nobase=matrix(pisnobase[-length(pisnobase)],ncol=18,byrow=TRUE)
 par(mfrow=c(1,2))
 barplot(colSums(pi.mat.old.mash),main="OldMash",names=c("ID",rep(paste0("Uk",(2:9))),rep(paste0("bma",(1:8))),"ALL"),las=2)
@@ -287,12 +343,12 @@ Let's look at the 'learned' covariance matrix of each as well as the true covari
 
 ```{r}
 c=readRDS("chatfixedomega.rds")
-t(sapply(c$covmat,function(x){diag(x)}))
+diag(c$covmat)
 ```
 
 ```{r}
 covmash=readRDS("covmatsparseoldmash.rds")
-coved=readRDS("covmatsparseL.rds")
+coved=readRDS("covmatsparseLwithED.rds")
 library('gplots')
 library('colorRamps')
 
@@ -317,7 +373,7 @@ lfsr.mash=as.matrix(read.table("sparseoldmashlfsr.txt"))[,-1]
 cov=readRDS("covmatsparseoldmash.rds")
 pis=readRDS("pissparseoldmash.rds")$pihat
 pi.mat.old.mash=matrix(pis[-length(pis)],ncol=18,byrow=TRUE)
-pisnobase=readRDS("pissparseL.rds")$pihat
+pisnobase=readRDS("pissparseLwithED.rds")$pihat
 pi.mat.nobase=matrix(pisnobase[-length(pisnobase)],ncol=18,byrow=TRUE)
 barplot(colSums(pi.mat.old.mash))
 barplot(colSums(pi.mat.nobase))
@@ -377,7 +433,7 @@ Compare RMSE:
 mle=as.matrix(wfull)
 beta=as.matrix(c$beta)
 
-mash.nobaselinemeans=as.matrix(read.table("sparseLposterior.means.txt")[,-1])
+mash.nobaselinemeans=as.matrix(read.table("sparseLwithEDposterior.means.txt")[,-1])
 mash.means=as.matrix(read.table("sparseoldmashposterior.means.txt")[,-1])
 
 standard=sqrt(mean((beta-mle)^2))
@@ -397,7 +453,7 @@ Now, let's try this with the true prior. Here, we use the covariance matrices th
 rm(list=ls())
 library('mash')
 
-readRDS(c,"chatfixedomega.rds")
+c=readRDS("chatfixedomega.rds")
 diag(c$covmat)
 
 t=c$t;b=c$chat;se=c$shat
