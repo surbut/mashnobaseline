@@ -20,7 +20,6 @@ Let's simulate data with one covariance matrix, and $\omega$ fixed at 2. We will
 We can have a look at the them first:
 
 ```{r}
-
 rm(list=ls())
 library('mash')
 set.seed(123)
