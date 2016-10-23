@@ -453,8 +453,13 @@ pi.mat.old.mash=matrix(pis[-length(pis)],ncol=18,byrow=TRUE)
 pisnobase=readRDS(&quot;pissparseLwithED.rds&quot;)$pihat
 pi.mat.nobase=matrix(pisnobase[-length(pisnobase)],ncol=18,byrow=TRUE)
 
-library('gplots')
-library('colorRamps')
+library('gplots')</code></pre>
+<pre><code>## 
+## Attaching package: 'gplots'</code></pre>
+<pre><code>## The following object is masked from 'package:stats':
+## 
+##     lowess</code></pre>
+<pre class="r"><code>library('colorRamps')
 
 for(i in 2:9){
   x=covmash[[i]]
