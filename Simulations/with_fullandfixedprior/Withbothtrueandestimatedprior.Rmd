@@ -12,7 +12,7 @@ knitr::opts_chunk$set(cache=TRUE)
 
 
 Let's simulate data with one covariance matrix, and $\omega$ fixed at 2.
-We can have a look at the them first:
+We can have a look at the them first. Here, for the inference we will still scale by all the $\omegas$ and later, we will compare with the estimates that come from using the true prior in both MASH and MASHNobasline.
 
 ```{r}
 

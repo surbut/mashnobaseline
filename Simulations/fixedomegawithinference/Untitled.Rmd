@@ -1,9 +1,4 @@
----
-title: "Untitled"
-output: html_document
----
 
----
 title: "withtruthandbigomega"
 output: html_document
 ---
@@ -16,7 +11,8 @@ knitr::opts_chunk$set(cache=TRUE)
 ```
 
 
-Let's simulate data with one covariance matrix, and $\omega$ fixed at 2. We will also use only one $\omega$ in our inference matrices. 
+Let's simulate data with one covariance matrix, and $\omega$ fixed at 2. We will also use only one $\omega$ in our inference matrices. The purpose of this document was to test the ability of `mash` and `mashnobaseline` to infer the truth when there was only one $\omega$ to complicate things, so that the 'shrinkage' was not an issue. You can see the inferred covariance matrices are shorter.
+
 We can have a look at the them first:
 
 ```{r}
@@ -313,6 +309,8 @@ apply(max.step$true.covs,1,function(x){qr(x)$rank})
 A="sparseoldmash"
 
 covmash=compute.hm.mash.covmat.all.max.step.fixed.omega(omega = 2,Q = 5,lambda.mat = lambda.mat,factor.mat = factor.mat,max.step = max.step,zero = TRUE,power = 2,A,bma = TRUE)$cov
+
+sapply(covmash,max)
 
 all.equal(covmash[[2]]/max(diag(covmash[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
 all.equal(covmash[[3]]/max(diag(covmash[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
