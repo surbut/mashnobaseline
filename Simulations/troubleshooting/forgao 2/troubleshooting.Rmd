@@ -1,0 +1,129 @@
+---
+title: "troubleshooting"
+output: html_document
+---
+
+The purpose of this document is to demonstrate why, when applying _mash_ to mean-centered data, Bovy is not stable (i.e., the estimates of the 'denoised' covariance matrices are not reproducible) and thus produce slightly different ultimate covariance matrices for assembly and corresponding likelihood matrix and estimated weights $\hat{\pi}$.
+
+```{r setup, include=FALSE}
+library('knitr')
+knitr::opts_chunk$set(cache=TRUE)
+```
+
+```{r}
+rm(list=ls())
+library('mash')
+library("ExtremeDeconvolution")
+c=readRDS("chatfixedomega.rds")
+
+c=readRDS("chatfixedomega.rds")
+
+t=c$t;b=c$chat;se=c$shat;R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+wfull=t(L%*%t(b))
+##show that they sum to 0
+
+#plot(rowSums(wfull),ylim=c(-1,1))
+```
+
+Now we proceed as in mash, selecting the strong t statistics:
+```{r}
+
+s.j=se/se
+absmat=abs(t(L%*%t(c$t)))
+
+
+index=which(rowSums(absmat>4)>0)
+length(index)
+mean(index<1000)
+
+factor.mat=as.matrix(read.table("sparseF_F.out"))
+lambda.mat=as.matrix(read.table("sparseF_lambda.out"))
+strongprojectedtsimulations=t(L%*%t(t[index,]))
+
+set.seed(123)
+max.step=deconvolution.em.with.bovy(t.stat = strongprojectedtsimulations,factor.mat = factor.mat,v.j = s.j,lambda.mat = lambda.mat,K = 3,P = 3 )
+set.seed(123)
+ms=deconvolution.em.with.bovy(t.stat = strongprojectedtsimulations,factor.mat = factor.mat,v.j = s.j,lambda.mat = lambda.mat,K = 3,P = 3 )
+
+##Show how the ranks is preserved
+apply(ms$true.covs,1,function(x){qr(x)$rank})
+
+###but show how Bovy not consistent
+
+all.equal(max.step,ms)
+identical(max.step,ms)
+```
+
+
+Show that this occurs in Bovy's e step, not in any of the other steps in deconvolution.em.with.Bovy. First, I show that my initialized covariance matrices (the first step in my `deconvolution.em.with.bovy` code, are identical on repetition:
+
+```{r}
+t.stat = strongprojectedtsimulations;factor.mat = factor.mat;v.j = s.j;lambda.mat = lambda.mat;K = 3;P = 3
+
+R=ncol(t.stat)
+
+init.cov=init.covmat(t.stat=t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,K=K,P=P)
+init.cov.list=list()
+for(i in 1:K){init.cov.list[[i]]=init.cov[i,,]}
+
+
+init.cov2=init.covmat(t.stat=t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,K=K,P=P)
+init.cov.list2=list()
+for(i in 1:K){init.cov.list2[[i]]=init.cov2[i,,]}
+all.equal(init.cov.list,init.cov.list2)
+identical(init.cov.list,init.cov.list2)
+```
+
+Now, let's use the crux of `deconvolution.em.with.bovy` and initialise the extreme_deconvolution function:
+```{r,initializefunction}
+
+mean.mat=matrix(rep(0,ncol(t.stat)*nrow(t.stat)),ncol=ncol(t.stat),nrow=nrow(t.stat))
+ydata=  t.stat
+xamp= rep(1/K,K)
+xcovar= init.cov.list
+fixmean= TRUE
+ycovar=  v.j
+xmean=   mean.mat
+projection= list();for(l in 1:nrow(t.stat)){projection[[l]]=diag(1,R)}
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+true.covs=array(dim=c(K,R,R))
+for(i in 1:K){true.covs[i,,]=e$xcovar[[i]]}
+
+
+###run again##
+
+e2=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+
+all.equal(e,e2)
+identical(e,e2)
+```
+
+When things are `equal` but not `identical` the likelihoods corresponding to these covariance matrices and corresponding `\pis` will be different:
+
+####Let's show that this cannot be resolved by setting a seed:
+```{r,seedextreme}
+set.seed(1)
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+set.seed(2)
+e2=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+identical(e,e2)
+```
+
+Thankfully, this is not a problem with `mashnobaseline`, perhaps because we account for degeneracy by removing the Rth dimension of w:
+```{r}
+
+lvllist=genlvllist(s.j[index,],L = L[-1,])
+##w should represent transformed betahats using all R subgroups and j genes
+wfull=t(L%*%t(b))
+sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
+dim(wfull)
+dim(sjmat)
+
+
+efunc=deconvolution.em.with.bovy.with.L(t.stat = strongprojectedtsimulations,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvllist,P = 3,L = L[-1,],Q = 5,w = strongprojectedtsimulations[,-1])
+efunc2=deconvolution.em.with.bovy.with.L(t.stat = strongprojectedtsimulations,factor.mat = factor.mat,lambda.mat = lambda.mat,v.j = lvllist,P = 3,L = L[-1,],Q = 5,w = strongprojectedtsimulations[,-1])
+
+all.equal(efunc,efunc2)
+identical(efunc,efunc2)
+```

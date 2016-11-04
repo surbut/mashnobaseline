@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  2 NOV 2016 12:43
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  4 NOV 2016 14:29
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -283,20 +283,20 @@ Package: parskip 2001/04/09 non-zero parskip adjustments
 (./MashNobase.aux)
 \openout1 = `MashNobase.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 61.
-LaTeX Font Info:    ... okay on input line 61.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 61.
-LaTeX Font Info:    ... okay on input line 61.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 61.
-LaTeX Font Info:    ... okay on input line 61.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 61.
-LaTeX Font Info:    ... okay on input line 61.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 61.
-LaTeX Font Info:    ... okay on input line 61.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 61.
-LaTeX Font Info:    ... okay on input line 61.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 61.
-LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -361,7 +361,7 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
 \AtBeginShipoutBox=\box29
-Package hyperref Info: Link coloring OFF on input line 61.
+Package hyperref Info: Link coloring OFF on input line 64.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
@@ -371,20 +371,20 @@ Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 )
 \c@section@level=\count119
 )
-LaTeX Info: Redefining \ref on input line 61.
-LaTeX Info: Redefining \pageref on input line 61.
-LaTeX Info: Redefining \nameref on input line 61.
+LaTeX Info: Redefining \ref on input line 64.
+LaTeX Info: Redefining \pageref on input line 64.
+LaTeX Info: Redefining \nameref on input line 64.
 
 (./MashNobase.out) (./MashNobase.out)
 \@outlinefile=\write3
 \openout3 = `MashNobase.out'.
 
-LaTeX Font Info:    Try loading font information for U+msa on input line 63.
+LaTeX Font Info:    Try loading font information for U+msa on input line 66.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 63.
+LaTeX Font Info:    Try loading font information for U+msb on input line 66.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -396,27 +396,65 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
  [1
 
 {/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 126.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 129.
 
  (/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 126.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 129.
 
 [2]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 156.
+(hyperref)                removing `math shift' on input line 159.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 156.
+(hyperref)                removing `math shift' on input line 159.
 
-./MashNobase.tex:166: Missing } inserted.
+./MashNobase.tex:161: Missing $ inserted.
+<inserted text> 
+                $
+l.161 ...he rank of the marginal variance of \wfit
+                                                   is guaranteed to be equal...
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:162: Missing $ inserted.
+<inserted text> 
+                $
+l.162 
+      
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:162: Missing } inserted.
 <inserted text> 
                 }
-l.166 $
+l.162 
+      
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:162: Extra }, or forgotten \endgroup.
+\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.162 
+      
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+./MashNobase.tex:169: Missing } inserted.
+<inserted text> 
+                }
+l.169 $
        \lstar$ \ceff \sim \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -424,34 +462,34 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:166: Incomplete \ifodd; all text was ignored after line 166.
+./MashNobase.tex:169: Incomplete \ifodd; all text was ignored after line 169.
 <inserted text> 
                 \fi 
-l.166 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
+l.169 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
                                                   
 A forbidden control sequence occurred in skipped text.
 This kind of error happens when you say `\if...' and forget
 the matching `\fi'. I've inserted a `\fi'; this might work.
 
-./MashNobase.tex:166: Missing $ inserted.
+./MashNobase.tex:169: Missing $ inserted.
 <inserted text> 
                 $
-l.166 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
+l.169 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
                                                   
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./MashNobase.tex:166: Extra \fi.
+./MashNobase.tex:169: Extra \fi.
 \math@cr@@@ ...ef \next@ {&\kern -\alignsep@ }\fi 
                                                   \next@ \cr 
-l.166 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
+l.169 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
                                                   
 I'm ignoring this; it doesn't match any \if.
 
-./MashNobase.tex:166: Undefined control sequence.
+./MashNobase.tex:169: Undefined control sequence.
 \math@cr@@@ ...t@ {&\kern -\alignsep@ }\fi \next@ 
                                                   \cr 
-l.166 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
+l.169 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
                                                   
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -459,19 +497,19 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-./MashNobase.tex:166: Missing { inserted.
+./MashNobase.tex:169: Missing { inserted.
 <inserted text> 
                 {
-l.166 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
+l.169 ...m \Norm (0, $\lstar$ U_{k} $\lstar$ ') \\
                                                   
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-./MashNobase.tex:167: Missing } inserted.
+./MashNobase.tex:170: Missing } inserted.
 <inserted text> 
                 }
-l.167 $
+l.170 $
        \lstar$ \chat \sim \Norm (0, $\lstar$  U_{k} $\lstar$ ' + $\lstar$ \h...
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -479,19 +517,19 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:168: Missing { inserted.
+./MashNobase.tex:171: Missing { inserted.
 <inserted text> 
                 {
-l.168 \end{aligned}
+l.171 \end{aligned}
                    
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-./MashNobase.tex:179: Missing } inserted.
+./MashNobase.tex:183: Missing } inserted.
 <inserted text> 
                 }
-l.179 \textbf{w} = $
+l.183 \textbf{w} = $
                     \lstar$ \chat \\
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -499,34 +537,34 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:179: Incomplete \ifodd; all text was ignored after line 179.
+./MashNobase.tex:183: Incomplete \ifodd; all text was ignored after line 183.
 <inserted text> 
                 \fi 
-l.179 \textbf{w} = $\lstar$ \chat \\
+l.183 \textbf{w} = $\lstar$ \chat \\
                                     
 A forbidden control sequence occurred in skipped text.
 This kind of error happens when you say `\if...' and forget
 the matching `\fi'. I've inserted a `\fi'; this might work.
 
-./MashNobase.tex:179: Missing $ inserted.
+./MashNobase.tex:183: Missing $ inserted.
 <inserted text> 
                 $
-l.179 \textbf{w} = $\lstar$ \chat \\
+l.183 \textbf{w} = $\lstar$ \chat \\
                                     
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./MashNobase.tex:179: Extra \fi.
+./MashNobase.tex:183: Extra \fi.
 \math@cr@@@ ...ef \next@ {&\kern -\alignsep@ }\fi 
                                                   \next@ \cr 
-l.179 \textbf{w} = $\lstar$ \chat \\
+l.183 \textbf{w} = $\lstar$ \chat \\
                                     
 I'm ignoring this; it doesn't match any \if.
 
-./MashNobase.tex:179: Undefined control sequence.
+./MashNobase.tex:183: Undefined control sequence.
 \math@cr@@@ ...t@ {&\kern -\alignsep@ }\fi \next@ 
                                                   \cr 
-l.179 \textbf{w} = $\lstar$ \chat \\
+l.183 \textbf{w} = $\lstar$ \chat \\
                                     
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -534,19 +572,19 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-./MashNobase.tex:179: Missing { inserted.
+./MashNobase.tex:183: Missing { inserted.
 <inserted text> 
                 {
-l.179 \textbf{w} = $\lstar$ \chat \\
+l.183 \textbf{w} = $\lstar$ \chat \\
                                     
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-./MashNobase.tex:180: Missing } inserted.
+./MashNobase.tex:184: Missing } inserted.
 <inserted text> 
                 }
-l.180 \textbf{w} | \vb, \hat{V} \sim \Norm ($
+l.184 \textbf{w} | \vb, \hat{V} \sim \Norm ($
                                              \lstar$ \vb, $\lstar$ \hat{V}  ...
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -554,34 +592,34 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:180: Incomplete \ifodd; all text was ignored after line 180.
+./MashNobase.tex:184: Incomplete \ifodd; all text was ignored after line 184.
 <inserted text> 
                 \fi 
-l.180 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
+l.184 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
                                                   
 A forbidden control sequence occurred in skipped text.
 This kind of error happens when you say `\if...' and forget
 the matching `\fi'. I've inserted a `\fi'; this might work.
 
-./MashNobase.tex:180: Missing $ inserted.
+./MashNobase.tex:184: Missing $ inserted.
 <inserted text> 
                 $
-l.180 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
+l.184 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
                                                   
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./MashNobase.tex:180: Extra \fi.
+./MashNobase.tex:184: Extra \fi.
 \math@cr@@@ ...ef \next@ {&\kern -\alignsep@ }\fi 
                                                   \next@ \cr 
-l.180 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
+l.184 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
                                                   
 I'm ignoring this; it doesn't match any \if.
 
-./MashNobase.tex:180: Undefined control sequence.
+./MashNobase.tex:184: Undefined control sequence.
 \math@cr@@@ ...t@ {&\kern -\alignsep@ }\fi \next@ 
                                                   \cr 
-l.180 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
+l.184 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
                                                   
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -589,18 +627,18 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-./MashNobase.tex:180: Missing { inserted.
+./MashNobase.tex:184: Missing { inserted.
 <inserted text> 
                 {
-l.180 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
+l.184 ...ar$ \vb, $\lstar$ \hat{V}  $\lstar$ ') \\
                                                   
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
 [3]
-./MashNobase.tex:209: Undefined control sequence.
-l.209 L(\pi) &:= p(\textbf{w} | \bpi
+./MashNobase.tex:213: Undefined control sequence.
+l.213 L(\pi) &:= p(\textbf{w} | \bpi
                                     , V, \Sigma  \\
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -608,18 +646,18 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-./MashNobase.tex:216: Missing $ inserted.
+./MashNobase.tex:220: Missing $ inserted.
 <inserted text> 
                 $
-l.216 
+l.220 
       
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./MashNobase.tex:216: Missing } inserted.
+./MashNobase.tex:220: Missing } inserted.
 <inserted text> 
                 }
-l.216 
+l.220 
       
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -627,18 +665,18 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:216: Display math should end with $$.
+./MashNobase.tex:220: Display math should end with $$.
 <to be read again> 
                    \@@par 
-l.216 
+l.220 
       
 The `$' that I just saw supposedly matches a previous `$$'.
 So I shall assume that you typed `$$' both times.
 
-./MashNobase.tex:216: Extra }, or forgotten \endgroup.
+./MashNobase.tex:220: Extra }, or forgotten \endgroup.
 \par ...m \@noitemerr {\@@par }\fi \else {\@@par }
                                                   \fi 
-l.216 
+l.220 
       
 I've deleted a group-closing symbol because it seems to be
 spurious, as in `$x}$'. But perhaps the } is legitimate and
@@ -647,32 +685,32 @@ the way to recover is to insert both the forgotten and the
 deleted material, e.g., by typing `I$}'.
 
 
-./MashNobase.tex:217: LaTeX Error: Bad math environment delimiter.
+./MashNobase.tex:221: LaTeX Error: Bad math environment delimiter.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.217 \end{equation}
+l.221 \end{equation}
                     
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
 or  <return>  to continue without it.
 
-./MashNobase.tex:217: You can't use `\eqno' in vertical mode.
+./MashNobase.tex:221: You can't use `\eqno' in vertical mode.
 \endmathdisplay@a ...\df@tag \@empty \else \veqno 
                                                   \alt@tag \df@tag \fi \ifx ...
-l.217 \end{equation}
+l.221 \end{equation}
                     
 Sorry, but I'm not programmed to handle this case;
 I'll just pretend that you didn't ask for it.
 If you're in the wrong mode, you might be able to
 return to the right one by typing `I}' or `I$' or `I\par'.
 
-./MashNobase.tex:217: Missing $ inserted.
+./MashNobase.tex:221: Missing $ inserted.
 <inserted text> 
                 $
-l.217 \end{equation}
+l.221 \end{equation}
                     
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -680,18 +718,18 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:217: Display math should end with $$.
+./MashNobase.tex:221: Display math should end with $$.
 <to be read again> 
                    \endgroup 
-l.217 \end{equation}
+l.221 \end{equation}
                     
 The `$' that I just saw supposedly matches a previous `$$'.
 So I shall assume that you typed `$$' both times.
 
-./MashNobase.tex:230: Missing } inserted.
+./MashNobase.tex:234: Missing } inserted.
 <inserted text> 
                 }
-l.230 $
+l.234 $
        \lstar$  \chat _j \sim \Norm (0, $\lstar$  \Sigma_{p} $\lstar$ ' + $\...
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -699,34 +737,34 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:230: Incomplete \ifodd; all text was ignored after line 230.
+./MashNobase.tex:234: Incomplete \ifodd; all text was ignored after line 234.
 <inserted text> 
                 \fi 
-l.230 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
+l.234 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
                                                   
 A forbidden control sequence occurred in skipped text.
 This kind of error happens when you say `\if...' and forget
 the matching `\fi'. I've inserted a `\fi'; this might work.
 
-./MashNobase.tex:230: Missing $ inserted.
+./MashNobase.tex:234: Missing $ inserted.
 <inserted text> 
                 $
-l.230 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
+l.234 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
                                                   
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./MashNobase.tex:230: Extra \fi.
+./MashNobase.tex:234: Extra \fi.
 \math@cr@@@ ...ef \next@ {&\kern -\alignsep@ }\fi 
                                                   \next@ \cr 
-l.230 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
+l.234 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
                                                   
 I'm ignoring this; it doesn't match any \if.
 
-./MashNobase.tex:230: Undefined control sequence.
+./MashNobase.tex:234: Undefined control sequence.
 \math@cr@@@ ...t@ {&\kern -\alignsep@ }\fi \next@ 
                                                   \cr 
-l.230 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
+l.234 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
                                                   
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -734,19 +772,19 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-./MashNobase.tex:230: Missing { inserted.
+./MashNobase.tex:234: Missing { inserted.
 <inserted text> 
                 {
-l.230 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
+l.234 ...ar$ ' + $\lstar$ \hat{V_j} $\lstar$ ') \\
                                                   
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-./MashNobase.tex:231: Missing } inserted.
+./MashNobase.tex:235: Missing } inserted.
 <inserted text> 
                 }
-l.231 T_{jp} = $
+l.235 T_{jp} = $
                 \lstar$ \Sigma_{p}  $\lstar$' + $\lstar$ \hat{V}_{j} $\lstar...
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -754,34 +792,34 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:231: Incomplete \ifodd; all text was ignored after line 231.
+./MashNobase.tex:235: Incomplete \ifodd; all text was ignored after line 235.
 <inserted text> 
                 \fi 
-l.231 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
+l.235 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
                                                   
 A forbidden control sequence occurred in skipped text.
 This kind of error happens when you say `\if...' and forget
 the matching `\fi'. I've inserted a `\fi'; this might work.
 
-./MashNobase.tex:231: Missing $ inserted.
+./MashNobase.tex:235: Missing $ inserted.
 <inserted text> 
                 $
-l.231 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
+l.235 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
                                                   
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./MashNobase.tex:231: Extra \fi.
+./MashNobase.tex:235: Extra \fi.
 \math@cr@@@ ...ef \next@ {&\kern -\alignsep@ }\fi 
                                                   \next@ \cr 
-l.231 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
+l.235 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
                                                   
 I'm ignoring this; it doesn't match any \if.
 
-./MashNobase.tex:231: Undefined control sequence.
+./MashNobase.tex:235: Undefined control sequence.
 \math@cr@@@ ...t@ {&\kern -\alignsep@ }\fi \next@ 
                                                   \cr 
-l.231 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
+l.235 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
                                                   
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -789,19 +827,19 @@ misspelled it (e.g., `\hobx'), type `I' and the correct
 spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
-./MashNobase.tex:231: Missing { inserted.
+./MashNobase.tex:235: Missing { inserted.
 <inserted text> 
                 {
-l.231 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
+l.235 ...star$' + $\lstar$ \hat{V}_{j} $\lstar$'\\
                                                   
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-./MashNobase.tex:232: Missing } inserted.
+./MashNobase.tex:236: Missing } inserted.
 <inserted text> 
                 }
-l.232 $
+l.236 $
        \lstar$  \chat _j  \sim \Norm (0, T_{jp} )
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -809,21 +847,597 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:233: Missing { inserted.
+./MashNobase.tex:237: Missing { inserted.
 <inserted text> 
                 {
-l.233 \end{aligned}
+l.237 \end{aligned}
                    
 I've put in what seems to be necessary to fix
 the current column of the current alignment.
 Try to go on, since this might almost work.
 
-[4] [5]
-./MashNobase.tex:314: Undefined control sequence.
-<argument> \string \newlabel {\mashlik 
-                                       }{{\@currentlabel }{\thepage }{\@curr...
-l.314 \end{equation}
+[4]
+
+./MashNobase.tex:280: LaTeX Error: \mathbf allowed only in math mode.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.280 \mathbf
+             {x}
+You're in trouble here.  Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+./MashNobase.tex:282: Missing $ inserted.
+<inserted text> 
+                $
+l.282 \begin{bmatrix}
+                     
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:285: Missing $ inserted.
+<inserted text> 
+                $
+l.285 \end{bmatrix}
+                   
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:289: Missing $ inserted.
+<inserted text> 
+                $
+l.289 \boldsymbol\mu
                     
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:295: Missing $ inserted.
+<inserted text> 
+                $
+l.295 
+      
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:295: Missing } inserted.
+<inserted text> 
+                }
+l.295 
+      
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:295: Extra }, or forgotten \endgroup.
+\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.295 
+      
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+./MashNobase.tex:297: Missing $ inserted.
+<inserted text> 
+                $
+l.297 \begin{bmatrix}
+                     
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:300: Missing $ inserted.
+<inserted text> 
+                $
+l.300 \end{bmatrix}
+                   
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:302: Missing $ inserted.
+<inserted text> 
+                $
+l.302 \boldsymbol\mu
+                    
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:308: Missing $ inserted.
+<inserted text> 
+                $
+l.308 
+      
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:308: Missing } inserted.
+<inserted text> 
+                }
+l.308 
+      
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:308: Extra }, or forgotten \endgroup.
+\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.308 
+      
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+./MashNobase.tex:311: Missing $ inserted.
+<inserted text> 
+                $
+l.311 \boldsymbol\Sigma
+                       
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+[5]
+./MashNobase.tex:317: Missing $ inserted.
+<inserted text> 
+                $
+l.317 
+      
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:317: Missing } inserted.
+<inserted text> 
+                }
+l.317 
+      
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:317: Extra }, or forgotten \endgroup.
+\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.317 
+      
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+
+./MashNobase.tex:346: LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.346  \mathbf{x}_1 = \vb \\
+                            
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./MashNobase.tex:346: Missing $ inserted.
+<inserted text> 
+                $
+l.346  \mathbf{x}_1 = \vb \\
+                            
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:346: Missing } inserted.
+<inserted text> 
+                }
+l.346  \mathbf{x}_1 = \vb \\
+                            
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:346: Display math should end with $$.
+<to be read again> 
+                   \@@par 
+l.346  \mathbf{x}_1 = \vb \\
+                            
+The `$' that I just saw supposedly matches a previous `$$'.
+So I shall assume that you typed `$$' both times.
+
+./MashNobase.tex:346: Extra }, or forgotten \endgroup.
+\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.346  \mathbf{x}_1 = \vb \\
+                            
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+./MashNobase.tex:347: Missing $ inserted.
+<inserted text> 
+                $
+l.347  $\mathbf{x}_2 = \mathbf{a}$ = \wfit
+                                          \\
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+
+./MashNobase.tex:347: LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.347  $\mathbf{x}_2 = \mathbf{a}$ = \wfit\\
+                                            
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./MashNobase.tex:347: Missing $ inserted.
+<inserted text> 
+                $
+l.347  $\mathbf{x}_2 = \mathbf{a}$ = \wfit\\
+                                            
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:347: Missing } inserted.
+<inserted text> 
+                }
+l.347  $\mathbf{x}_2 = \mathbf{a}$ = \wfit\\
+                                            
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:347: Extra }, or forgotten \endgroup.
+\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.347  $\mathbf{x}_2 = \mathbf{a}$ = \wfit\\
+                                            
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+./MashNobase.tex:348: Missing $ inserted.
+<inserted text> 
+                $
+l.348    \boldsymbol\mu
+                       _1 = \boldmath{0}\\
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+
+LaTeX Font Warning: Command \boldmath invalid in math mode on input line 348.
+
+
+LaTeX Font Warning: Command \mathversion invalid in math mode on input line 348
+.
+
+
+./MashNobase.tex:348: LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.348    \boldsymbol\mu_1 = \boldmath{0}\\
+                                          
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./MashNobase.tex:348: Missing $ inserted.
+<inserted text> 
+                $
+l.348    \boldsymbol\mu_1 = \boldmath{0}\\
+                                          
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:348: Missing } inserted.
+<inserted text> 
+                }
+l.348    \boldsymbol\mu_1 = \boldmath{0}\\
+                                          
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:348: Extra }, or forgotten \endgroup.
+\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.348    \boldsymbol\mu_1 = \boldmath{0}\\
+                                          
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+./MashNobase.tex:349: Missing $ inserted.
+<inserted text> 
+                $
+l.349     \boldsymbol\mu
+                        _2 = \boldmath{0}\\
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+
+LaTeX Font Warning: Command \boldmath invalid in math mode on input line 349.
+
+
+LaTeX Font Warning: Command \mathversion invalid in math mode on input line 349
+.
+
+
+./MashNobase.tex:349: LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.349     \boldsymbol\mu_2 = \boldmath{0}\\
+                                           
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./MashNobase.tex:349: Missing $ inserted.
+<inserted text> 
+                $
+l.349     \boldsymbol\mu_2 = \boldmath{0}\\
+                                           
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:349: Missing } inserted.
+<inserted text> 
+                }
+l.349     \boldsymbol\mu_2 = \boldmath{0}\\
+                                           
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:349: Extra }, or forgotten \endgroup.
+\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.349     \boldsymbol\mu_2 = \boldmath{0}\\
+                                           
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+./MashNobase.tex:350: Missing $ inserted.
+<inserted text> 
+                $
+l.350  \boldsymbol\Sigma
+                        _{11} = \Sigma \\
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+
+./MashNobase.tex:350: LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.350  \boldsymbol\Sigma_{11} = \Sigma \\
+                                         
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./MashNobase.tex:350: Missing $ inserted.
+<inserted text> 
+                $
+l.350  \boldsymbol\Sigma_{11} = \Sigma \\
+                                         
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:350: Missing } inserted.
+<inserted text> 
+                }
+l.350  \boldsymbol\Sigma_{11} = \Sigma \\
+                                         
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:350: Extra }, or forgotten \endgroup.
+\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.350  \boldsymbol\Sigma_{11} = \Sigma \\
+                                         
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+./MashNobase.tex:351: Missing $ inserted.
+<inserted text> 
+                $
+l.351   \boldsymbol\Sigma
+                         _{22} = T \\
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+
+./MashNobase.tex:351: LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.351   \boldsymbol\Sigma_{22} = T \\
+                                     
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./MashNobase.tex:351: Missing $ inserted.
+<inserted text> 
+                $
+l.351   \boldsymbol\Sigma_{22} = T \\
+                                     
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:351: Missing } inserted.
+<inserted text> 
+                }
+l.351   \boldsymbol\Sigma_{22} = T \\
+                                     
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:351: Extra }, or forgotten \endgroup.
+\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.351   \boldsymbol\Sigma_{22} = T \\
+                                     
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+./MashNobase.tex:352: Missing $ inserted.
+<inserted text> 
+                $
+l.352 \boldsymbol\Sigma
+                       _{12} = \Cov(\vb \wfit ) = \Sigma \lstar'\\
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+
+./MashNobase.tex:352: LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.352 ...12} = \Cov(\vb \wfit ) = \Sigma \lstar'\\
+                                                  
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./MashNobase.tex:352: Missing $ inserted.
+<inserted text> 
+                $
+l.352 ...12} = \Cov(\vb \wfit ) = \Sigma \lstar'\\
+                                                  
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:352: Missing } inserted.
+<inserted text> 
+                }
+l.352 ...12} = \Cov(\vb \wfit ) = \Sigma \lstar'\\
+                                                  
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:352: Extra }, or forgotten \endgroup.
+\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.352 ...12} = \Cov(\vb \wfit ) = \Sigma \lstar'\\
+                                                  
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+
+./MashNobase.tex:353: LaTeX Error: Bad math environment delimiter.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.353 \end{equation}
+                    
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./MashNobase.tex:353: You can't use `\eqno' in vertical mode.
+\endmathdisplay@a ...\df@tag \@empty \else \veqno 
+                                                  \alt@tag \df@tag \fi \ifx ...
+l.353 \end{equation}
+                    
+Sorry, but I'm not programmed to handle this case;
+I'll just pretend that you didn't ask for it.
+If you're in the wrong mode, you might be able to
+return to the right one by typing `I}' or `I$' or `I\par'.
+
+./MashNobase.tex:353: Missing $ inserted.
+<inserted text> 
+                $
+l.353 \end{equation}
+                    
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:353: Display math should end with $$.
+<to be read again> 
+                   \endgroup 
+l.353 \end{equation}
+                    
+The `$' that I just saw supposedly matches a previous `$$'.
+So I shall assume that you typed `$$' both times.
+
+./MashNobase.tex:369: Undefined control sequence.
+l.369 &= \Cov(\vb , \lstar \vb ) + \mathbm
+                                          {0} \\
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
 misspelled it (e.g., `\hobx'), type `I' and the correct
@@ -832,34 +1446,447 @@ and I'll forget about whatever was undefined.
 
 [6]
 
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 389.
+./MashNobase.tex:380: LaTeX Error: There's no line here to end.
 
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.380 ...igma ) = \Sigma \lstar ' T^{-1} \wfit  \\
+                                                  
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
 
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 389.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 404.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 404.
-
-[7]
-./MashNobase.tex:692: Missing $ inserted.
+./MashNobase.tex:380: Missing $ inserted.
 <inserted text> 
                 $
-l.692 $\begin{verbatim}
+l.380 ...igma ) = \Sigma \lstar ' T^{-1} \wfit  \\
+                                                  
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:380: Missing } inserted.
+<inserted text> 
+                }
+l.380 ...igma ) = \Sigma \lstar ' T^{-1} \wfit  \\
+                                                  
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:380: Display math should end with $$.
+<to be read again> 
+                   \@@par 
+l.380 ...igma ) = \Sigma \lstar ' T^{-1} \wfit  \\
+                                                  
+The `$' that I just saw supposedly matches a previous `$$'.
+So I shall assume that you typed `$$' both times.
+
+./MashNobase.tex:380: Extra }, or forgotten \endgroup.
+\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.380 ...igma ) = \Sigma \lstar ' T^{-1} \wfit  \\
+                                                  
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+./MashNobase.tex:381: Missing $ inserted.
+<inserted text> 
+                $
+l.381 U^
+        {1} ( \Sigma_p ) = \Sigma - \Sigma \lstar ' T^{-1} \lstar  \Sigma_{p}\\
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+
+./MashNobase.tex:381: LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.381 ...igma \lstar ' T^{-1} \lstar  \Sigma_{p}\\
+                                                  
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./MashNobase.tex:381: Missing $ inserted.
+<inserted text> 
+                $
+l.381 ...igma \lstar ' T^{-1} \lstar  \Sigma_{p}\\
+                                                  
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:381: Missing } inserted.
+<inserted text> 
+                }
+l.381 ...igma \lstar ' T^{-1} \lstar  \Sigma_{p}\\
+                                                  
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:381: Extra }, or forgotten \endgroup.
+\par ...m \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.381 ...igma \lstar ' T^{-1} \lstar  \Sigma_{p}\\
+                                                  
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+
+./MashNobase.tex:382: LaTeX Error: Bad math environment delimiter.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.382 \end{equation}
+                    
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./MashNobase.tex:382: You can't use `\eqno' in vertical mode.
+\endmathdisplay@a ...\df@tag \@empty \else \veqno 
+                                                  \alt@tag \df@tag \fi \ifx ...
+l.382 \end{equation}
+                    
+Sorry, but I'm not programmed to handle this case;
+I'll just pretend that you didn't ask for it.
+If you're in the wrong mode, you might be able to
+return to the right one by typing `I}' or `I$' or `I\par'.
+
+./MashNobase.tex:382: Missing $ inserted.
+<inserted text> 
+                $
+l.382 \end{equation}
+                    
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:382: Display math should end with $$.
+<to be read again> 
+                   \endgroup 
+l.382 \end{equation}
+                    
+The `$' that I just saw supposedly matches a previous `$$'.
+So I shall assume that you typed `$$' both times.
+
+[7]
+./MashNobase.tex:423: Missing $ inserted.
+<inserted text> 
+                $
+l.423 Here, the likelihood of \wfit
+                                    = $L$ \chat$ integrating over $\vb$ is:
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:428: Undefined control sequence.
+<argument> \string \newlabel {\mashlik 
+                                       }{{\@currentlabel }{\thepage }{\@curr...
+l.428 \end{equation}
+                    
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+./MashNobase.tex:446: Missing $ inserted.
+<inserted text> 
+                $
+l.446 ...ch we observe uncentered expression \chat
+                                                   = \begin{bmatrix} 1 & 4 &...
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:447: Missing $ inserted.
+<inserted text> 
+                $
+l.447 
+      
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:447: Missing } inserted.
+<inserted text> 
+                }
+l.447 
+      
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:447: Extra }, or forgotten \endgroup.
+\@par ... \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.447 
+      
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+./MashNobase.tex:448: Missing $ inserted.
+<inserted text> 
+                $
+l.448 ...h recognize that $\vb$ is \begin{bmatrix}
+                                                   0 & 3 &0 \end{bmatrix},  ...
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:448: Missing $ inserted.
+<inserted text> 
+                $
+l.448 ...is \begin{bmatrix} 0 & 3 &0 \end{bmatrix}
+                                                  ,  not  \begin{bmatrix} -1...
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:448: Missing $ inserted.
+<inserted text> 
+                $
+l.448 ...3 &0 \end{bmatrix},  not  \begin{bmatrix}
+                                                   -1 & 2 & -1 \end{bmatrix}
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:448: Missing $ inserted.
+<inserted text> 
+                $
+l.448 ...\begin{bmatrix} -1 & 2 & -1 \end{bmatrix}
+                                                  
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+[8]
+
+./MashNobase.tex:456: LaTeX Error: Bad math environment delimiter.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.456 \end{equation}
+                    
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./MashNobase.tex:456: You can't use `\eqno' in math mode.
+\endmathdisplay@a ...\df@tag \@empty \else \veqno 
+                                                  \alt@tag \df@tag \fi \ifx ...
+l.456 \end{equation}
+                    
+Sorry, but I'm not programmed to handle this case;
+I'll just pretend that you didn't ask for it.
+If you're in the wrong mode, you might be able to
+return to the right one by typing `I}' or `I$' or `I\par'.
+
+./MashNobase.tex:456: Missing } inserted.
+<inserted text> 
+                }
+l.456 \end{equation}
+                    
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+
+./MashNobase.tex:456: LaTeX Error: \begin{aligned} on input line 453 ended by \
+end{equation}.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.456 \end{equation}
+                    
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./MashNobase.tex:456: Missing $ inserted.
+<inserted text> 
+                $
+l.456 \end{equation}
+                    
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:456: Missing } inserted.
+<inserted text> 
+                }
+l.456 \end{equation}
+                    
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:456: Missing \cr inserted.
+<inserted text> 
+                \cr 
+l.456 \end{equation}
+                    
+I'm guessing that you meant to end an alignment here.
+
+./MashNobase.tex:456: Missing { inserted.
+<inserted text> 
+                {
+l.456 \end{equation}
+                    
+I've put in what seems to be necessary to fix
+the current column of the current alignment.
+Try to go on, since this might almost work.
+
+./MashNobase.tex:456: Missing $ inserted.
+<inserted text> 
+                $
+l.456 \end{equation}
+                    
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+./MashNobase.tex:456: Missing } inserted.
+<inserted text> 
+                }
+l.456 \end{equation}
+                    
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:457: Misplaced \crcr.
+\endaligned ->\crcr 
+                    \egroup \restorecolumn@ \egroup 
+l.457 \end{aligned}
+                   
+I can't figure out why you would want to use a tab mark
+or \cr or \span just now. If something like a right brace
+up above has ended a previous alignment prematurely,
+you're probably due for more error messages, and you
+might try typing `S' now just to see what is salvageable.
+
+./MashNobase.tex:457: Extra }, or forgotten $.
+\endaligned ->\crcr \egroup 
+                            \restorecolumn@ \egroup 
+l.457 \end{aligned}
+                   
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+./MashNobase.tex:457: Extra }, or forgotten $.
+\endaligned ...cr \egroup \restorecolumn@ \egroup 
+                                                  
+l.457 \end{aligned}
+                   
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+
+./MashNobase.tex:457: LaTeX Error: \begin{equation} on input line 452 ended by 
+\end{aligned}.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.457 \end{aligned}
+                   
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./MashNobase.tex:457: Missing $ inserted.
+<inserted text> 
+                $
+l.457 \end{aligned}
+                   
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:457: Display math should end with $$.
+<to be read again> 
+                   \endgroup 
+l.457 \end{aligned}
+                   
+The `$' that I just saw supposedly matches a previous `$$'.
+So I shall assume that you typed `$$' both times.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 545.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 545.
+
+[9]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 560.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 560.
+
+[10]
+./MashNobase.tex:848: Missing $ inserted.
+<inserted text> 
+                $
+l.848 $\begin{verbatim}
                        {function(n=1000,d=44,betasd=1,esd=0.1,K=10){
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-./MashNobase.tex:692: Missing } inserted.
+./MashNobase.tex:848: Missing } inserted.
 <inserted text> 
                 }
-l.692 $\begin{verbatim}
+l.848 $\begin{verbatim}
                        {function(n=1000,d=44,betasd=1,esd=0.1,K=10){
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -867,10 +1894,10 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:692: Missing \endgroup inserted.
+./MashNobase.tex:848: Missing \endgroup inserted.
 <inserted text> 
                 \endgroup 
-l.692 $\begin{verbatim}
+l.848 $\begin{verbatim}
                        {function(n=1000,d=44,betasd=1,esd=0.1,K=10){
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -878,10 +1905,10 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-./MashNobase.tex:692: Extra }, or forgotten \endgroup.
+./MashNobase.tex:848: Extra }, or forgotten \endgroup.
 \@par ... \@noitemerr {\@@par }\fi \else {\@@par }
                                                   \fi 
-l.692 $\begin{verbatim}
+l.848 $\begin{verbatim}
                        {function(n=1000,d=44,betasd=1,esd=0.1,K=10){
 I've deleted a group-closing symbol because it seems to be
 spurious, as in `$x}$'. But perhaps the } is legitimate and
@@ -890,157 +1917,220 @@ the way to recover is to insert both the forgotten and the
 deleted material, e.g., by typing `I$}'.
 
 
-Overfull \hbox (177.9879pt too wide) in paragraph at lines 722--722
+Overfull \hbox (202.07793pt too wide) in paragraph at lines 878--878
  []  \OT1/cmtt/m/n/10.95 configs = matrix((rnorm(d*K)),byrow=T,ncol=d) # A matr
 ix of K classes (patterns) across R subgroups[] 
  []
 
 
-Overfull \hbox (86.0089pt too wide) in paragraph at lines 722--722
+Overfull \hbox (110.09892pt too wide) in paragraph at lines 878--878
  []  \OT1/cmtt/m/n/10.95 ## each entry of F is the the factor of decomposition 
 of covariance of effect sizes[] 
  []
 
 
-Overfull \hbox (109.00365pt too wide) in paragraph at lines 722--722
+Overfull \hbox (133.09367pt too wide) in paragraph at lines 878--878
  []  \OT1/cmtt/m/n/10.95 z = sample(K,J,replace=TRUE) # randomly sample factor 
 to be loaded on for each real snp[] 
  []
 
 
-Overfull \hbox (17.02464pt too wide) in paragraph at lines 722--722
+Overfull \hbox (41.11467pt too wide) in paragraph at lines 878--878
  []  \OT1/cmtt/m/n/10.95 mumat=matrix(rep(mus,d),ncol=d)##generate a matrix of 
 mus for each gene[] 
  []
 
 
-Overfull \hbox (57.26546pt too wide) in paragraph at lines 722--722
+Overfull \hbox (81.35548pt too wide) in paragraph at lines 878--878
  []  \OT1/cmtt/m/n/10.95 omega=abs(rnorm(J,mean=0,sd=betasd))##effect size vari
 ance can be big or small[] 
  []
 
-[8]
-Overfull \hbox (63.01414pt too wide) in paragraph at lines 722--722
+
+Overfull \hbox (87.10417pt too wide) in paragraph at lines 878--878
  []  \OT1/cmtt/m/n/10.95 sj=abs(matrix(rnorm(n*d,esd,0.001),ncol=d))##use unifo
 rm to simulate 'shrunken'[] 
  []
 
 
-Overfull \hbox (11.27596pt too wide) in paragraph at lines 722--722
+Overfull \hbox (35.36598pt too wide) in paragraph at lines 878--878
  []  \OT1/cmtt/m/n/10.95 e=t(apply(sj,1,function(x){rmvnorm(1,mean=rep(0,d),sig
 ma=diag(x)^2)}))[] 
  []
 
 
-Overfull \hbox (40.0194pt too wide) in paragraph at lines 722--722
+Overfull \hbox (64.10942pt too wide) in paragraph at lines 878--878
  []  \OT1/cmtt/m/n/10.95 return(list(beta=beta,chat=chat,covmat=covmat,componen
 ts=z,t=t,mumat=mumat,[] 
  []
 
 
-./MashNobase.tex:722: LaTeX Error: \begin{itemize} on input line 125 ended by \
+./MashNobase.tex:878: LaTeX Error: \begin{itemize} on input line 465 ended by \
 end{verbatim}.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.722 ...e,ceff=c,F=F,omega=omega))}\end{verbatim}
+l.878 ...e,ceff=c,F=F,omega=omega))}\end{verbatim}
                                                   }$
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
 or  <return>  to continue without it.
 
-./MashNobase.tex:722: Too many }'s.
-l.722 ...,ceff=c,F=F,omega=omega))}\end{verbatim}}
+./MashNobase.tex:878: Extra }, or forgotten \endgroup.
+l.878 ...,ceff=c,F=F,omega=omega))}\end{verbatim}}
                                                   $
-You've closed more groups than you opened.
-Such booboos are generally harmless, so keep going.
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
 
-./MashNobase.tex:723: Missing $ inserted.
+./MashNobase.tex:879: Missing $ inserted.
 <inserted text> 
                 $
-l.723 
+l.879 
       
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
 
-[9]
-Overfull \hbox (58.63383pt too wide) in paragraph at lines 770--770
-[]  \OT1/cmtt/m/n/10.95 S=sample(seq(1:nrow(configs)),size = K,replace = FALSE)
-##which factors will be used[] 
+./MashNobase.tex:879: Missing } inserted.
+<inserted text> 
+                }
+l.879 
+      
+I've inserted something that you may have forgotten.
+(See the <inserted text> above.)
+With luck, this will get me unwedged. But if you
+really didn't forget anything, try typing `2' now; then
+my insertion and my current dilemma will both disappear.
+
+./MashNobase.tex:879: Extra }, or forgotten \endgroup.
+\@par ... \@noitemerr {\@@par }\fi \else {\@@par }
+                                                  \fi 
+l.879 
+      
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+[11]
+Overfull \hbox (86.0089pt too wide) in paragraph at lines 926--926
+ []  \OT1/cmtt/m/n/10.95 S=sample(seq(1:nrow(configs)),size = K,replace = FALSE
+)##which factors will be used[] 
  []
 
 
-Overfull \hbox (58.63383pt too wide) in paragraph at lines 770--770
-[]  \OT1/cmtt/m/n/10.95 ## each entry of F is the the factor of decomposition o
-f covariance of effect sizes[] 
+Overfull \hbox (86.0089pt too wide) in paragraph at lines 926--926
+ []  \OT1/cmtt/m/n/10.95 ## each entry of F is the the factor of decomposition 
+of covariance of effect sizes[] 
  []
 
 
-Overfull \hbox (81.62859pt too wide) in paragraph at lines 770--770
-[]  \OT1/cmtt/m/n/10.95 z = sample(K,J,replace=TRUE) # randomly sample factor t
-o be loaded on for each real snp[] 
+Overfull \hbox (109.00365pt too wide) in paragraph at lines 926--926
+ []  \OT1/cmtt/m/n/10.95 z = sample(K,J,replace=TRUE) # randomly sample factor 
+to be loaded on for each real snp[] 
  []
 
 
-Overfull \hbox (29.8904pt too wide) in paragraph at lines 770--770
-[]  \OT1/cmtt/m/n/10.95 omega=abs(rnorm(J,mean=0,sd=betasd))##effect size varia
-nce can be big or small[] 
+Overfull \hbox (17.02464pt too wide) in paragraph at lines 926--926
+ []  \OT1/cmtt/m/n/10.95 mumat=matrix(rep(mus,d),ncol=d)##generate a matrix of 
+mus for each gene[] 
  []
 
 
-Overfull \hbox (35.63908pt too wide) in paragraph at lines 770--770
-[]  \OT1/cmtt/m/n/10.95 sj=abs(matrix(rnorm(n*d,esd,0.001),ncol=d))##use unifor
-m to simulate 'shrunken'[] 
+Overfull \hbox (57.26546pt too wide) in paragraph at lines 926--926
+ []  \OT1/cmtt/m/n/10.95 omega=abs(rnorm(J,mean=0,sd=betasd))##effect size vari
+ance can be big or small[] 
+ []
+
+[12]
+Overfull \hbox (63.01414pt too wide) in paragraph at lines 926--926
+ []  \OT1/cmtt/m/n/10.95 sj=abs(matrix(rnorm(n*d,esd,0.001),ncol=d))##use unifo
+rm to simulate 'shrunken'[] 
  []
 
 
-Overfull \hbox (288.58134pt too wide) in paragraph at lines 770--770
-[]  \OT1/cmtt/m/n/10.95 return(list(beta=beta,chat=chat,covmat=covmat,component
-s=z,factors=F,t=t,mumat=mumat,shat=sj,error=e,ceff=c,omega=omega))}}[] 
+Overfull \hbox (11.27596pt too wide) in paragraph at lines 926--926
+ []  \OT1/cmtt/m/n/10.95 e=t(apply(sj,1,function(x){rmvnorm(1,mean=rep(0,d),sig
+ma=diag(x)^2)}))[] 
  []
 
-[10]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 788.
- [11]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 788.
+
+Overfull \hbox (315.9564pt too wide) in paragraph at lines 926--926
+ []  \OT1/cmtt/m/n/10.95 return(list(beta=beta,chat=chat,covmat=covmat,componen
+ts=z,factors=F,t=t,mumat=mumat,shat=sj,error=e,ceff=c,omega=omega))}}[] 
+ []
+
+
+./MashNobase.tex:944: LaTeX Error: \begin{itemize} on input line 128 ended by \
+end{document}.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.944 \end{document}
+                    
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 944.
+[13]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 944.
  (./MashNobase.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 788.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 788.
-Package rerunfilecheck Info: File `MashNobase.out' has not changed.
-(rerunfilecheck)             Checksum: D645BA1BFCD8C75B99F9A2D2047E60D2;672.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 788.
- ) 
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 944.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 944.
+
+
+Package rerunfilecheck Warning: File `MashNobase.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `MashNobase.out':
+(rerunfilecheck)             Before: 1D00293ADBB86C6A4A03FF558A422012;777
+(rerunfilecheck)             After:  773CD5BF7F442F41F677934D46C51087;786.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 944.
+ )
+(\end occurred inside a group at level 1)
+
+### semi simple group (level 1) entered at line 128 (\begingroup)
+### bottom level 
 Here is how much of TeX's memory you used:
- 6672 strings out of 493089
- 95811 string characters out of 6134842
- 189090 words of memory out of 5000000
- 10011 multiletter control sequences out of 15000+600000
+ 6689 strings out of 493089
+ 96006 string characters out of 6134842
+ 190120 words of memory out of 5000000
+ 10016 multiletter control sequences out of 15000+600000
  24785 words of font info for 93 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 29i,9n,31p,607b,490s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
-></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
-</usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></
-usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></u
-sr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></us
-r/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/
-local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmib10.pfb></usr/
-local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmmib8.pfb></
-usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></us
-r/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/
-local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/lo
-cal/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local
-/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/
-texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/te
-xlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/tex
-live/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texl
-ive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on MashNobase.pdf (11 pages, 207044 bytes).
+ 29i,9n,31p,607b,581s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmbx10.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmbx12.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmbx8.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/
+cmex10.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/c
+mmi10.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+mi8.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi
+b10.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cmextra
+/cmmib8.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/
+cmr10.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+r12.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr1
+7.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.p
+fb></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pf
+b></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
+</usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb><
+/usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></
+usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></u
+sr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb
+>
+Output written on MashNobase.pdf (13 pages, 219932 bytes).
 PDF statistics:
- 228 PDF objects out of 1000 (max. 8388607)
- 196 compressed objects within 2 object streams
- 53 named destinations out of 1000 (max. 500000)
- 97 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 262 PDF objects out of 1000 (max. 8388607)
+ 226 compressed objects within 3 object streams
+ 65 named destinations out of 1000 (max. 500000)
+ 113 words of extra memory for PDF output out of 10000 (max. 10000000)
 
