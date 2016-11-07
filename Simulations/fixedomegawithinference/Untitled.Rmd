@@ -211,6 +211,14 @@ all.equal(edcov[[9]]/max(diag(edcov[[9]])),max.step$true.covs[2,,]/max(diag(max.
 
 ```
 
+Let's also look at what these matrices look like when we subtract the minimum:
+
+```{r}
+for(x in 2:9){
+ print(round(edcov[[x]]-min(abs(edcov[[x]]))))
+}
+```
+
 Now let's compute the likelihood with ED:
 
 ```{r eval=T}

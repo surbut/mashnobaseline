@@ -1,0 +1,164 @@
+---
+title: "mashonly"
+output: html_document
+---
+###Compare with MASH##
+```{r setup, include=FALSE}
+library('knitr')
+knitr::opts_chunk$set(cache=TRUE)
+```
+Now we can compare with mash. In this model, for each gene J:
+
+$$chat |\mu, V = \mu + \beta + E$$
+
+$$chat - \mu = \beta + E$$
+
+and $$E \sim N(0,V)$$
+while $$\beta  ~ \sum_{p} \pi_{p} N(0, U_{p})$$
+```{r eval=F}
+##if you want to simulate data yourself
+rm(list=ls())
+
+library('mash')
+set.seed(123)
+c=chat_sim_fsingle_fixedomega(n = 10000,d = 8,omega = 2,esd = 0.1)
+saveRDS(c,"chatfixedomega.rds")
+diag(c$covmat)
+
+```
+
+Here you can load my data:
+```{r}
+c=readRDS("chatfixedomega.rds")
+t=c$t;b=c$chat;se=c$shat;R=ncol(t)
+
+#Now wfull will be the median
+wfull=t(apply(b,1,function(x){x-median(x)}))
+##show that they sum to 0
+
+#plot(rowSums(wfull),ylim=c(-1,1))
+```
+
+Now we proceed as in mash, selecting the strongest deviations from the median:
+```{r}
+
+s.j=se/se
+absmat=abs(t(apply(t,1,function(x){x-median(x)})))
+tmedian=(t(apply(t,1,function(x){x-median(x)})))
+
+index=which(rowSums(absmat>4)>0)
+length(index)
+mean(index<1000)
+
+sparsestrongt=tmedian[index,]
+strongprojectedt=sparsestrongt
+```
+
+You can see that the rank of the strongprojectedt is not R-1 this time
+```{r}
+qr(strongprojectedt)$rank
+```
+
+
+
+```{r filewrite,eval=F}
+#here's if you wanted to computed factors yourself
+write.table(sparsestrongt,"sparsestrongt.txt",col.names = FALSE,row.names=FALSE)
+
+```
+
+
+Now, we need to project into the centered space to estimate the covariance matrix of the true deviations, using the full L since $v$ will be R, and not $R-1$.
+
+
+```{r sfa,eval=T}
+#here's if you wanted to computed factors yourself
+#system('/Users/sarahurbut/miniconda3/bin/sfa -gen sparsestrongt.txt -g 789 -k 5 -n 8 i -o sparseFmediancentered')
+#A="sparseFmediancentered"
+
+factor.mat=as.matrix(read.table("sparseFmediancentered_F.out"))
+lambda.mat=as.matrix(read.table("sparseFmediancentered_lambda.out"))
+
+
+```
+
+
+Now sho how again, this isn't a problem with my initiation:
+
+
+```{r}
+library("ExtremeDeconvolution")
+t.stat = strongprojectedt;factor.mat = factor.mat;v.j = s.j;lambda.mat = lambda.mat;K = 3;P = 3
+
+max.step=deconvolution.em.with.bovy(t.stat = strongprojectedt,factor.mat = factor.mat,v.j = s.j,lambda.mat = lambda.mat,K = 3,P = 3 )
+
+ms2=deconvolution.em.with.bovy(t.stat = strongprojectedt,factor.mat = factor.mat,v.j = s.j,lambda.mat = lambda.mat,K = 3,P = 3 )
+
+
+all.equal(max.step,ms2)
+identical(max.step,ms2)
+```
+
+Show that this problem isn't restricted to my intiation (or wrapper function):
+
+```{r}
+R=ncol(t.stat)
+
+init.cov=init.covmat(t.stat=t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,K=K,P=P)
+init.cov.list=list()
+for(i in 1:K){init.cov.list[[i]]=init.cov[i,,]}
+
+
+init.cov2=init.covmat(t.stat=t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,K=K,P=P)
+init.cov.list2=list()
+for(i in 1:K){init.cov.list2[[i]]=init.cov2[i,,]}
+all.equal(init.cov.list,init.cov.list2)
+identical(init.cov.list,init.cov.list2)
+
+library("ExtremeDeconvolution")
+
+mean.mat=matrix(rep(0,ncol(t.stat)*nrow(t.stat)),ncol=ncol(t.stat),nrow=nrow(t.stat))
+ydata=  t.stat
+xamp= rep(1/K,K)
+xcovar= init.cov.list
+fixmean= TRUE
+ycovar=  v.j
+xmean=   mean.mat
+projection= list();for(l in 1:nrow(t.stat)){projection[[l]]=diag(1,R)}
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+true.covs=array(dim=c(K,R,R))
+for(i in 1:K){true.covs[i,,]=e$xcovar[[i]]}
+
+
+###run again##
+
+e2=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+
+all.equal(e,e2)
+identical(e,e2)
+
+```
+
+
+Now show how this is a problem when we compute covariance matrices:
+
+```{r}
+A="covmashmaxstep"
+
+covmash=compute.hm.mash.covmat.all.max.step.fixed.omega(omega = 2,Q = 5,lambda.mat = lambda.mat,factor.mat = factor.mat,max.step = max.step,zero = TRUE,power = 2,A,bma = TRUE)$cov
+
+
+A="covmashms2"
+covmashms2=compute.hm.covmat.all.max.step(max.step = ms2,b.hat = wfull,se.hat = se,t.stat = strongprojectedt,Q = 5,lambda.mat = lambda.mat,A,factor.mat = factor.mat,zero = T,power = 2)$covmat
+
+A="covmashmaxstep"
+covmashmaxstep=compute.hm.covmat.all.max.step(max.step = max.step,b.hat = wfull,se.hat = se,t.stat = strongprojectedt,Q = 5,lambda.mat = lambda.mat,A,factor.mat = factor.mat,zero = T,power = 2)$covmat
+```
+show the only matrices that aren't equal are the ones output by ED:
+
+```{r}
+sapply(seq(1:9),function(x){all.equal(covmashms2[[x]],covmashmaxstep[[x]])})
+sapply(seq(1:9),function(x){identical(covmashms2[[x]],covmashmaxstep[[x]])})
+```
+
+Which will result in different likelihood matrices and corresponding pis!

@@ -529,13 +529,14 @@ R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 wfull=t(L%*%t(b))
 sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is 
-covs=compute.covmat.using.truth(b.gp.hat = wfull,sebetahat = sjmat,A="test",zero=TRUE,covlist=covl,power=2)
+
 
 ```
 
 ```{r mashtruth,eval=T}
 A="mashtruthwithfixedomega"
 covs=readRDS("covmatwithfixedomega.rds")
+length(covs)
 compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covs,A=A,pen=1)
 
 
