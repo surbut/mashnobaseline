@@ -486,12 +486,11 @@ R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 wfull=t(L%*%t(b))
 sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is </code></pre>
-<pre class="r"><code>covs=readRDS(&quot;covmatsparseLwithEDoneK.rds&quot;)
+<pre class="r"><code>covs=readRDS(&quot;covmatwithoneK.rds&quot;)
 length(covs)</code></pre>
 <pre><code>## [1] 3</code></pre>
-<pre class="r"><code>rm(A)</code></pre>
-<pre><code>## Warning in rm(A): object 'A' not found</code></pre>
-<pre class="r"><code>A=&quot;withoneKmash&quot;
+<pre class="r"><code>rm(A)
+A=&quot;withoneKmash&quot;
 compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covs,A=A,pen=1)</code></pre>
 <pre><code>## quartz_off_screen 
 ##                 2</code></pre>
@@ -500,7 +499,7 @@ compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covs,A=A,pen
 
 weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covs,b.gp.hat=wfull,se.gp.hat = se,pis,A=A,checkpoint = FALSE)})</code></pre>
 <p>And test to see if calculations are accurate:</p>
-<pre class="r"><code>cov=readRDS(&quot;covmatsparseLwithEDoneK.rds&quot;)
+<pre class="r"><code>cov=readRDS(&quot;covmatwithoneK.rds&quot;)
 mash.means=as.matrix(read.table(&quot;withoneKmashposterior.means.txt&quot;)[,-1])
 w=data.frame(wfull)
 R=ncol(w)

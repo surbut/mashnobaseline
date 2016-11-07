@@ -3,7 +3,6 @@ title: "withjustone"
 output: html_document
 ---
 
-
 ```{r setup, include=FALSE}
 library('knitr')
 knitr::opts_chunk$set(cache=TRUE)
@@ -397,7 +396,7 @@ sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of a
 ```
 
 ```{r mashtruthwithonek,eval=T}
-covs=readRDS("covmatsparseLwithEDoneK.rds")
+covs=readRDS("covmatwithoneK.rds")
 length(covs)
 rm(A)
 A="withoneKmash"
@@ -415,7 +414,7 @@ And test to see if calculations are accurate:
 
 
 ```{r,eval=T,echo=T}
-cov=readRDS("covmatsparseLwithEDoneK.rds")
+cov=readRDS("covmatwithoneK.rds")
 mash.means=as.matrix(read.table("withoneKmashposterior.means.txt")[,-1])
 w=data.frame(wfull)
 R=ncol(w)
