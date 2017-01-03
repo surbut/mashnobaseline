@@ -313,7 +313,7 @@ all.equal(covmash[[9]]/max(diag(covmash[[9]])),max.step$true.covs[2,,]/max(diag(
 
 Now, proceed as always, estimating likelihood and computing posteriors.
 
-```{r mashmethod, eval=T}
+```{r mashmethod, eval=F}
 A="sparseoldmash"
 compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covmash,A=A,pen=1)
 
@@ -324,8 +324,7 @@ se.test=s.j
 weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covmash,b.gp.hat=wfull,se.gp.hat = se,pis,A=A,checkpoint = FALSE)})
 ```
 
-
-##Let's compare the weights"
+WE can't compare the likelihoods because there are fewer matrices.
 
 ```{r}
 pis=readRDS("pissparseoldmash.rds")$pihat
@@ -621,6 +620,24 @@ par(mfrow=c(1,2))
 barplot(colSums(matrix(pied[-length(pied)],ncol=2,byrow=TRUE)),names=c("ID","Uk1"),las=2,main="Mashnobase")
 barplot(colSums(matrix(pimash[-length(pied)],ncol=2,byrow=TRUE)),names=c("ID","Uk1"),las=2,main="Mash")
 ```
+
+Compare likelihoods:
+
+```{r}
+likmash=readRDS("liketrainmashtruthwithfixedomega.rds")
+pimash=readRDS("pismashtruthwithfixedomega.rds")$pihat
+
+test=exp(likmash)
+sum(log(test%*%pimash))
+
+likmnb=readRDS("liketrainwithfixedomegamnb.rds")
+pimnb=readRDS("piswithfixedomegamnb.rds")$pihat
+
+test=exp(likmnb)
+sum(log(test%*%pimnb))
+```
+
+
 
 We can see that using the same set of covariance matrices, _mashnobaseline_ is better able to emphasize the true configurations because the likelihood and posterior computations incorporate L. Recall, for mash:
 

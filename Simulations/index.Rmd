@@ -1,0 +1,19 @@
+---
+title: "Table of Contents"
+output: html_document
+---
+
+**Last updated:** `r Sys.Date()`
+
+**Code version:** `r system("git log -1 --format='%H'", intern = TRUE)`
+
+[Recall that we've already shown that the likelihood and RMSE with MashNoBaseline is **much** better than with **MASH** when using the truth, but not when with using the learned matrix](with_fullandfixedprior/Withbothtrueandestimatedprior.html)
+
+But that the RMSEs are comparable when using inference. We then simplified things more:
+
+1) [In this simulation, I simulate a set of three covariance matrices, one with ED, one as the ID and one with all 0, and compute the likelihood with this estimate using MNB, the truth using MNB, and the truth using MASH](withjustone/withjustone.html)
+
+2) [Then, per your suggestion, I generate one Uk matrix according to the Bovy algorithm, using the matrix of maximal (i.e., top 1000 average deviations across subgroups) of T statistics initiliazed with the empirical covariance matrix, and then rescaled to fit the centered $\beta$ by creating max of diagonal as 2. We will compare this to the results using the true covariance matrix $ee’$, where e = $0000011$](justonelikcompare/jol.html)
+
+[Then, I use mash on the median centered estimates and show that the RMSE (0.2020265) is much lower than mash with truth (0.76) and close to MNB with the truth (0.10)](mashmedian/mashmedian.html)
+

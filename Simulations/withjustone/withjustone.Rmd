@@ -287,11 +287,16 @@ weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covs,
 
 ```
 
-And test to see if calculations are accurate:
+And test to see if calculations are accurate and show that likelihood with MNB is much better than with mash:
 
 
 ```{r,eval=T,echo=T}
 cov=readRDS("covmatwithfixedomega.rds")
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+likmat=readRDS(paste0("liketrain",A,".rds"))
+test=exp(likmat)
+sum(log(test%*%pis))
+
 mash.means=as.matrix(read.table("mashtruthwithfixedomegaposterior.means.txt")[,-1])
 w=data.frame(wfull)
 R=ncol(w)
@@ -457,9 +462,22 @@ identical(as.numeric(mash.arrays$post.covs[k,]),as.numeric(diag(U.gp1kl)))
 
 beta=as.matrix(c$beta)
 mle=as.matrix(wfull)
-mashoneK=as.matrix(read.table("withoneKposterior.means.txt"))[,-1]
+mashoneK=as.matrix(read.table("withoneKmashposterior.means.txt"))[,-1]
 standard=sqrt(mean((beta-mle)^2))
 sqrt(mean((mashoneK-beta)^2))/standard
 
+##let's test mash likelihood###
 
+A="withoneKmash"
+pis=readRDS(paste0("pis",A,".rds"))$pihat
 
+likmat=readRDS(paste0("liketrain",A,".rds"))
+test=exp(likmat)
+sum(log(test%*%pis))
+
+A="mashtruthwithfixedomega"
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+likmat=readRDS(paste0("liketrain",A,".rds"))
+test=exp(likmat)
+sum(log(test%*%pis))

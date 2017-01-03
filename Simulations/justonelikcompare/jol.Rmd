@@ -1,0 +1,183 @@
+---
+title: "newliks"
+output: html_document
+---
+
+> The purpose of this document is to:
+
+* generate one Uk matrix according to the Bovy algorithm, using the matrix of maximal (i.e., top 1000 average deviations across subgroups) of T statistics initiliazed with X'X, and then rescaled to fit the centered $\hat{beta}$ by creating max of diagonal as 2.
+
+* We will compare this to the results using the $true$ covariance matrix ee', where e = [0 0 0 0 0 0 1]
+
+
+
+
+```{r setup, include=FALSE}
+library('knitr')
+knitr::opts_chunk$set(cache=TRUE)
+
+```
+
+```{r,echo=FALSE}
+suppressMessages(library(mvtnorm))
+suppressMessages(library(mash))
+```
+Let's simulate data with one covariance matrix, and $\omega$ fixed at 2. We will also use only one $\omega$ in our inference matrices. The purpose of this document was to test the ability of `mash` and `mashnobaseline` to infer the truth when there was only one $\omega$ to complicate things, so that the 'shrinkage' was not an issue. You can see the inferred covariance matrices are shorter.
+
+We can have a look at the them first:
+
+```{r}
+rm(list=ls())
+library('mash')
+set.seed(123)
+c=chat_sim_fsingle_fixedomega(n = 10000,d = 8,omega = 2,esd = 0.1)
+saveRDS(c,"chatfixedomega.rds")
+diag(c$covmat)
+
+```
+
+
+And here we run our analysis:
+```{r}
+
+t=c$t;b=c$chat;se=c$shat
+#hist(t)
+#hist(b)
+R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+s.j=se/se
+
+absmat=abs(t(L%*%t(c$t)))
+index=which(rowSums(absmat>4)>0)
+length(index)
+mean(index<1000)
+
+#index=which(rowMeans(abs(t(L%*%t(c$t))))>1.3)##choose the associations with average deviation large.
+
+##show deviations
+plot(rowSums(absmat>4))
+points(index,rowSums(absmat>4)[index],col="blue")
+
+sparsestrongt=t(L%*%t(t[index,]))
+
+```
+
+```{r filewrite,eval=T}
+
+write.table(sparsestrongt,"sparsestrongt.txt",col.names = FALSE,row.names=FALSE)
+
+```
+
+
+Now, we need to project into the centered space to estimate the covariance matrix of the true deviations, using the full L since $v$ will be R, and not $R-1$.
+
+
+```{r}
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen sparsestrongt.txt -g 748 -k 5 -n 8 i -o sparseF')
+A="sparseF"
+
+factor.mat=as.matrix(read.table("sparseF_F.out"))
+lambda.mat=as.matrix(read.table("sparseF_lambda.out"))
+
+#recall here that w will now be the L[-1,]%*%t(t[strong,]), which is equivalent to removing the first column of the strong projected t. Thus the covariance of v is initated with the RxR matrices (strong projected t), and the model is trained on the strong projected t less the first column because the model has v_{rxr}|w_{r,r-1}
+
+strongprojectedt=sparsestrongt
+
+
+lvllist=genlvllist(s.j[index,],L = L[-1,])
+
+
+##w should represent transformed betahats using all R subgroups and j genes
+wfull=t(L%*%t(b))
+sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
+dim(wfull)
+dim(sjmat)
+
+```
+
+```{r}
+w=data.frame(wfull)[,-1]
+```
+
+
+> Now run with ED to generate the max like covariance matrix using the maximum initialized t statistics and compare to the initial X'X:
+
+
+```{r}
+source("~/matrix_ash/R/mashnobasescripts.R")
+source("~/matrix_ash/R/truthscripts.R")
+rm(A)
+
+A="withoneK"
+
+
+library("ExtremeDeconvolution")
+efunc=deconvolution.em.with.bovy.with.L.oneK(t.stat = strongprojectedt,v.j = lvllist,L = L[-1,],w = strongprojectedt[,-1])
+
+dim(efunc$true.covs)
+length(efunc$pi)
+
+efunc$true.covs[1,,]-min(abs(efunc$true.covs[1,,]))
+
+##compare to initialized matrix
+X.real=as.matrix(strongprojectedt)
+X.c=apply(X.real,2,function(x) x-mean(x)) ##Column centered matrix of t statistics
+data.prox=((t(X.c)%*%X.c))/(nrow(X.real)-1)
+(data.prox)-min(abs(data.prox))
+```
+
+Here you can see our 'list' of covariance matrices contains just one covariance matrix that has been scaled to contain 2 as the max on the diagonal.
+
+```{r}
+covlist=list();covlist[[1]]=2*efunc$true.covs[1,,]/max(diag(efunc$true.covs[1,,]))
+edcov=edcov=covlist
+max(edcov[[1]])
+barplot(diag(edcov[[1]]))
+
+```
+
+
+
+```{r eval=T}
+w=data.frame(wfull)[,-1]
+
+j=1
+
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
+
+likmat=t(as.matrix(readRDS("liketrainwithoneK.rds")))
+
+sum(log(exp(likmat)))
+LSigL=lapply(edcov,function(x){L[-1,]%*%x%*%t(L[-1,])})
+
+lltest=log.lik.func(b.mle=w[j,],V.gp.hat = L[-1,]%*%diag(se[j,])^2%*%t(L[-1,]),covmat =LSigL )                                                                                          
+
+identical(as.numeric(likmat[j]),as.numeric(lltest))
+```
+
+Now let's compute the likelihood with the true matrix which looks like this:
+
+```{r}
+covtruthlist=list(2*c$covmat)
+barplot(diag(covtruthlist[[1]]))
+
+```
+
+
+```{r}
+
+A="truth"
+compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = covtruthlist,A = A,pen = 1,L = L[-1,])
+
+likmattruth=t(as.matrix(readRDS("liketraintruth.rds")))
+LSigL=lapply(covtruthlist,function(x){L[-1,]%*%x%*%t(L[-1,])})
+
+lltest=log.lik.func(b.mle=w[j,],V.gp.hat = L[-1,]%*%diag(se[j,])^2%*%t(L[-1,]),covmat =LSigL )                                                                                          
+
+identical(as.numeric(likmattruth[j]),as.numeric(lltest))
+
+sum(log(exp(likmattruth)))
+```
+
+
+As you can see, the likelihood with the truth, `r ceiling(sum(log(exp(likmattruth))))` is better than the likelihood with the *learned* $U_k$, `r ceiling(sum(log(exp(likmat))))` but this is to be expected because the likelihood with the *learned* $U_k$ was computed using the max like estimates of Bovy on the Maximum deviations, while the the truth provides more weight on 0 that will help with the largely null observations.

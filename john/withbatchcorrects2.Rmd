@@ -346,3 +346,99 @@ for(k in 2:9){
   }
 
 ```
+
+Let's also plot pairwise sharing by magnitude and sign:
+
+
+
+```{r pairwisesharing}
+library("mashr")
+post.means=read.table("batchcorrectwithEDposterior.means.txt")[,-1]
+lfsr.mash=read.table("batchcorrectwithEDlfsr.txt")[,-1]
+se.matched=as.matrix(read.table("sebetabatchcorrected.txt"))[,-1]
+strain.names=read.table("StrainNames.txt",header = T,stringsAsFactors = F)[,1]
+pm.mash.beta=post.means*se.matched
+colnames(pm.mash.beta)=colnames(lfsr.mash)=strain.names
+lfsr.mash.sig=lfsr.mash[rowSums(lfsr.mash<0.05)>0,]##only 137,223 are significant in at least one subgroup
+pm.mash.sig=pm.mash.beta[rowSums(lfsr.mash<0.05)>0,]
+
+signheatmap=compute.sharing.by.sign(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.mash.beta = pm.mash.sig)
+signheatmap[lower.tri(signheatmap)] <- NA
+magheatmap=compute.mag.by.sharing(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.mash.beta = pm.mash.sig)
+magheatmap[lower.tri(magheatmap)] <- NA
+
+
+library('colorRamps')
+library('corrplot')
+library(gplots)
+library(ggplot2)
+
+class(signheatmap)
+
+
+
+library('lattice')
+
+clrs <- colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
+                               "#E0F3F8","#91BFDB","#4575B4")))(64)
+#clrs[63:64] <- "darkviolet"
+lat=signheatmap
+lat[lower.tri(lat)] <- NA
+print(levelplot(lat,col.regions = clrs,xlab = "",ylab = "",colorkey = TRUE,main="PairwiseSharingBySign"))
+
+
+heatmap.2(magheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by Magnitude"),
+          cexRow=0.6,cexCol=2,cex.main=0.5,#breaks=seq(0.35,1,0.01),
+          labCol=NA)
+
+library('lattice')
+
+clrs <- colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
+                               "#E0F3F8","#91BFDB","#4575B4")))(64)
+#clrs[63:64] <- "darkviolet"
+absmagheatmap=compute.mag.by.sharing(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.mash.beta = abs(pm.mash.sig))
+absmagheatmap[lower.tri(absmagheatmap)] <- NA
+lat=absmagheatmap
+lat[lower.tri(lat)] <- NA
+print(levelplot(lat,col.regions = clrs,
+                xlab = "",ylab = "",colorkey = TRUE,main="PairwiseSharingByMagnitude"))
+```
+
+Now, let's look at sharing my asbolute value of magntiude:
+```{r}
+
+heatmap.2(signheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by Sign"),
+          cexRow=0.6,cexCol=0.5,cex.main=0.5)
+#,breaks=seq(0.7,1,0.01))
+
+heatmap.2(1-signheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by Opposite Sign"),
+          cexRow=0.6,cexCol=0.5,cex.main=0.5)
+#,breaks=seq(0.7,1,0.01))
+
+
+
+absmagheatmap=compute.mag.by.sharing(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.mash.beta = abs(pm.mash.sig))
+absmagheatmap[lower.tri(absmagheatmap)] <- NA
+heatmap.2(absmagheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by abs(Magnitude)"),
+          cexRow=0.6,cexCol=2,cex.main=0.5,#breaks=seq(0.35,1,0.01),
+          labCol=NA)
+
+heatmap.2(magheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by Magnitude"),
+          cexRow=0.6,cexCol=2,cex.main=0.5,#breaks=seq(0.35,1,0.01),
+          labCol=NA)
+```
+
+
+
+
+

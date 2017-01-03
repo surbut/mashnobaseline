@@ -1,0 +1,277 @@
+---
+title: "johnsdatamashmedian"
+output: html_document
+---
+```{r}
+rm(list=ls())
+
+library('mash')
+
+
+t=read.table("tbatchcorrected.txt")
+b=read.table("betabatchcorrected.txt")
+se=read.table("sebetabatchcorrected.txt")
+#Now wfull will be the median
+wfull=t(apply(b,1,function(x){x-median(x)}))
+##show that they sum to 0
+```
+
+Now we proceed as in mash, selecting the strongest deviations from the median:
+```{r}
+
+s.j=se/se
+absmat=abs(t(apply(t,1,function(x){x-median(x)})))
+tmedian=(t(apply(t,1,function(x){x-median(x)})))
+
+index=which(rowSums(absmat>4)>0)
+length(index)
+
+
+sparsestrongt=tmedian[index,]
+strongprojectedt=sparsestrongt
+```
+
+
+
+```{r filewrite,eval=T}
+
+write.table(sparsestrongt,"sparsestrongt.txt",col.names = FALSE,row.names=FALSE)
+
+```
+
+
+Now, we need to project into the centered space to estimate the covariance matrix of the true deviations, using the full L since $v$ will be R, and not $R-1$.
+
+
+```{r,eval=T}
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen sparsestrongt.txt -g 137 -k 5 -n 8 i -o sparseFmediancentered')
+A="sparseFmediancentered"
+
+factor.mat=as.matrix(read.table("sparseFmediancentered_F.out"))
+lambda.mat=as.matrix(read.table("sparseFmediancentered_lambda.out"))
+
+library("ExtremeDeconvolution")
+
+max.step=deconvolution.em.with.bovy(t.stat = strongprojectedt,factor.mat = factor.mat,v.j = s.j,lambda.mat = lambda.mat,K = 3,P = 3 )
+
+##Show how the ranks is preserved
+apply(max.step$true.covs,1,function(x){qr(x)$rank})
+
+
+A="sparseoldmash"
+
+covmash=compute.hm.mash.covmat.all.max.step.fixed.omega(omega = 2,Q = 5,lambda.mat = lambda.mat,factor.mat = factor.mat,max.step = max.step,zero = TRUE,power = 2,A,bma = TRUE)$cov
+
+sapply(covmash,max)
+
+##Show how the ranks is preserved
+apply(max.step$true.covs,1,function(x){qr(x)$rank})
+
+
+all.equal(covmash[[2]]/max(diag(covmash[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
+all.equal(covmash[[3]]/max(diag(covmash[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
+all.equal(covmash[[9]]/max(diag(covmash[[9]])),max.step$true.covs[2,,]/max(diag(max.step$true.covs[2,,])))
+
+length(covmash)
+# 
+# 
+covmash=compute.hm.covmat.all.max.step(max.step = max.step,b.hat = wfull,se.hat = se,t.stat = strongprojectedt,Q = 5,lambda.mat = lambda.mat,A = "sparseoldmash",factor.mat = factor.mat,zero = T,power = 2)$covmat
+
+all.equal(covmash[[2]]/max(diag(covmash[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
+all.equal(covmash[[3]]/max(diag(covmash[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
+all.equal(covmash[[9]]/max(diag(covmash[[9]])),max.step$true.covs[2,,]/max(diag(max.step$true.covs[2,,])))
+
+```
+
+Now, proceed as always, estimating likelihood and computing posteriors.
+
+```{r mashmethod, eval=F}
+A="sparseoldmash"
+compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covmash,A=A,pen=1)
+
+
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covmash,b.gp.hat=wfull,se.gp.hat = se,pis,A=A,checkpoint = FALSE)})
+```
+
+
+
+Let's look at the 'learned' covariance matrix of each as well as the true covariance matrices of each, and see how they comapre to the true configurations. Recall that the true configurations looked like this:
+
+
+```{r}
+pis=readRDS("pissparseoldmash.rds")$pihat
+pi.mat.old.mash=matrix(pis[-length(pis)],ncol=18,byrow=TRUE)
+covmash=readRDS("covmatsparseoldmash.rds")
+
+library('gplots')
+library('colorRamps')
+
+for(i in 2:9){
+  x=covmash[[i]]
+  heatmap.2(x/max(diag(x)),Rowv = NULL,Colv = NULL,dendrogram = "none",col=blue2green,density.info = "none",trace="none",main=paste0("CovMash",round(colSums(pi.mat.old.mash)[i],2)))}
+
+
+
+```
+
+
+Test to show our calculations are accurate:
+
+```{r,eval=T,echo=T}
+mash.means=as.matrix(read.table("sparseoldmashposterior.means.txt")[,-1])
+lfsr.mash=as.matrix(read.table("sparseoldmashlfsr.txt"))[,-1]
+cov=readRDS("covmatsparseoldmash.rds")
+pis=readRDS("pissparseoldmash.rds")$pihat
+pi.mat.old.mash=matrix(pis[-length(pis)],ncol=18,byrow=TRUE)
+#pisnobase=readRDS("pissparseLwithED.rds")$pihat
+#pi.mat.nobase=matrix(pisnobase[-length(pisnobase)],ncol=18,byrow=TRUE)
+barplot(colSums(pi.mat.old.mash))
+#barplot(colSums(pi.mat.nobase))
+
+w=data.frame(wfull)
+R=ncol(w)
+j=10
+
+arrays=post.array.per.snp.no.baseline(j = 10,covmat = cov,b.gp.hat = w,se.gp.hat = se,L = diag(1,R))
+mash.arrays=post.array.per.snp(j = 10,covmat = cov,b.gp.hat = w,se.gp.hat = se)
+##show same algebra
+
+
+k=5
+
+V.gp.hat=diag(se[j,])^2
+
+b.mle = as.vector(w[j,])
+
+lapply(seq(1:5),function(x){all.equal(arrays[[x]],mash.arrays[[x]])})
+L=diag(1,R)
+LSigL=L%*%cov[[k]]%*%t(L)
+LVL=L%*%V.gp.hat%*%t(L)
+
+LSigL_list=lapply(cov,function(x){L%*%x%*%t(L)})
+identical(LSigL_list[[k]],LSigL)
+identical(as.numeric(arrays$post.means[k,]),as.numeric(post.mean.with.proj(b.mle = t(b.mle),tinv = solve(LVL+L%*%cov[[k]]%*%t(L)),U.k = cov[[k]],L = L)))
+identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(tinv = solve(LVL+L%*%cov[[k]]%*%t(L)),U.k = cov[[k]],L = L))))
+
+
+
+
+b.mle=as.vector(t(w[j,]))##turn i into a R x 1 vector
+V.gp.hat=diag(se[j,])^2
+V.gp.hat.inv <- solve(V.gp.hat)
+U.gp1kl= (post.b.gpkl.cov(V.gp.hat.inv, cov[[k]]))
+  
+identical(as.numeric(mash.arrays$post.means[k,]),as.numeric(post.b.gpkl.mean(b.mle = b.mle,V.gp.hat.inv = V.gp.hat.inv,U.gp1kl = U.gp1kl)))
+
+identical(as.numeric(mash.arrays$post.covs[k,]),as.numeric(diag(U.gp1kl)))
+
+
+
+log.lik.snp=log.lik.func(b.mle,LVL,LSigL_list)
+log.lik.minus.max=log.lik.snp-max(log.lik.snp)
+exp.vec=exp(log.lik.minus.max)
+post.weights=t(exp.vec*pis/sum(exp.vec*pis))
+
+all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(mash.means[j,]))
+
+```
+
+
+Let's also plot pairwise sharing by magnitude and sign:
+
+
+
+```{r pairwisesharing}
+library("mashr")
+post.means=as.matrix(read.table("sparseoldmashposterior.means.txt")[,-1])
+lfsr.mash=as.matrix(read.table("sparseoldmashlfsr.txt"))[,-1]
+
+se.matched=as.matrix(read.table("sebetabatchcorrected.txt"))
+strain.names=read.table("StrainNames.txt",header = T,stringsAsFactors = F)[,1]
+pm.mash.beta=post.means*se.matched
+colnames(pm.mash.beta)=colnames(lfsr.mash)=strain.names
+lfsr.mash.sig=lfsr.mash[rowSums(lfsr.mash<0.05)>0,]##only 137,223 are significant in at least one subgroup
+pm.mash.sig=pm.mash.beta[rowSums(lfsr.mash<0.05)>0,]
+
+signheatmap=compute.sharing.by.sign(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.mash.beta = pm.mash.sig)
+signheatmap[lower.tri(signheatmap)] <- NA
+magheatmap=compute.mag.by.sharing(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.mash.beta = pm.mash.sig)
+magheatmap[lower.tri(magheatmap)] <- NA
+
+
+library('colorRamps')
+library('corrplot')
+library(gplots)
+library(ggplot2)
+
+class(signheatmap)
+
+
+
+library('lattice')
+
+clrs <- colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
+                               "#E0F3F8","#91BFDB","#4575B4")))(64)
+#clrs[63:64] <- "darkviolet"
+lat=signheatmap
+lat[lower.tri(lat)] <- NA
+print(levelplot(lat,col.regions = clrs,xlab = "",ylab = "",colorkey = TRUE,main="PairwiseSharingBySign"))
+
+
+heatmap.2(magheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by Magnitude"),
+          cexRow=0.6,cexCol=2,cex.main=0.5,#breaks=seq(0.35,1,0.01),
+          labCol=NA)
+
+library('lattice')
+
+clrs <- colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
+                               "#E0F3F8","#91BFDB","#4575B4")))(64)
+#clrs[63:64] <- "darkviolet"
+absmagheatmap=compute.mag.by.sharing(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.mash.beta = abs(pm.mash.sig))
+absmagheatmap[lower.tri(absmagheatmap)] <- NA
+lat=absmagheatmap
+lat[lower.tri(lat)] <- NA
+print(levelplot(lat,col.regions = clrs,
+                xlab = "",ylab = "",colorkey = TRUE,main="PairwiseSharingByMagnitude"))
+```
+
+Now, let's look at sharing my asbolute value of magntiude:
+```{r}
+
+heatmap.2(signheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by Sign"),
+          cexRow=0.6,cexCol=0.5,cex.main=0.5)
+#,breaks=seq(0.7,1,0.01))
+
+heatmap.2(1-signheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by Opposite Sign"),
+          cexRow=0.6,cexCol=0.5,cex.main=0.5)
+#,breaks=seq(0.7,1,0.01))
+
+
+
+absmagheatmap=compute.mag.by.sharing(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.mash.beta = abs(pm.mash.sig))
+absmagheatmap[lower.tri(absmagheatmap)] <- NA
+heatmap.2(absmagheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by abs(Magnitude)"),
+          cexRow=0.6,cexCol=2,cex.main=0.5,#breaks=seq(0.35,1,0.01),
+          labCol=NA)
+
+heatmap.2(magheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by Magnitude"),
+          cexRow=0.6,cexCol=2,cex.main=0.5,#breaks=seq(0.35,1,0.01),
+          labCol=NA)
+```
+
+
+
+
+
