@@ -7,7 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library('knitr')
-knitr::opts_chunk$set(cache=TRUE)
+
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='~/Dropbox/PhDThesis/Figures/', warning=FALSE, message=FALSE)
 ```
 
 
@@ -44,8 +45,8 @@ mean(index<1000)
 #index=which(rowMeans(abs(t(L%*%t(c$t))))>1.3)##choose the associations with average deviation large.
 
 ##show deviations
-plot(rowSums(absmat>4))
-points(index,rowSums(absmat>4)[index],col="blue")
+#plot(rowSums(absmat>4))
+#points(index,rowSums(absmat>4)[index],col="blue")
 
 sparsestrongt=t(L%*%t(t[index,]))
 
@@ -157,7 +158,7 @@ and choose the set of $\pi$ that maximizes compute the following likelihood at e
 $$L_{R-1,R}  chat _j \sim N (0, L_{R-1,R}  \Sigma_{p} L_{R-1,R} ' + L_{R-1,R} \hat{V_j} L_{R-1,R} ') $$
  
 Now compute likelihood without ED:
-```{r}
+```{r,eval=F}
 w=data.frame(wfull)[,-1]
 
 A="noedcovsparse"
@@ -209,7 +210,7 @@ all.equal(edcov[[9]]/max(diag(edcov[[9]])),max.step$true.covs[2,,]/max(diag(max.
 
 Now let's compute the likelihood with ED:
 
-```{r eval=T}
+```{r eval=F}
 w=data.frame(wfull)[,-1]
 
 compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
@@ -282,10 +283,8 @@ wfull=t(L%*%t(b))
 
 Now we proceed as in mash, selecting the strong t statistics:
 ```{r}
-
 s.j=se/se
 absmat=abs(t(L%*%t(c$t)))
-
 
 index=which(rowSums(absmat>4)>0)
 length(index)
@@ -293,8 +292,6 @@ mean(index<1000)
 
 factor.mat=as.matrix(read.table("sparseF_F.out"))
 lambda.mat=as.matrix(read.table("sparseF_lambda.out"))
-
-
 
 strongprojectedtsimulations=t(L%*%t(t[index,]))
 max.step=deconvolution.em.with.bovy(t.stat = strongprojectedtsimulations,factor.mat = factor.mat,v.j = s.j,lambda.mat = lambda.mat,K = 3,P = 3 )
@@ -324,9 +321,9 @@ se.test=s.j
 weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covmash,b.gp.hat=wfull,se.gp.hat = se,pis,A=A,checkpoint = FALSE)})
 ```
 
-WE can't compare the likelihoods because there are fewer matrices.
+We can't compare the likelihoods because there are fewer matrices.
 
-```{r}
+```{r,eval=F}
 pis=readRDS("pissparseoldmash.rds")$pihat
 pi.mat.old.mash=matrix(pis[-length(pis)],ncol=18,byrow=TRUE)
 pisnobase=readRDS("pissparseLwithED.rds")$pihat
@@ -338,7 +335,7 @@ barplot(colSums(pi.mat.nobase),main="NoBase",names=c("ID",rep(paste0("UkM",(2:9)
  
 It seems that _mashnobaseline_ puts more weight on the 'singleton configurations'.
 
-Let's look at the 'learned' covariance matrix of each as well as the true covariance matrices of each, and see how they comapre to the true configurations. Recall that the true configurations looked like this:
+Let's look at the 'learned' covariance matrix of each as well as the true covariance matrices of each, and see how they compare to the true configurations. Recall that the true configurations looked like this:
 
 ```{r}
 c=readRDS("chatfixedomega.rds")
@@ -346,6 +343,12 @@ diag(c$covmat)
 ```
 
 ```{r}
+pis=readRDS("pissparseoldmash.rds")$pihat
+pi.mat.old.mash=matrix(pis[-length(pis)],ncol=18,byrow=TRUE)
+
+pisnobase=readRDS("pissparseLwithED.rds")$pihat
+pi.mat.nobase=matrix(pisnobase[-length(pisnobase)],ncol=18,byrow=TRUE)
+
 covmash=readRDS("covmatsparseoldmash.rds")
 coved=readRDS("covmatsparseLwithED.rds")
 library('gplots')
@@ -371,8 +374,10 @@ mash.means=as.matrix(read.table("sparseoldmashposterior.means.txt")[,-1])
 lfsr.mash=as.matrix(read.table("sparseoldmashlfsr.txt"))[,-1]
 cov=readRDS("covmatsparseoldmash.rds")
 pis=readRDS("pissparseoldmash.rds")$pihat
+
 pi.mat.old.mash=matrix(pis[-length(pis)],ncol=18,byrow=TRUE)
 pisnobase=readRDS("pissparseLwithED.rds")$pihat
+pi.mat.old.mash=matrix(pis[-length(pis)],ncol=18,byrow=TRUE)
 pi.mat.nobase=matrix(pisnobase[-length(pisnobase)],ncol=18,byrow=TRUE)
 barplot(colSums(pi.mat.old.mash))
 barplot(colSums(pi.mat.nobase))
@@ -438,6 +443,10 @@ mash.means=as.matrix(read.table("sparseoldmashposterior.means.txt")[,-1])
 standard=sqrt(mean((beta-mle)^2))
 sqrt(mean((mash.means-beta)^2))/standard
 sqrt(mean((mash.nobaselinemeans-beta)^2))/standard
+
+rmse.all.table=rmse.all.table=cbind(mash=sqrt(mean((mash.means-beta)^2))/standard,mnb=sqrt(mean((mash.nobaselinemeans-beta)^2))/standard)
+barplot(as.numeric(rmse.all.table),main="RMRSE:MASH vs MNB",
+        ylab="relative error (RRMSE)",xlab="Method",col=c("green","red"),names=colnames(rmse.all.table),ylim=c(0,0.9),cex.main=1.5,cex.lab=1,cex.names=1.5)
 ```
 
 
@@ -470,7 +479,7 @@ barplot(diag(covs[[2]]/max(diag(covs[[2]]))))
 w=data.frame(wfull)[,-1]
 ```
 
-```{r,eval=T}
+```{r,eval=F}
 A="withfixedomegamnb"
 compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = covs,A = A,pen = 1,L = L[-1,])
 pis=readRDS(paste0("pis",A,".rds"))$pihat
@@ -532,7 +541,7 @@ sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of a
 
 ```
 
-```{r mashtruth,eval=T}
+```{r mashtruth,eval=F}
 A="mashtruthwithfixedomega"
 covs=readRDS("covmatwithfixedomega.rds")
 length(covs)
@@ -551,7 +560,9 @@ And test to see if calculations are accurate:
 
 ```{r,eval=T,echo=T}
 cov=readRDS("covmatwithfixedomega.rds")
-mash.means=as.matrix(read.table("mashtruthwithfixedomegaposterior.means.txt")[,-1])
+c=readRDS("chatfixedomega.rds")
+
+mash.means=as.matrix(read.table("mashtruthwithfixedomegaposterior.means.txt"))
 w=data.frame(wfull)
 R=ncol(w)
 j=10
@@ -601,19 +612,28 @@ all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(mash.means[j,]
 
 mashnobase.means=as.matrix(read.table("withfixedomegamnbposterior.means.txt")[,-1])
 
+c=readRDS("chatfixedomega.rds")
 beta=as.matrix(c$beta)
 mle=as.matrix(wfull)
 mash.means=as.matrix(mash.means)
 standard=sqrt(mean((beta-mle)^2))
-sqrt(mean((mash.means-beta)^2))/standard
-sqrt(mean((mashnobase.means-beta)^2))/standard
+mashrmse=sqrt(mean((mash.means-beta)^2))/standard
+mnbrmse=sqrt(mean((mashnobase.means-beta)^2))/standard
+
+rmse.all.table=cbind(mash=mashrmse,mnb=mnbrmse)
+
+barplot(as.numeric(rmse.all.table),main="RMRSE:MASH vs MNB",
+        ylab="relative error (RRMSE)",xlab="Method",col=c("green","red"),names=colnames(rmse.all.table),ylim=c(0,0.9),cex.main=1.5,cex.lab=1,cex.names=1.5)
+
+
+
 ```
 
-Let's compare the learned matrices which receive the most weighting in mash and mashnobaseline. First, let' look at the dsitribution of matrices.
+Let's compare the learned matrices which receive the most weighting in mash and mashnobaseline. First, let's look at the distribution of matrices.
 
 Let's do the same thing comparing the pis using mash from the truth and from mashnobaseline:
 
-```{r}
+```{r,eval=F}
 pimash=readRDS("pismashtruthwithfixedomega.rds")$pihat
 pied=readRDS("piswithfixedomegamnb.rds")$pihat
 par(mfrow=c(1,2))

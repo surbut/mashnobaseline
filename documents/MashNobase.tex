@@ -105,9 +105,9 @@ where the `true' uncentered averages $\ceff$ can be written as follows:
 \ceff | \mu, \vb  = \mu \bm{1} + \vb
 \end{equation}
 
-Where $\mu$ is a scalar that is the mean of the `true' uncentered averages $\ceff$.
+Where \mu is a scalar that is the mean of the `true' uncentered averages \ceff.
 
-$\vb$ is a zero-centered mixture of multivariate normals:
+\vb is a zero-centered mixture of multivariate normals:
 
 
  \begin{equation}
@@ -115,8 +115,30 @@ $\vb$ is a zero-centered mixture of multivariate normals:
   \vb | \bm{\pi},\bf{U} \sim \sum_{k,l} \pi_{k,l} \;{\it N}_R(\bm{0}, \omega_l U_{k})
 \end{equation}
 
-Critically, our quantity of interest now, $\vb$  represents the true `deviations` from average gene expression across each condition and can be seen as the effects in $\mash$.
+Critically, our quantity of interest now, $\vb$  represents the true `deviations` from average gene expression across each condition and can be seen as the effects in \mash{}.
 
+Thus:
+
+Let 
+
+\begin{equation}
+L \ceff = L \mu \bm{1} + L \vb
+\end{equation}
+
+L is the $RxR$ centering matrix $L_{r}=I_{r}-{\tfrac  {1}{r}}{\mathbf  {1}}{\mathbf  {1}}^{\top }$ which removes the mean of each R column vector.
+
+Then :
+
+\begin{equation}
+\label{model}
+\begin{aligned}
+L \ceff &= L \mu \bm{1}+ L \vb \\
+L \ceff &= 0 + L \vb \\
+L \chat &= L \vb + E \\
+\end{aligned}
+\end{equation}
+
+Where $E \sim \Norm (0, L\hat{V} L')$. Note that this is identical to Bovy equation (1). 
 
 
 
@@ -128,7 +150,7 @@ and then expanding this list by a fixed grid of scalar weights $\omega_{l}$ such
 \begin{itemize}
 \item estimate the $P$ prior weights $\bm\pi$ on this fixed P-list of covariance matrices from a training matrix of randomly selected feature expression measurements across conditions
 \item compute the posterior distribution $\vb | L \chat, \bm{s_{j}}$
-
+\end{itemize}
 Let 
 
 \begin{equation}
@@ -156,9 +178,9 @@ Where $E \sim \Norm (0, L\hat{V} L')$. Note that this is identical to Bovy equat
 
 
 
-\section{Likelihood with $\mnb$}
+\section{Likelihood with \mnb{}}
 
-With $\mnb$, we will replace the RxR matrix $L$ with the R-1xR matrix $\lstar$, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of \wfit is guaranteed to be equal to the dimension of \wfit.
+With \mnb{}, we will replace the RxR matrix $L$ with the R-1xR matrix \lstar, effectively removing a data point from the observed uncentered statistics, such that the rank of the marginal variance of \wfit is guaranteed to be equal to the dimension of \wfit.
 
 Now for each gene J at each component k, integrating over $\vb$, 
 
@@ -173,7 +195,9 @@ $\lstar$ \chat \sim \Norm (0, $\lstar$  U_{k} $\lstar$ ' + $\lstar$ \hat{V} $\ls
 
 Note that because $\lstar$ removes one rank from every vector, adding a rank 1 matrix ($\onemat$) to  $U_{k}$ will not change the likelihood.
 
-And thus we can use the Bovy et al algorithm invoked in both the Extreme Deconvolution package and in `Sarah's MixEm' where according to Bovy's language we observe a noisy estimate of uncentered averages $\chat$ and can center them to and $w_{j} = $\lstar$ \chat_{j}$.
+And thus we can use the Bovy et al algorithm invoked in both the Extreme Deconvolution package {ref:%and in `Sarah's MixEm' 
+
+where according to Bovy's language we observe a noisy estimate of uncentered averages $\chat$ and can center them to and $w_{j} = $\lstar$ \chat_{j}$.
 
 Then we can apply Bovy:
 
@@ -273,7 +297,7 @@ Our question is, if you were to add the matrix of 1s (i.e., $\onemat$ ) to each 
 And thus we see that $\mu^{1}_{jp} ( \Sigma_p ) =  \mu^{1}_{jp} ( \Sigma_p + \onemat)$ if the projection matrix is equal to the centering matrix $\lstar$. But this result seems strange!
 
 
-This is correct. We can see that in Bovy (11) and (12), to derive the posterior condition distribution of $\vb | \wfit$, he uses the following formulat: 
+This is correct. We can see that in Bovy (11) and (12), to derive the posterior condition distribution of $\vb | \wfit$, he uses the following formula: 
 
 If x is partitioned as follows:
 
@@ -384,11 +408,11 @@ U^{1} ( \Sigma_p ) = \Sigma - \Sigma \lstar ' T^{-1} \lstar  \Sigma_{p}\\
 
 \subsection{Selecting The Covariance Matrices}
 
-We initiate our set of covariance matrices for the denoising step as before in $\mash$, where now we compute the empirical covariance matrices and a variety of dimensional reductions on the feature-centered JxR \textit{matrix} of maximum average, $L \hat{C}' $ instead of $\hat{C}$ alone. In practice, we actually use the matrix of maximum uncentered $T$ statistics. Three critical things to note:
+We initiate our set of covariance matrices for the denoising step as before in \mash{}, where now we compute the empirical covariance matrices and a variety of dimensional reductions on the feature-centered JxR \textit{matrix} of maximum average, $L \hat{C}' $ instead of $\hat{C}$ alone. In practice, we actually use the matrix of maximum uncentered $T$ statistics. Three critical things to note:
 
 \begin{enumerate}
 \item Here, L will be $RxR$ because we need $U_{k}$ to be RxR
-\item When denoising with Bovy, our previous approach used the matrix of maximum $T$ statistics $T_{Mxr}$ to both initialize and train the BovyEM. Now, we will initalize with the MXR matrix of t($L_{R,R}T')$ (or alternatively, $TL$) and train the EM on the MxR-1 matrix of maximum $t($\lstar$T')$
+\item When denoising with Bovy, our previous approach used the matrix of maximum $T$ statistics $T_{Mxr}$ to both initialize and train the BovyEM. Now, we will initialize with the MXR matrix of t($L_{R,R}T')$ (or alternatively, $TL$) and train the EM on the MxR-1 matrix of maximum $t($\lstar$T')$
 \item When choosing $\omega$, we will use the diagonal of $L V L'$, where $V$ is $D(s.j^2)$, and select from the MxR matrix of centered T statistics and their centered standard errors.
 \item We will choose the maxes as those that have a maximum centered t statistic of at least some threshold in at least one (or averaged across tissues) rather than those that satisfy an ash criteria in at least one tissue because we know that choosing uncorrelated $L V L'$ as the standard errors with which to input to ash  is incorrect.
 \end{enumerate}
@@ -397,7 +421,7 @@ We initiate our set of covariance matrices for the denoising step as before in $
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Previous Model}
 
-If we were to apply the old $\mash$ to data simulated as in (\ref{model}) in which we assumed the mean was known, we would write
+If we were to apply the old \mash{} to data simulated as in (\ref{model}) in which we assumed the mean was known, we would write
 
 \begin{equation}
 \label{mashmodel}
@@ -435,28 +459,27 @@ Here, the likelihood of \wfit = $L$ \chat$ integrating over $\vb$ is:
 
 In the new model, we incorporate the centering matrix $L$ into our selection of covariance matrices by modeling $L\chat = L \vb + E$ where $E \sim N(0,LVL')$. \
 
-Using old mash, we assume that the mean centered estimates directly approximate $\vb$, that is $\chat-\mu$ = $\vb + E$ where $E \sim N(0,V)$. 
+Using old $\mash{}$, we assume that the mean centered estimates \textbf{directly approximate} \vb, that is $\chat-\mu$ = $\vb + E$ where $E \sim N(0,V)$. 
 We want to estimate effects with no baseline, such that null effects aren't forced to be negative (by a competitive default, given that non-null effects are seen as positive, or vice versa). We hope that this method will simply shrink null effects to zero and recognize the direction of the non-null effects, instead of making both null and non-null positive (negative) relative to some intermediate average.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Intuition}
+%\section{Intuition}
+%
+%Consider the situation in which we observe uncentered expression \chat = \begin{bmatrix} 1 & 4 &1 \end{bmatrix}
+%
+%We want to produce estimates which recognize that $\vb$ is \begin{bmatrix} 0 & 3 &0 \end{bmatrix},  not  $\begin{bmatrix} -1 & 2 & -1 \end{bmatrix}$. 
+%
+%We hope to improve upon the measurement $L \chat \begin{bmatrix} -1 & 2 & -1 \end{bmatrix}$ as an approximation of $\vb$ so that rather than 
+%
+%\begin{equation}
+%\begin{aligned}
+%L \chat \sim N (v,E)\\
+%\lstar \chat \sim N(L\vb,E)\\
+%%\end{equation}
+%\end{aligned}
 
-Consider the situation in which we observe uncentered expression \chat = \begin{bmatrix} 1 & 4 &1 \end{bmatrix}
-
-We want to produce estimates which recognize that $\vb$ is \begin{bmatrix} 0 & 3 &0 \end{bmatrix},  not  \begin{bmatrix} -1 & 2 & -1 \end{bmatrix} 
-
-We hope to improve upon the measurement $L \chat \begin{bmatrix} -1 & 2 & -1 \end{bmatrix}$ as an approximation of $\vb$ so that rather than 
-
-\begin{equation}
-\begin{aligned}
-L \chat \sim N (v,E)\\
-\lstar \chat \sim N(L\vb,E)\\
-\end{equation}
-\end{aligned}
-
-Note that the error in the first line will by $N \sim (0,V)$, while in the second line, it will be $N \sim(0, \lstar V \lstar')$, and as we previously pointed out, $\lstar$ is R-1 while $L$ is R.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -464,9 +487,13 @@ Note that the error in the first line will by $N \sim (0,V)$, while in the secon
 
 \begin{itemize}
 
-\item When using \mash and \mnb to generate inference matrices and compute likelihoods and posteriors, respectively, \mnb seems no better (see ../Simulations/fixedomegawithinference/Untitled.html)
-\item  When we use the true prior for both frameworks, \mnb is much better (see ../Simulations/Withbothtrueandestimatedprior.html) because we can see that using the same set of covariance matrices, \mnb is better able to emphasize the true configurations because the likelihood and posterior computations incorporate L.
-\item Recall, for mash:
+\item When using \mash and \mnb to generate inference matrices and compute likelihoods and posteriors, respectively, \mnb 
+seems no better (see ../Simulations/fixedomegawithinference/Untitled.html).
+
+\item  When we use the true prior for both frameworks, \mnb is much better 
+(see ../Simulations/Withbothtrueandestimatedprior.html) because we can see that using the same set of covariance matrices, \mnb is better able to emphasize the true configurations because the likelihood and posterior computations incorporate L.
+
+\item Recall, for \mash{}:
 $$w_{j,R} ~ N(0,V+U)$$
 $$w_{j,R-1} ~ N(0,LVL' + LUL')$$ where L is the R-1 x R centering matrix.
 
@@ -477,7 +504,7 @@ $$chat = c + E$$
 $$v \sim \sum_p N(0,Uk)$$
 $$E \sim N(0,V)$$
 
-So even if the Uks are different, the likelihood and corresponding $\pi$s will be different.
+So even if the $U_ks$ are different, the likelihood and corresponding $\pi$s will be different.
 
 
 
@@ -542,7 +569,7 @@ So even if the Uks are different, the likelihood and corresponding $\pi$s will b
 %\tilde{\pi}_{jp} = \frac{\Norm(L\chat;0, T_{jp})}{\sum_{p} \Norm(L\chat;0, T_{jp})}
 %\end{equation}
 
-\section{Differences required over $\mash$ implementation}
+\section{Differences required over \mash{} implementation}
 
 \begin{itemize}
 \item We will now work with a matrix of observed column-centered gene averages, $L \hat{C} '$ in order to:
@@ -555,23 +582,26 @@ So even if the Uks are different, the likelihood and corresponding $\pi$s will b
 \item It is critical to note that here \textbf{$L$ will need to be RxR because $U_{k}$ must be RxR}
 \item The new distribution we seek to estimate for each j is then $v | $\lstar$ \chat , \bm{s}_{j}$
 \item To choose the maxes, I think we ought to use a $w_{j}$ cutoff since computing the univariate lfsr on $w_{j}$ and the diagonal of $LVL'$ assumes that $LVL'$ is diagonal when we know it cannot be.
-\end{itemize}
-
-\section{ $\mash$ implementation}
-
-\begin{itemize}
-\item We will now work with a matrix of observed column-centered gene averages, $L \hat{C} '$ in order to:
-\begin{enumerate}
-	\item initialize our choice of $U_{k}$;
-	\item  choose the maxes by which to denoise, 
-	\item choose our set of scales, $\omega_{l}$
-	\item compute our hierarchical weights, $\bm{\pi}_{p}$ as well as our posteriors. 
-\end{enumerate}
-\item It is critical to note that here \textbf{L will need to be RxR because $U_{k}$ must be RxR}
-\item Now, we ignore $\lstar$ and continue with L because we see that \ref{mashlik} only requires the matrix of centered average gene expression
-\item The new distribution we seek to estimate for each j is then $v | L \chat , \bm{s}_{j}$
+\item For the \mash{} implementation, the new distribution we seek to estimate for each j is then $v | L \chat , \bm{s}_{j}$
 \item We proceed as before and as in $\mnb$, feeding in the matrix of centered summary statistics and this time, the matrix of standard errors (rather than the list of $\lstar$ V $\lstar$' arrays)
+
 \end{itemize}
+
+%\section
+%
+%\begin{itemize}
+%\item We will now work with a matrix of observed column-centered gene averages, $L \hat{C} '$ in order to:
+%\begin{enumerate}
+%	\item initialize our choice of $U_{k}$;
+%	\item  choose the maxes by which to denoise, 
+%	\item choose our set of scales, $\omega_{l}$
+%	\item compute our hierarchical weights, $\bm{\pi}_{p}$ as well as our posteriors. 
+%\end{enumerate}
+%\item It is critical to note that here \textbf{L will need to be RxR because $U_{k}$ must be RxR}
+%\item Now, we ignore $\lstar$ and continue with L because we see that \ref{mashlik} only requires the matrix of centered average gene expression
+%\item The new distribution we seek to estimate for each j is then $v | L \chat , \bm{s}_{j}$
+%\item We proceed as before and as in $\mnb$, feeding in the matrix of centered summary statistics and this time, the matrix of standard errors (rather than the list of $\lstar$ V $\lstar$' arrays)
+%\end{itemize}
 
 %Some questions:
 %
@@ -843,9 +873,11 @@ So even if the Uks are different, the likelihood and corresponding $\pi$s will b
 
  In this simulation framework, there are 1000 real associations in 10000 null across 44 tissues.
  
- Each 'real association' is simulated in the following manner:
+ Each `real association' is simulated in the following manner:
  
-$\begin{verbatim}{function(n=1000,d=44,betasd=1,esd=0.1,K=10){
+$\begin{verbatim}{
+
+function(n=1000,d=44,betasd=1,esd=0.1,K=10){
   library("MASS")
   library("mvtnorm")
   J=0.10*n
@@ -878,7 +910,7 @@ $\begin{verbatim}{function(n=1000,d=44,betasd=1,esd=0.1,K=10){
   shat=sj,error=e,ceff=c,F=F,omega=omega))}\end{verbatim}}$
   
   
-Such that for every true associations a factor is chosen and 'standardized' such that the maximum value across the diagonal is one. The true effects are then simulated according to the assigned component, scaled by some factor $\omega$, and then and this scaling is added to a chosen mean for the gene, centered at o with $\sigma^{2}$ of 1. 
+Such that for every true associations a factor is chosen and 'standardized' such that the maximum value across the diagonal is one. The true effects are then simulated according to the assigned component, scaled by some factor $\omega$, and then and this scaling is added to a chosen mean for the gene, centered at 0 with $\sigma^{2}$ of 1. 
 
 The true $ceff$ is then computed as 
 $$ceff = \mu + \beta$$ 
@@ -886,7 +918,7 @@ $$ceff = \mu + \beta$$
 and
 $$chat = ceff + E$$ where $E \sim N(0,V)$ and V is diagonal.
 
-This function reports the true $\mu$, the true $\beta$ for the 1000 real genes and their associated componenent, as well as the standard error.
+This function reports the true $\mu$, the true $\beta$ for the 1000 real genes and their associated component, as well as the standard error.
 
 \section{Simpler Simulation}
 
@@ -936,7 +968,7 @@ $$chat = ceff + E$$ where $E \sim N(0,V)$ and V is diagonal.
 
 This function reports the true $\mu$, the true $\beta$ for the 1000 real genes and their associated componenent, as well as the standard error.
 
-As mentioned, in $\mnb$ we will use the input matrix of $w = t(\lstar t(\chat))$ and list of $\lstar V \lstar'$ covariance of the errors, while in $\mash$, we simply input w = $t (L t(\chat))$  and the JxR matrix of standard errors.
+As mentioned, in $\mnb$ we will use the input matrix of $w = t(\lstar t(\chat))$ and list of $\lstar V \lstar'$ covariance of the errors, while in \mash{}, we simply input w = $t (L t(\chat))$  and the JxR matrix of standard errors.
 
 
 

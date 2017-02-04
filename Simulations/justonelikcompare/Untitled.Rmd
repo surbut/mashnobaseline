@@ -1,0 +1,216 @@
+First, run with the empirical covariance matrix:
+
+```{r}
+rm(list=ls())
+library('mash')
+set.seed(123)
+source("~/matrix_ash/R/mashnobasescripts.R")
+source("~/matrix_ash/R/truthscripts.R")
+library("ExtremeDeconvolution")
+R=8
+c=readRDS("chatfixedomega.rds")
+t=c$t;b=c$chat;se=c$shat
+#hist(t)
+#hist(b)
+R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+s.j=se/se
+
+absmat=abs(t(L%*%t(c$t)))
+index=which(rowSums(absmat>4)>0)
+length(index)
+mean(index<1000)
+strongprojectedt=t(L%*%t(t[index,]))
+
+
+
+
+lvllist=genlvllist(s.j[index,],L = L[-1,])
+
+
+##w should represent transformed betahats using all R subgroups and j genes
+wfull=t(L%*%t(b))
+sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
+dim(wfull)
+dim(sjmat)
+
+t.stat =strongprojectedt;v.j = lvllist;L = L[-1,]
+init.cov.list=list()
+init.cov.list[[1]]=cov(strongprojectedt)
+#head(init.cov.list)
+mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)  
+ydata=strongprojectedt[,-1]
+xamp=1
+xcovar=init.cov.list
+fixmean=TRUE     
+ycovar=v.j     
+xmean=mean.mat   
+projection=list();for(l in 1:nrow(t.stat)){projection[[l]]=L}
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+se.train=se
+
+covlist=e$xcovar
+R=8;L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+train.b=data.frame(wfull)[,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
+lik.mat=t(sapply(seq(1:J),function(j){
+  V.gp.hat=diag(se.train[j,])^2;
+  LVL=L%*%V.gp.hat%*%t(L);
+  LSigL=L%*%covlist[[1]]%*%t(L)
+  b.mle=train.b[j,]
+  dmvnorm(x=b.mle, sigma=(LSigL + LVL),log=TRUE)}))
+
+dim(lik.mat)
+sum(log(exp(lik.mat)))
+j=1
+lik.mat[1]
+V.gp.hat=diag(se.train[j,])^2;
+LVL=L%*%V.gp.hat%*%t(L)
+LSigL=L%*%covlist[[1]]%*%t(L)
+dmvnorm(x=train.b[j,], sigma=(LSigL + LVL),log=TRUE)
+
+```
+
+Now do with the Identity:
+
+```{r}
+rm(list=ls())
+library('mash')
+set.seed(123)
+source("~/matrix_ash/R/mashnobasescripts.R")
+source("~/matrix_ash/R/truthscripts.R")
+library("ExtremeDeconvolution")
+R=8
+c=readRDS("chatfixedomega.rds")
+t=c$t;b=c$chat;se=c$shat
+#hist(t)
+#hist(b)
+R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+s.j=se/se
+
+absmat=abs(t(L%*%t(c$t)))
+index=which(rowSums(absmat>4)>0)
+length(index)
+mean(index<1000)
+strongprojectedt=t(L%*%t(t[index,]))
+
+
+
+
+lvllist=genlvllist(s.j[index,],L = L[-1,])
+
+
+##w should represent transformed betahats using all R subgroups and j genes
+wfull=t(L%*%t(b))
+sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
+dim(wfull)
+dim(sjmat)
+
+t.stat =strongprojectedt;v.j = lvllist;L = L[-1,]
+init.cov.list=list()
+init.cov.list[[1]]=diag(1,R)
+#head(init.cov.list)
+mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)  
+ydata=strongprojectedt[,-1]
+xamp=1
+xcovar=init.cov.list
+fixmean=TRUE     
+ycovar=v.j     
+xmean=mean.mat   
+projection=list();for(l in 1:nrow(t.stat)){projection[[l]]=L}
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+se.train=se
+
+covlist=e$xcovar
+R=8;L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+train.b=data.frame(wfull)[,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
+lik.mat=t(sapply(seq(1:J),function(j){
+  V.gp.hat=diag(se.train[j,])^2;
+  LVL=L%*%V.gp.hat%*%t(L);
+  LSigL=L%*%covlist[[1]]%*%t(L)
+  b.mle=train.b[j,]
+  dmvnorm(x=b.mle, sigma=(LSigL + LVL),log=TRUE)}))
+
+dim(lik.mat)
+sum(log(exp(lik.mat)))
+j=1
+lik.mat[1]
+V.gp.hat=diag(se.train[j,])^2;
+LVL=L%*%V.gp.hat%*%t(L)
+LSigL=L%*%covlist[[1]]%*%t(L)
+dmvnorm(x=train.b[j,], sigma=(LSigL + LVL),log=TRUE)
+  
+```
+
+Now do with the truth:
+
+
+```{r}
+rm(list=ls())
+library('mash')
+set.seed(123)
+source("~/matrix_ash/R/mashnobasescripts.R")
+source("~/matrix_ash/R/truthscripts.R")
+library("ExtremeDeconvolution")
+R=8
+c=readRDS("chatfixedomega.rds")
+t=c$t;b=c$chat;se=c$shat
+#hist(t)
+#hist(b)
+R=ncol(t)
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+s.j=se/se
+
+absmat=abs(t(L%*%t(c$t)))
+index=which(rowSums(absmat>4)>0)
+length(index)
+mean(index<1000)
+strongprojectedt=t(L%*%t(t[index,]))
+
+
+
+
+lvllist=genlvllist(s.j[index,],L = L[-1,])
+
+
+##w should represent transformed betahats using all R subgroups and j genes
+wfull=t(L%*%t(b))
+sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
+dim(wfull)
+dim(sjmat)
+
+t.stat =strongprojectedt;v.j = lvllist;L = L[-1,]
+init.cov.list=list()
+init.cov.list[[1]]=c$covmat
+#head(init.cov.list)
+mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)  
+ydata=strongprojectedt[,-1]
+xamp=1
+xcovar=init.cov.list
+fixmean=TRUE     
+ycovar=v.j     
+xmean=mean.mat   
+projection=list();for(l in 1:nrow(t.stat)){projection[[l]]=L}
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+se.train=se
+
+covlist=e$xcovar
+R=8;L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+train.b=data.frame(wfull)[,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
+lik.mat=t(sapply(seq(1:J),function(j){
+  V.gp.hat=diag(se.train[j,])^2;
+  LVL=L%*%V.gp.hat%*%t(L);
+  LSigL=L%*%covlist[[1]]%*%t(L)
+  b.mle=train.b[j,]
+  dmvnorm(x=b.mle, sigma=(LSigL + LVL),log=TRUE)}))
+
+dim(lik.mat)
+sum(log(exp(lik.mat)))
+j=1
+lik.mat[1]
+V.gp.hat=diag(se.train[j,])^2;
+LVL=L%*%V.gp.hat%*%t(L)
+LSigL=L%*%covlist[[1]]%*%t(L)
+dmvnorm(x=train.b[j,], sigma=(LSigL + LVL),log=TRUE)
+  
+```

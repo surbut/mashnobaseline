@@ -10,7 +10,9 @@ The weights don't make a sizeable difference, and the modeling with mean include
 
 
 ```{r setup, include=FALSE}
+require(knitr)
 knitr::opts_chunk$set(cache=TRUE)
+opts_chunk$set(fig.path = "/Users/sarahurbut/Dropbox/PhDThesis/Figures/") 
 ```
 
 
@@ -351,7 +353,7 @@ Let's also plot pairwise sharing by magnitude and sign:
 
 
 
-```{r pairwisesharing}
+```{r pairwisesharingmnb}
 library("mashr")
 post.means=read.table("batchcorrectwithEDposterior.means.txt")[,-1]
 lfsr.mash=read.table("batchcorrectwithEDlfsr.txt")[,-1]
@@ -361,6 +363,12 @@ pm.mash.beta=post.means*se.matched
 colnames(pm.mash.beta)=colnames(lfsr.mash)=strain.names
 lfsr.mash.sig=lfsr.mash[rowSums(lfsr.mash<0.05)>0,]##only 137,223 are significant in at least one subgroup
 pm.mash.sig=pm.mash.beta[rowSums(lfsr.mash<0.05)>0,]
+
+
+
+library(RColorBrewer)
+p=colorRampPalette(brewer.pal(9,"Greens"))(100)
+g=colorRampPalette(brewer.pal(9,"Blues"))(100)
 
 signheatmap=compute.sharing.by.sign(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.mash.beta = pm.mash.sig)
 signheatmap[lower.tri(signheatmap)] <- NA
@@ -384,7 +392,7 @@ clrs <- colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
 #clrs[63:64] <- "darkviolet"
 lat=signheatmap
 lat[lower.tri(lat)] <- NA
-print(levelplot(lat,col.regions = clrs,xlab = "",ylab = "",colorkey = TRUE,main="PairwiseSharingBySign"))
+print(levelplot(lat,col.regions = p,xlab = "",ylab = "",colorkey = TRUE,main="PairwiseSharingBySign"))
 
 
 heatmap.2(magheatmap,Rowv=FALSE,Colv=FALSE,
@@ -402,11 +410,11 @@ absmagheatmap=compute.mag.by.sharing(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.
 absmagheatmap[lower.tri(absmagheatmap)] <- NA
 lat=absmagheatmap
 lat[lower.tri(lat)] <- NA
-print(levelplot(lat,col.regions = clrs,
+print(levelplot(lat,col.regions = g,
                 xlab = "",ylab = "",colorkey = TRUE,main="PairwiseSharingByMagnitude"))
 ```
 
-Now, let's look at sharing my asbolute value of magntiude:
+Now, let's look at sharing my absolute value of magnitude:
 ```{r}
 
 heatmap.2(signheatmap,Rowv=FALSE,Colv=FALSE,

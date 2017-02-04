@@ -2,9 +2,15 @@
 title: "johnsdatamashmedian"
 output: html_document
 ---
-```{r}
-rm(list=ls())
 
+
+```{r global_options, include=FALSE}
+require(knitr)
+knitr::opts_chunk$set(cache=TRUE)
+opts_chunk$set(fig.path = "/Users/sarahurbut/Dropbox/PhDThesis/Figures/") 
+```
+
+```{r}
 library('mash')
 
 
@@ -183,7 +189,7 @@ Let's also plot pairwise sharing by magnitude and sign:
 
 
 
-```{r pairwisesharing}
+```{r pairwisesharingmashmedian}
 library("mashr")
 post.means=as.matrix(read.table("sparseoldmashposterior.means.txt")[,-1])
 lfsr.mash=as.matrix(read.table("sparseoldmashlfsr.txt"))[,-1]
@@ -217,7 +223,12 @@ clrs <- colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
 #clrs[63:64] <- "darkviolet"
 lat=signheatmap
 lat[lower.tri(lat)] <- NA
-print(levelplot(lat,col.regions = clrs,xlab = "",ylab = "",colorkey = TRUE,main="PairwiseSharingBySign"))
+
+library(RColorBrewer)
+p=colorRampPalette(brewer.pal(9,"Blues"))(100)
+g=colorRampPalette(brewer.pal(9,"Greens"))(100)
+
+print(levelplot(lat,col.regions = p,xlab = "",ylab = "",colorkey = TRUE,main="PairwiseSharingBySign"))
 
 
 heatmap.2(magheatmap,Rowv=FALSE,Colv=FALSE,
@@ -235,7 +246,7 @@ absmagheatmap=compute.mag.by.sharing(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.
 absmagheatmap[lower.tri(absmagheatmap)] <- NA
 lat=absmagheatmap
 lat[lower.tri(lat)] <- NA
-print(levelplot(lat,col.regions = clrs,
+print(levelplot(lat,col.regions = g,
                 xlab = "",ylab = "",colorkey = TRUE,main="PairwiseSharingByMagnitude"))
 ```
 
