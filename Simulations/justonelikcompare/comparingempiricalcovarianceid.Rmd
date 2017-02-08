@@ -1,15 +1,29 @@
-First, run with the empirical covariance matrix:
+In this document, we are trying to determine how the output of ED varies with different starting points, and we are also trying to see how using the output of ED to compute likelihood of data varies with using the matrix that was used to simulate the data. 
+
+Also, we simulate our data using a standard error of 1 instead of 0.1, so that the EZ and EE models are the same.
+
+Our findings are that the likelihood is better with ED output than when using the truth, and that the results of ED do depend on the initiation point. The best results come when initializing ED with X'X or identity.
+
+First, run while initiating ED with empirical covariance matrix:
 
 ```{r}
 rm(list=ls())
-library('mash')
+library('mashr')
 set.seed(123)
-source("~/matrix_ash/R/mashnobasescripts.R")
-source("~/matrix_ash/R/truthscripts.R")
+
 library("ExtremeDeconvolution")
 R=8
-c=readRDS("chatfixedomega.rds")
+
+
+
+
+set.seed(123)
+c=chat_sim_fsingle_fixedomega(n = 100,d = 8,omega = 2,esd = 1)
+saveRDS(c,"chatfixedomegastandardone.rds")
+diag(c$covmat)
+
 t=c$t;b=c$chat;se=c$shat
+identical(b,t)
 #hist(t)
 #hist(b)
 R=ncol(t)
@@ -17,7 +31,7 @@ L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
 
 absmat=abs(t(L%*%t(c$t)))
-index=which(rowSums(absmat>4)>0)
+index=which(rowSums(absmat>2)>0)
 length(index)
 mean(index<1000)
 strongprojectedt=t(L%*%t(t[index,]))
@@ -39,7 +53,7 @@ init.cov.list=list()
 init.cov.list[[1]]=cov(strongprojectedt)
 #head(init.cov.list)
 mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)  
-ydata=strongprojectedt[,-1]
+ydata=strongprojectedt[,-1]##train on the max like estimates
 xamp=1
 xcovar=init.cov.list
 fixmean=TRUE     
@@ -51,7 +65,7 @@ se.train=se
 
 covlist=e$xcovar
 R=8;L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
-train.b=data.frame(wfull)[,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
+train.b=data.frame(wfull)[index,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
 lik.mat=t(sapply(seq(1:J),function(j){
   V.gp.hat=diag(se.train[j,])^2;
   LVL=L%*%V.gp.hat%*%t(L);
@@ -61,8 +75,8 @@ lik.mat=t(sapply(seq(1:J),function(j){
 
 dim(lik.mat)
 sum(log(exp(lik.mat)))
-j=1
-lik.mat[1]
+j=10
+lik.mat[10]
 V.gp.hat=diag(se.train[j,])^2;
 LVL=L%*%V.gp.hat%*%t(L)
 LSigL=L%*%covlist[[1]]%*%t(L)
@@ -74,13 +88,10 @@ Now do with the Identity:
 
 ```{r}
 rm(list=ls())
-library('mash')
 set.seed(123)
-source("~/matrix_ash/R/mashnobasescripts.R")
-source("~/matrix_ash/R/truthscripts.R")
-library("ExtremeDeconvolution")
+
 R=8
-c=readRDS("chatfixedomega.rds")
+c=readRDS("chatfixedomegastandardone.rds")
 t=c$t;b=c$chat;se=c$shat
 #hist(t)
 #hist(b)
@@ -89,7 +100,7 @@ L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
 
 absmat=abs(t(L%*%t(c$t)))
-index=which(rowSums(absmat>4)>0)
+index=which(rowSums(absmat>2)>0)
 length(index)
 mean(index<1000)
 strongprojectedt=t(L%*%t(t[index,]))
@@ -123,7 +134,7 @@ se.train=se
 
 covlist=e$xcovar
 R=8;L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
-train.b=data.frame(wfull)[,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
+train.b=data.frame(wfull)[index,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
 lik.mat=t(sapply(seq(1:J),function(j){
   V.gp.hat=diag(se.train[j,])^2;
   LVL=L%*%V.gp.hat%*%t(L);
@@ -133,8 +144,8 @@ lik.mat=t(sapply(seq(1:J),function(j){
 
 dim(lik.mat)
 sum(log(exp(lik.mat)))
-j=1
-lik.mat[1]
+j=10
+lik.mat[10]
 V.gp.hat=diag(se.train[j,])^2;
 LVL=L%*%V.gp.hat%*%t(L)
 LSigL=L%*%covlist[[1]]%*%t(L)
@@ -147,13 +158,11 @@ Now do with the truth:
 
 ```{r}
 rm(list=ls())
-library('mash')
+
 set.seed(123)
-source("~/matrix_ash/R/mashnobasescripts.R")
-source("~/matrix_ash/R/truthscripts.R")
-library("ExtremeDeconvolution")
+
 R=8
-c=readRDS("chatfixedomega.rds")
+c=readRDS("chatfixedomegastandardone.rds")
 t=c$t;b=c$chat;se=c$shat
 #hist(t)
 #hist(b)
@@ -162,7 +171,7 @@ L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
 
 absmat=abs(t(L%*%t(c$t)))
-index=which(rowSums(absmat>4)>0)
+index=which(rowSums(absmat>2)>0)
 length(index)
 mean(index<1000)
 strongprojectedt=t(L%*%t(t[index,]))
@@ -196,7 +205,7 @@ se.train=se
 
 covlist=e$xcovar
 R=8;L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
-train.b=data.frame(wfull)[,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
+train.b=data.frame(wfull)[index,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
 lik.mat=t(sapply(seq(1:J),function(j){
   V.gp.hat=diag(se.train[j,])^2;
   LVL=L%*%V.gp.hat%*%t(L);
@@ -206,11 +215,37 @@ lik.mat=t(sapply(seq(1:J),function(j){
 
 dim(lik.mat)
 sum(log(exp(lik.mat)))
-j=1
-lik.mat[1]
+j=10
+lik.mat[j]
 V.gp.hat=diag(se.train[j,])^2;
 LVL=L%*%V.gp.hat%*%t(L)
 LSigL=L%*%covlist[[1]]%*%t(L)
 dmvnorm(x=train.b[j,], sigma=(LSigL + LVL),log=TRUE)
   
+```
+
+####
+
+
+Let's also see what happens when we use just the truth or the output after using the empirical covariance matrix:
+
+```{r}
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+covlist=list();covlist[[1]]=c$covmat
+train.b=data.frame(wfull)[index,-1];se.train = se;covlist = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
+lik.mat=t(sapply(seq(1:J),function(j){
+  V.gp.hat=diag(se.train[j,])^2;
+  LVL=L%*%V.gp.hat%*%t(L);
+  LSigL=L%*%covlist[[1]]%*%t(L)
+  b.mle=train.b[j,]
+  dmvnorm(x=b.mle, sigma=(LSigL + LVL),log=TRUE)}))
+
+dim(lik.mat)
+sum(log(exp(lik.mat)))
+j=10
+lik.mat[j]
+V.gp.hat=diag(se.train[j,])^2;
+LVL=L%*%V.gp.hat%*%t(L)
+LSigL=L%*%covlist[[1]]%*%t(L)
+dmvnorm(x=train.b[j,], sigma=(LSigL + LVL),log=TRUE)
 ```

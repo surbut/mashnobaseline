@@ -119,31 +119,43 @@ $(document).ready(function () {
 </div>
 
 
-<p>First, run with the empirical covariance matrix:</p>
+<p>In this document, we are trying to determine how the output of ED varies with different starting points, and we are also trying to see how using the output of ED to compute likelihood of data varies with using the matrix that was used to simulate the data.</p>
+<p>Also, we simulate our data using a standard error of 1 instead of 0.1, so that the EZ and EE models are the same.</p>
+<p>Our findings are that the likelihood is better with ED output than when using the truth, and that the results of ED do depend on the initiation point. The best results come when initializing ED with X’X or identity.</p>
+<p>First, run while initiating ED with empirical covariance matrix:</p>
 <pre class="r"><code>rm(list=ls())
-library('mash')</code></pre>
+library('mashr')</code></pre>
 <pre><code>## Loading required package: SQUAREM</code></pre>
 <pre><code>## Warning: package 'SQUAREM' was built under R version 3.2.5</code></pre>
 <pre><code>## Loading required package: mvtnorm</code></pre>
 <pre class="r"><code>set.seed(123)
-source(&quot;~/matrix_ash/R/mashnobasescripts.R&quot;)
-source(&quot;~/matrix_ash/R/truthscripts.R&quot;)
+
 library(&quot;ExtremeDeconvolution&quot;)
 R=8
-c=readRDS(&quot;chatfixedomega.rds&quot;)
-t=c$t;b=c$chat;se=c$shat
-#hist(t)
+
+
+
+
+set.seed(123)
+c=chat_sim_fsingle_fixedomega(n = 100,d = 8,omega = 2,esd = 1)
+saveRDS(c,&quot;chatfixedomegastandardone.rds&quot;)
+diag(c$covmat)</code></pre>
+<pre><code>## [1] 0 0 0 0 0 0 1 1</code></pre>
+<pre class="r"><code>t=c$t;b=c$chat;se=c$shat
+identical(b,t)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>#hist(t)
 #hist(b)
 R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
 
 absmat=abs(t(L%*%t(c$t)))
-index=which(rowSums(absmat&gt;4)&gt;0)
+index=which(rowSums(absmat&gt;2)&gt;0)
 length(index)</code></pre>
-<pre><code>## [1] 748</code></pre>
+<pre><code>## [1] 27</code></pre>
 <pre class="r"><code>mean(index&lt;1000)</code></pre>
-<pre><code>## [1] 0.9986631</code></pre>
+<pre><code>## [1] 1</code></pre>
 <pre class="r"><code>strongprojectedt=t(L%*%t(t[index,]))
 
 
@@ -156,15 +168,15 @@ lvllist=genlvllist(s.j[index,],L = L[-1,])
 wfull=t(L%*%t(b))
 sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
 dim(wfull)</code></pre>
-<pre><code>## [1] 10000     8</code></pre>
+<pre><code>## [1] 100   8</code></pre>
 <pre class="r"><code>dim(sjmat)</code></pre>
-<pre><code>## [1] 10000     8</code></pre>
+<pre><code>## [1] 100   8</code></pre>
 <pre class="r"><code>t.stat =strongprojectedt;v.j = lvllist;L = L[-1,]
 init.cov.list=list()
 init.cov.list[[1]]=cov(strongprojectedt)
 #head(init.cov.list)
 mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)  
-ydata=strongprojectedt[,-1]
+ydata=strongprojectedt[,-1]##train on the max like estimates
 xamp=1
 xcovar=init.cov.list
 fixmean=TRUE     
@@ -176,7 +188,7 @@ se.train=se
 
 covlist=e$xcovar
 R=8;L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
-train.b=data.frame(wfull)[,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
+train.b=data.frame(wfull)[index,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
 lik.mat=t(sapply(seq(1:J),function(j){
   V.gp.hat=diag(se.train[j,])^2;
   LVL=L%*%V.gp.hat%*%t(L);
@@ -185,27 +197,24 @@ lik.mat=t(sapply(seq(1:J),function(j){
   dmvnorm(x=b.mle, sigma=(LSigL + LVL),log=TRUE)}))
 
 dim(lik.mat)</code></pre>
-<pre><code>## [1]     1 10000</code></pre>
+<pre><code>## [1]  1 27</code></pre>
 <pre class="r"><code>sum(log(exp(lik.mat)))</code></pre>
-<pre><code>## [1] -4039.145</code></pre>
-<pre class="r"><code>j=1
-lik.mat[1]</code></pre>
-<pre><code>## [1] -0.4527417</code></pre>
+<pre><code>## [1] -277.0879</code></pre>
+<pre class="r"><code>j=10
+lik.mat[10]</code></pre>
+<pre><code>## [1] -10.17273</code></pre>
 <pre class="r"><code>V.gp.hat=diag(se.train[j,])^2;
 LVL=L%*%V.gp.hat%*%t(L)
 LSigL=L%*%covlist[[1]]%*%t(L)
 dmvnorm(x=train.b[j,], sigma=(LSigL + LVL),log=TRUE)</code></pre>
-<pre><code>##          1 
-## -0.4527417</code></pre>
+<pre><code>##        34 
+## -10.17273</code></pre>
 <p>Now do with the Identity:</p>
 <pre class="r"><code>rm(list=ls())
-library('mash')
 set.seed(123)
-source(&quot;~/matrix_ash/R/mashnobasescripts.R&quot;)
-source(&quot;~/matrix_ash/R/truthscripts.R&quot;)
-library(&quot;ExtremeDeconvolution&quot;)
+
 R=8
-c=readRDS(&quot;chatfixedomega.rds&quot;)
+c=readRDS(&quot;chatfixedomegastandardone.rds&quot;)
 t=c$t;b=c$chat;se=c$shat
 #hist(t)
 #hist(b)
@@ -214,11 +223,11 @@ L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
 
 absmat=abs(t(L%*%t(c$t)))
-index=which(rowSums(absmat&gt;4)&gt;0)
+index=which(rowSums(absmat&gt;2)&gt;0)
 length(index)</code></pre>
-<pre><code>## [1] 748</code></pre>
+<pre><code>## [1] 27</code></pre>
 <pre class="r"><code>mean(index&lt;1000)</code></pre>
-<pre><code>## [1] 0.9986631</code></pre>
+<pre><code>## [1] 1</code></pre>
 <pre class="r"><code>strongprojectedt=t(L%*%t(t[index,]))
 
 
@@ -231,9 +240,9 @@ lvllist=genlvllist(s.j[index,],L = L[-1,])
 wfull=t(L%*%t(b))
 sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
 dim(wfull)</code></pre>
-<pre><code>## [1] 10000     8</code></pre>
+<pre><code>## [1] 100   8</code></pre>
 <pre class="r"><code>dim(sjmat)</code></pre>
-<pre><code>## [1] 10000     8</code></pre>
+<pre><code>## [1] 100   8</code></pre>
 <pre class="r"><code>t.stat =strongprojectedt;v.j = lvllist;L = L[-1,]
 init.cov.list=list()
 init.cov.list[[1]]=diag(1,R)
@@ -251,7 +260,7 @@ se.train=se
 
 covlist=e$xcovar
 R=8;L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
-train.b=data.frame(wfull)[,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
+train.b=data.frame(wfull)[index,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
 lik.mat=t(sapply(seq(1:J),function(j){
   V.gp.hat=diag(se.train[j,])^2;
   LVL=L%*%V.gp.hat%*%t(L);
@@ -260,27 +269,25 @@ lik.mat=t(sapply(seq(1:J),function(j){
   dmvnorm(x=b.mle, sigma=(LSigL + LVL),log=TRUE)}))
 
 dim(lik.mat)</code></pre>
-<pre><code>## [1]     1 10000</code></pre>
+<pre><code>## [1]  1 27</code></pre>
 <pre class="r"><code>sum(log(exp(lik.mat)))</code></pre>
-<pre><code>## [1] -4039.494</code></pre>
-<pre class="r"><code>j=1
-lik.mat[1]</code></pre>
-<pre><code>## [1] -0.4528344</code></pre>
+<pre><code>## [1] -277.088</code></pre>
+<pre class="r"><code>j=10
+lik.mat[10]</code></pre>
+<pre><code>## [1] -10.17273</code></pre>
 <pre class="r"><code>V.gp.hat=diag(se.train[j,])^2;
 LVL=L%*%V.gp.hat%*%t(L)
 LSigL=L%*%covlist[[1]]%*%t(L)
 dmvnorm(x=train.b[j,], sigma=(LSigL + LVL),log=TRUE)</code></pre>
-<pre><code>##          1 
-## -0.4528344</code></pre>
+<pre><code>##        34 
+## -10.17273</code></pre>
 <p>Now do with the truth:</p>
 <pre class="r"><code>rm(list=ls())
-library('mash')
+
 set.seed(123)
-source(&quot;~/matrix_ash/R/mashnobasescripts.R&quot;)
-source(&quot;~/matrix_ash/R/truthscripts.R&quot;)
-library(&quot;ExtremeDeconvolution&quot;)
+
 R=8
-c=readRDS(&quot;chatfixedomega.rds&quot;)
+c=readRDS(&quot;chatfixedomegastandardone.rds&quot;)
 t=c$t;b=c$chat;se=c$shat
 #hist(t)
 #hist(b)
@@ -289,11 +296,11 @@ L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
 
 absmat=abs(t(L%*%t(c$t)))
-index=which(rowSums(absmat&gt;4)&gt;0)
+index=which(rowSums(absmat&gt;2)&gt;0)
 length(index)</code></pre>
-<pre><code>## [1] 748</code></pre>
+<pre><code>## [1] 27</code></pre>
 <pre class="r"><code>mean(index&lt;1000)</code></pre>
-<pre><code>## [1] 0.9986631</code></pre>
+<pre><code>## [1] 1</code></pre>
 <pre class="r"><code>strongprojectedt=t(L%*%t(t[index,]))
 
 
@@ -306,9 +313,9 @@ lvllist=genlvllist(s.j[index,],L = L[-1,])
 wfull=t(L%*%t(b))
 sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
 dim(wfull)</code></pre>
-<pre><code>## [1] 10000     8</code></pre>
+<pre><code>## [1] 100   8</code></pre>
 <pre class="r"><code>dim(sjmat)</code></pre>
-<pre><code>## [1] 10000     8</code></pre>
+<pre><code>## [1] 100   8</code></pre>
 <pre class="r"><code>t.stat =strongprojectedt;v.j = lvllist;L = L[-1,]
 init.cov.list=list()
 init.cov.list[[1]]=c$covmat
@@ -326,7 +333,7 @@ se.train=se
 
 covlist=e$xcovar
 R=8;L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
-train.b=data.frame(wfull)[,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
+train.b=data.frame(wfull)[index,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
 lik.mat=t(sapply(seq(1:J),function(j){
   V.gp.hat=diag(se.train[j,])^2;
   LVL=L%*%V.gp.hat%*%t(L);
@@ -335,18 +342,45 @@ lik.mat=t(sapply(seq(1:J),function(j){
   dmvnorm(x=b.mle, sigma=(LSigL + LVL),log=TRUE)}))
 
 dim(lik.mat)</code></pre>
-<pre><code>## [1]     1 10000</code></pre>
+<pre><code>## [1]  1 27</code></pre>
 <pre class="r"><code>sum(log(exp(lik.mat)))</code></pre>
-<pre><code>## [1] 24085.67</code></pre>
-<pre class="r"><code>j=1
-lik.mat[1]</code></pre>
-<pre><code>## [1] 1.341038</code></pre>
+<pre><code>## [1] -298.53</code></pre>
+<pre class="r"><code>j=10
+lik.mat[j]</code></pre>
+<pre><code>## [1] -10.40622</code></pre>
 <pre class="r"><code>V.gp.hat=diag(se.train[j,])^2;
 LVL=L%*%V.gp.hat%*%t(L)
 LSigL=L%*%covlist[[1]]%*%t(L)
 dmvnorm(x=train.b[j,], sigma=(LSigL + LVL),log=TRUE)</code></pre>
-<pre><code>##        1 
-## 1.341038</code></pre>
+<pre><code>##        34 
+## -10.40622</code></pre>
+<div id="section" class="section level4">
+<h4></h4>
+<p>Let’s also see what happens when we use just the truth or the output after using the empirical covariance matrix:</p>
+<pre class="r"><code>L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+covlist=list();covlist[[1]]=c$covmat
+train.b=data.frame(wfull)[index,-1];se.train = se;covlist = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
+lik.mat=t(sapply(seq(1:J),function(j){
+  V.gp.hat=diag(se.train[j,])^2;
+  LVL=L%*%V.gp.hat%*%t(L);
+  LSigL=L%*%covlist[[1]]%*%t(L)
+  b.mle=train.b[j,]
+  dmvnorm(x=b.mle, sigma=(LSigL + LVL),log=TRUE)}))
+
+dim(lik.mat)</code></pre>
+<pre><code>## [1]  1 27</code></pre>
+<pre class="r"><code>sum(log(exp(lik.mat)))</code></pre>
+<pre><code>## [1] -299.1</code></pre>
+<pre class="r"><code>j=10
+lik.mat[j]</code></pre>
+<pre><code>## [1] -10.24593</code></pre>
+<pre class="r"><code>V.gp.hat=diag(se.train[j,])^2;
+LVL=L%*%V.gp.hat%*%t(L)
+LSigL=L%*%covlist[[1]]%*%t(L)
+dmvnorm(x=train.b[j,], sigma=(LSigL + LVL),log=TRUE)</code></pre>
+<pre><code>##        34 
+## -10.24593</code></pre>
+</div>
 
 
 

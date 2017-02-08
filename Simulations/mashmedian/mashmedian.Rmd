@@ -69,6 +69,24 @@ factor.mat=as.matrix(read.table("sparseFmediancentered_F.out"))
 lambda.mat=as.matrix(read.table("sparseFmediancentered_lambda.out"))
 
 library("ExtremeDeconvolution")
+t.stat=strongprojectedt
+w=chat%*%L
+R=ncol(t.stat)
+init.cov=init.covmat(t.stat=t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,K=K,P=P)
+init.cov.list=list()
+for(i in 1:K){init.cov.list[[i]]=init.cov[i,,]}
+head(init.cov.list)
+mean.mat=matrix(rep(0,ncol(t.stat)*nrow(t.stat)),ncol=ncol(t.stat),nrow=nrow(t.stat))
+
+ydata=  t.stat
+xamp= rep(1/K,K)
+xcovar= init.cov.list
+fixmean= TRUE     
+ycovar=  v.j     
+xmean=   mean.mat   
+projection= list();for(l in 1:nrow(t.stat)){projection[[l]]=diag(1,R)}
+
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
 
 max.step=deconvolution.em.with.bovy(t.stat = strongprojectedt,factor.mat = factor.mat,v.j = s.j,lambda.mat = lambda.mat,K = 3,P = 3 )
 
@@ -416,4 +434,6 @@ So even if the Uks are different, the likelihood and corresponding $\pi$s will b
 covmash=readRDS("covmatsparseoldmash.rds")
 (covmash[[3]]-min(abs(covmash[[3]])))/max(diag(covmash[[3]]))
 (covmash[[9]]-min(abs(covmash[[9]])))/max(diag(covmash[[9]]))
+
+rmse.table=c()
 ```

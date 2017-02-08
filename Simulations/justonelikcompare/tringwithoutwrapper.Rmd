@@ -6,7 +6,7 @@ output: html_document
 -- Goal: To try different Initiation Points with ED to see how to maximise ED
 ```{r}
 rm(list=ls())
-library('mash')
+library('mashr')
 set.seed(123)
 c=chat_sim_fsingle_fixedomega(n = 10000,d = 8,omega = 2,esd = 0.1)
 saveRDS(c,"chatfixedomega.rds")

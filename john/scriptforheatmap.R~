@@ -1,0 +1,7 @@
+library('gplots')
+library('colorRamps')
+x=as.matrix(mash.means)
+
+png("estimatedeffectsJohn.png")
+heatmap.2(x/max(diag(x)),Rowv = NULL,Colv = NULL,dendrogram = "none",col=blue2green,density.info = "none",trace="none",main=paste0("EstimatedEffects, MASH"))
+dev.off()

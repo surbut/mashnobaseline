@@ -31,7 +31,7 @@ We can have a look at the them first:
 rm(list=ls())
 library('mash')
 set.seed(123)
-c=chat_sim_fsingle_fixedomega(n = 10000,d = 8,omega = 2,esd = 0.1)
+c=chat_sim_fsingle_fixedomega(n = 10000,d = 8,omega = 2,esd = 1)
 saveRDS(c,"chatfixedomega.rds")
 diag(c$covmat)
 
