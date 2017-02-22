@@ -18,7 +18,7 @@ R=8
 
 
 set.seed(123)
-c=chat_sim_fsingle_fixedomega(n = 100,d = 8,omega = 2,esd = 1)
+c=chat_sim_fsingle_fixedomega(n = 10000,d = 8,omega = 2,esd = 1)
 saveRDS(c,"chatfixedomegastandardone.rds")
 diag(c$covmat)
 
@@ -30,10 +30,7 @@ R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
 
-absmat=abs(t(L%*%t(c$t)))
-index=which(rowSums(absmat>2)>0)
-length(index)
-mean(index<1000)
+index=which(rowSums(c$beta)!=0)
 strongprojectedt=t(L%*%t(t[index,]))
 
 
@@ -99,10 +96,7 @@ R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
 
-absmat=abs(t(L%*%t(c$t)))
-index=which(rowSums(absmat>2)>0)
-length(index)
-mean(index<1000)
+index=which(rowSums(c$beta)!=0)
 strongprojectedt=t(L%*%t(t[index,]))
 
 
@@ -170,10 +164,7 @@ R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
 
-absmat=abs(t(L%*%t(c$t)))
-index=which(rowSums(absmat>2)>0)
-length(index)
-mean(index<1000)
+index=which(rowSums(c$beta)!=0)
 strongprojectedt=t(L%*%t(t[index,]))
 
 

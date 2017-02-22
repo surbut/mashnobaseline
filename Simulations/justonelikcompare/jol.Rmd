@@ -14,24 +14,25 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library('knitr')
-knitr::opts_chunk$set(cache=TRUE)
 
 ```
 
 
 ```{r,echo=FALSE}
 suppressMessages(library(mvtnorm))
-suppressMessages(library(mash))
+suppressMessages(library(mashr))
 ```
 Let's simulate data with one covariance matrix, and $\omega$ fixed at 2. We will also use only one $\omega$ in our inference matrices. The purpose of this document was to test the ability of `mash` and `mashnobaseline` to infer the truth when there was only one $\omega$ to complicate things, so that the 'shrinkage' was not an issue. You can see the inferred covariance matrices are shorter.
 
-We can have a look at the them first:
+We can have a look at the them first. Here, the c and t should be the same because they are simulated with standard error of 1.
 
 ```{r}
+
+system("ls; rm *rds;rm *txt; rm *pdf")
 rm(list=ls())
-library('mash')
+library('mashr')
 set.seed(123)
-c=chat_sim_fsingle_fixedomega(n = 10000,d = 8,omega = 2,esd = 1)
+c=chat_sim_fsingle_fixedomega(n = 1000,d = 8,omega = 2,esd = 1,reals=1)
 saveRDS(c,"chatfixedomega.rds")
 diag(c$covmat)
 
@@ -48,16 +49,14 @@ R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 s.j=se/se
 
-absmat=abs(t(L%*%t(c$t)))
-index=which(rowSums(absmat>4)>0)
-length(index)
-mean(index<1000)
+
+###here we cheat and use the index as the 'real associations'
+
+index=which(rowSums(c$beta)!=0)
 
 #index=which(rowMeans(abs(t(L%*%t(c$t))))>1.3)##choose the associations with average deviation large.
 
-##show deviations
-plot(rowSums(absmat>4))
-points(index,rowSums(absmat>4)[index],col="blue")
+
 
 sparsestrongt=t(L%*%t(t[index,]))
 
@@ -74,7 +73,7 @@ Now, we need to project into the centered space to estimate the covariance matri
 
 
 ```{r}
-system('/Users/sarahurbut/miniconda3/bin/sfa -gen sparsestrongt.txt -g 748 -k 5 -n 8 i -o sparseF')
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen sparsestrongt.txt -g 1000 -k 5 -n 8 i -o sparseF')
 A="sparseF"
 
 factor.mat=as.matrix(read.table("sparseF_F.out"))
@@ -105,9 +104,7 @@ w=data.frame(wfull)[,-1]
 
 
 ```{r}
-source("~/matrix_ash/R/mashnobasescripts.R")
-source("~/matrix_ash/R/truthscripts.R")
-rm(A)
+
 
 A="withoneK"
 
@@ -144,7 +141,7 @@ w=data.frame(wfull)[,-1]
 
 j=1
 A="withoneKandoneomeganew"
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
+compute.hm.train.log.lik.pen.with.L(w[index,],se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
 
 likmat=t(as.matrix(readRDS(paste0("liketrain",A,".rds"))))
 
@@ -175,7 +172,7 @@ L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 
 j=1
 A="withoneKandoneomeganewwithnoscale"
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
+compute.hm.train.log.lik.pen.with.L(w[index,],se.train = se,covmat = edcov,A = A,pen = 1,L = L[-1,])
 
 likmat=t(as.matrix(readRDS(paste0("liketrain",A,".rds"))))
 
@@ -186,6 +183,17 @@ LSigL=lapply(edcov,function(x){L[-1,]%*%x%*%t(L[-1,])})
 lltest=log.lik.func(b.mle=w[j,],V.gp.hat = L[-1,]%*%diag(se[j,])^2%*%t(L[-1,]),covmat =LSigL )                                                                                          
 
 identical(as.numeric(likmat[j]),as.numeric(lltest))
+
+pis=1
+A="mashnobedcov"
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+
+weightedquants=lapply(seq(1:nrow(w)),function(j){total.quant.per.snp.no.baseline(j,edcov,b.gp.hat=w,se.gp.hat = se,pis,A=A,checkpoint = FALSE,L=L[-1,])})
+
+w=data.frame(wfull[,-1])
+a=post.mean.with.proj(b.mle = t(w[1,]),tinv = solve(L[-1,]%*%diag(se[1,],R)%*%t(L[-1,])+L[-1,]%*%edcov[[1]]%*%t(L[-1,])),U.k = edcov[[1]],L=L[-1,])
+mashnobasemeans=read.table("mashnobedcovposterior.means.txt")[,-1]
+all.equal(as.numeric(mashnobasemeans[1,]),as.numeric(a))
 ```
 
 
@@ -201,7 +209,7 @@ barplot(diag(covtruthlist[[1]]))
 ```{r}
 
 A="truth"
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = covtruthlist,A = A,pen = 1,L = L[-1,])
+compute.hm.train.log.lik.pen.with.L(train.b = w[index,],se.train = se,covmat = covtruthlist,A = A,pen = 1,L = L[-1,])
 
 likmattruth=t(as.matrix(readRDS("liketraintruth.rds")))
 LSigL=lapply(covtruthlist,function(x){L[-1,]%*%x%*%t(L[-1,])})
@@ -214,262 +222,117 @@ sum(log(exp(likmattruth)))
 sum(log(exp(likmattruth[1:1000])))
 
 
-liked=t(as.matrix(readRDS("liketrainwithoneK.rds")))
+liked=t(as.matrix(readRDS("liketrainwithoneKandoneomeganewwithnoscale.rds")))
 
 
 
 sum(log(exp(liked)))
 sum(log(exp(liked[1:1000])))
 liktable=c(LikelihoodwithTruth=sum(log(exp(likmattruth))),LikewithEd=sum(log(exp(liked))))
-barplot(liktable,ylim=c(0,50000),main="LogLikelihood with Truth vs ED",col=c("red","green"))
+barplot(liktable,ylim=c(-10000,0),main="LogLikelihood with Truth vs ED",col=c("red","green"))
 ```
 
 
 As you can see, the likelihood with the truth, `r ceiling(sum(log(exp(likmattruth))))` is better than the likelihood with the *learned* $U_k$, `r ceiling(sum(log(exp(likmat))))` but this is to be expected because the likelihood with the *learned* $U_k$ was computed using the max like estimates of Bovy on the Maximum deviations, while the the truth provides more weight on 0 that will help with the largely null observations.
 
----------
 
-Now, let's try with different initiation points:
-```{r}
-R=8
-K=1
-init.cov.list=list()
-init.cov.list[[1]]=diag(1,R)
-mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)
-ydata=strongprojectedt[,-1]
-xamp=1
-xcovar=init.cov.list
-fixmean=TRUE     
-ycovar=lvllist     
-xmean=mean.mat   
-projection=list();for(l in 1:nrow(w)){projection[[l]]=L}
-e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+### Now there is just one component for MASH, using the centered t and beta hats to compute likelihood: 
 
-covlist.identity=list();
-covlist.identity[[1]]=e$xcovar[[1]]
-A="withidentity"
-
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = covlist.identity,A = A,pen = 1,L = L[-1,])
-
-likmat=t(as.matrix(readRDS(paste0("liketrain",A,".rds"))))
-
-sum(log(exp(likmat)))
-sum(log(exp(likmat[1:1000])))
-LSigL=lapply(covlist.identity,function(x){L[-1,]%*%x%*%t(L[-1,])})
-
-lltest=log.lik.func(b.mle=w[j,],V.gp.hat = L[-1,]%*%diag(se[j,])^2%*%t(L[-1,]),covmat =LSigL )                                                                                          
-
-identical(as.numeric(likmat[j]),as.numeric(lltest))
-```
-
-And now, starting with the truth:
+We use the same data as above (i.e., there is a mean) and we center the chats and t statistics before training and computing likelihood:
 
 ```{r}
-R=8
-K=1
-init.cov.list=list()
-init.cov.list[[1]]=2*c$covmat
-mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)
-ydata=strongprojectedt[,-1]
-xamp=1
-xcovar=init.cov.list
-fixmean=TRUE     
-ycovar=lvllist     
-xmean=mean.mat   
-projection=list();for(l in 1:nrow(w)){projection[[l]]=L}
-e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
-
-covlist.identity=list();
-covlist.identity[[1]]=e$xcovar[[1]]
-A="withtruth"
-
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = covlist.identity,A = A,pen = 1,L = L[-1,])
-
-likmat=t(as.matrix(readRDS(paste0("liketrain",A,".rds"))))
-
-sum(log(exp(likmat)))
-sum(log(exp(likmat[1:1000])))
-LSigL=lapply(covlist.identity,function(x){L[-1,]%*%x%*%t(L[-1,])})
-
-lltest=log.lik.func(b.mle=w[j,],V.gp.hat = L[-1,]%*%diag(se[j,])^2%*%t(L[-1,]),covmat =LSigL )                                                                                          
-
-identical(as.numeric(likmat[j]),as.numeric(lltest))
-```
-
-And now, starting with the empirical covariance:
-
-```{r}
-R=8
-K=1
-init.cov.list=list()
-wfull=as.matrix(wfull)
-init.cov.list[[1]]=t(wfull)%*%wfull
-mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)
-ydata=strongprojectedt[,-1]
-xamp=1
-xcovar=init.cov.list
-fixmean=TRUE     
-ycovar=lvllist     
-xmean=mean.mat   
-projection=list();for(l in 1:nrow(w)){projection[[l]]=L}
-e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
-
-covlist.empirical=list();
-covlist.empirical[[1]]=e$xcovar[[1]]
-A="withempiricalcovariance"
-
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = covlist.empirical,A = A,pen = 1,L = L[-1,])
-
-likmat=t(as.matrix(readRDS(paste0("liketrain",A,".rds"))))
-
-sum(log(exp(likmat)))
-sum(log(exp(likmat[1:1000])))
-LSigL=lapply(covlist.empirical,function(x){L[-1,]%*%x%*%t(L[-1,])})
-
-lltest=log.lik.func(b.mle=w[j,],V.gp.hat = L[-1,]%*%diag(se[j,])^2%*%t(L[-1,]),covmat =LSigL )                                                                                          
-
-identical(as.numeric(likmat[j]),as.numeric(lltest))
-```
-
-
-And now, starting with the empirical covariance:
-
-```{r}
-R=8
-K=1
-init.cov.list=list()
-
-init.cov.list[[1]]=t(strongprojectedt)%*%strongprojectedt
-mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)
-ydata=strongprojectedt[,-1]
-xamp=1
-xcovar=init.cov.list
-fixmean=TRUE     
-ycovar=lvllist     
-xmean=mean.mat   
-projection=list();for(l in 1:nrow(w)){projection[[l]]=L}
-e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
-
-covlist.empirical=list();
-covlist.empirical[[1]]=e$xcovar[[1]]
-A="strongstats"
-
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = covlist.empirical,A = A,pen = 1,L = L[-1,])
-
-likmat=t(as.matrix(readRDS(paste0("liketrain",A,".rds"))))
-
-sum(log(exp(likmat)))
-sum(log(exp(likmat[1:1000])))
-LSigL=lapply(covlist.empirical,function(x){L[-1,]%*%x%*%t(L[-1,])})
-
-lltest=log.lik.func(b.mle=w[j,],V.gp.hat = L[-1,]%*%diag(se[j,])^2%*%t(L[-1,]),covmat =LSigL )                                                                                          
-
-identical(as.numeric(likmat[j]),as.numeric(lltest))
-```
-
-
-And now, with 2 times:
-```{r,eval=T}
 rm(list=ls())
 
 c=readRDS("chatfixedomega.rds")
 t=c$t;b=c$chat;se=c$shat
-#hist(t)
-#hist(b)
+length(which(rowSums(c$beta)!=0))
+
+###Here we're just going to use the 'real associations'
+index=which(rowSums(c$beta)!=0)
+t=c$t[index,];b=c$chat[index,];se=c$shat[index,]
 R=ncol(t)
+##center the estimates
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
-s.j=se/se
+w=t(L%*%t(b))
+wt=t(L%*%t(t))
 
-absmat=abs(t(L%*%t(c$t)))
-index=which(rowSums(absmat>4)>0)
-
-sparsestrongt=t(L%*%t(t[index,]))
-
-strongprojectedt=sparsestrongt
-
-
-lvllist=genlvllist(s.j[index,],L = L[-1,])
+dim(t)
+identical(t,b)
+strongt=wt[index,]
+v.j=se
 
 
-##w should represent transformed betahats using all R subgroups and j genes
-wfull=t(L%*%t(b))
-sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is the sqrt of the diagonal of LVL' for each j. Recall here L is still RxR so we can have the full set of deviations and thier standard errors to choose grid
 
-w=data.frame(wfull)[,-1]
-
-
-R=8;L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
-K=1
 init.cov.list=list()
-t.stat = strongprojectedt;v.j = lvllist;L = L[-1,];w = strongprojectedt[,-1]
-K=1
-X.t=as.matrix(t.stat)
-X.real=X.t
-X.c=apply(X.real,2,function(x) x-mean(x)) ##Column centered matrix of t statistics
-data.prox=((t(X.c)%*%X.c))/nrow(X.t)
-init.cov.list=list()
-init.cov.list[[1]]=data.prox
+init.cov.list[[1]]=cov(strongt)
+
 #head(init.cov.list)
-mean.mat=matrix(rep(0,ncol(t.stat)*nrow(t.stat)),ncol=ncol(t.stat),nrow=nrow(t.stat))
-ydata=w
-xamp= 1
-xcovar= init.cov.list
-fixmean= TRUE     
-ycovar=  v.j     
-xmean=   mean.mat   
-projection=list();for(l in 1:nrow(t.stat)){projection[[l]]=L}
-e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
-  
-
-# X.real=strongprojectedt
-# X.c=apply(X.real,2,function(x) x-mean(x)) ##Column centered matrix of t statistics
-# data.prox=((t(X.c)%*%X.c))/nrow(X.real)
-# init.cov.list[[1]]=data.prox
-# mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)
-# ydata=strongprojectedt[,-1]
-# xamp=1
-# xcovar=init.cov.list
-# fixmean=TRUE     
-# ycovar=lvllist     
-# xmean=mean.mat   
-# projection=list();for(l in 1:nrow(w)){projection[[l]]=L}
-# e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
-
-covlist.empirical=list();
-
-covlist.empirical[[1]]=2*e$xcovar[[1]]/max(diag(e$xcovar[[1]]))
-
-#all.equal(covlist.empirical,edcov)
-A="strongcovwithsecondtry"
-
-L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
-compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = covlist.empirical,A = A,pen = 1,L = L[-1,])
-
-R=8
-
-w=data.frame(wfull[,-1])
-train.b=w;se.train = se;covmat = covlist.empirical;A = A;pen = 1;L = L[-1,]
-J=nrow(train.b)
-R=8
-###redfine V.jhat as the marginal varianc of Lchat which is LVL'
-covmat=covlist.empirical
-L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
-
-LSigL=lapply(covmat,function(x){L%*%x%*%t(L)})##redefine Sigma_p as a list of the variance of Lv (i.e., LUkL')
-
-lik.mat=t(sapply(seq(1:J),function(x){
-V.gp.hat=diag(se.train[x,])^2;
-LVL=L%*%V.gp.hat%*%t(L);
-log.lik.func(b.mle=train.b[x,],V.gp.hat=LVL,covmat=LSigL)}))##be sure to use log lik function
+mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)  
+ydata= strongt##train on the max like estimates (same as using max ws)
+xamp=1
+xcovar=init.cov.list
+fixmean=TRUE     
+ycovar=v.j     
+xmean=mean.mat   
+projection=list();for(l in 1:nrow(strongt)){projection[[l]]=diag(1,R)}##no projection in mash
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)##notice no projection.
+se.train=se
 
 
-likmat=t(as.matrix(readRDS(paste0("liketrain",A,".rds"))))
 
-sum(log(exp(likmat)))
-sum(log(exp(likmat[1:1000])))
-LSigL=lapply(covlist.empirical,function(x){L[-1,]%*%x%*%t(L[-1,])})
+se.train=se
 
-lltest=log.lik.func(b.mle=w[j,],V.gp.hat = L[-1,]%*%diag(se[j,])^2%*%t(L[-1,]),covmat =LSigL )                                                                                          
 
-identical(as.numeric(likmat[j]),as.numeric(lltest))
+covlist=e$xcovar
+
+train.b=data.frame(strongt);se.train = se;covmat = covlist;pen = 1;L = diag(1,R);J=nrow(train.b)
+lik.mat=t(sapply(seq(1:J),function(j){
+  V.gp.hat=diag(se.train[j,])^2;
+  b.mle=train.b[j,]
+  dmvnorm(x=b.mle, sigma=(covlist[[1]]+V.gp.hat),log=TRUE)}))##here the likelihood estimate is different
+
+dim(lik.mat)
+sum(log(exp(lik.mat)))
+j=10
+lik.mat[10]
+V.gp.hat=diag(se.train[j,])^2;
+dmvnorm(x=train.b[j,], sigma=(covlist[[1]]+V.gp.hat),log=TRUE)
+mean(lik.mat)
+e$avgloglikedata
+
+A="mash"
+compute.hm.train.log.lik.pen.with.L(train.b = w[index,],se.train = se,covmat = covlist,A = A,pen = 1,L = diag(1,R))
+lik.mat=readRDS(paste0("liketrain",A,".rds"))
+sum(log(exp(lik.mat)))
+
+pis=1
+A="mash"
+
+weightedquants=lapply(seq(1:nrow(w)),function(j){total.quant.per.snp(j,covlist,b.gp.hat=w,se.gp.hat = se,pis,A=A,checkpoint = FALSE)})
 ```
+
+
+Let's compare RMSEs:
+
+```{r}
+mash.means=read.table("mashposterior.means.txt")[,-1]
+mash.nobasemeans=read.table("mashnobedcovposterior.means.txt")[,-1]
+
+mle=w
+
+head(mle)
+rmse.mash=sqrt(mean((mash.means-mle)^2))
+rmse.mnb=sqrt(mean((mash.nobasemeans-mle)^2))
+
+rmse.all.table=cbind(mash=rmse.mash,mnb=rmse.mnb)
+
+rmse.mash
+rmse.mnb
+
+barplot(rmse.all.table)
+U.gp1kl = post.b.gpkl.cov(V.gp.hat.inv = solve(diag(se[1,],R)),U.0k.l = covlist[[1]])
+
+all.equal(as.numeric(post.b.gpkl.mean(b.mle = w[1,],V.gp.hat.inv = solve(diag(se[1,],R)),U.gp1kl = U.gp1kl)),as.numeric(mash.means[1,]))
+
+```
+

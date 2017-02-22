@@ -142,7 +142,7 @@ lambda.mat=as.matrix(read.table("batchcorrect_lambda.out"))
 
 Here are the matrices we will initialize BOVY with. Note that  t.stat is the matrix, MxR, of centered maximum t statistics.
 ```{r}
-source("~/matrix_ash/R/mashnobasescripts.R")
+library('mashr')
 initlist=init.covmat.single.with.projection(t.stat = strongprojectedt,factor.mat = factor.mat,lambda.mat = lambda.mat,Q = 5,P=3)
 ```
 
@@ -226,7 +226,8 @@ init.cov.list=list()
 for(i in 1:K){init.cov.list[[i]]=init.cov[i,,]}
 mean.mat=matrix(rep(0,ncol(t.stat)*nrow(t.stat)),ncol=ncol(t.stat),nrow=nrow(t.stat))
   
-  ydata=  w[index,]
+  ydata=  w[index,]##make sure to train on maximum chats
+
   xamp= rep(1/K,K)
   xcovar= init.cov.list
   fixmean= TRUE     
@@ -243,8 +244,7 @@ sapply(seq(1:8),function(k){all.equal(as.numeric(e$xcovar[[k]]),as.numeric(efunc
 Alternatively, we can generate using our old covmat function. Let's use the EE model, so we estimate the grid, fit and compute posteriors using $w$ as the transformed betahat.
 
 ```{r}
-library('mash')
-source("~/matrix_ash/R/sarah's_mixem.R")
+
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 allcenteredt=(t(L%*%t(t)))
 maxt=(t(L%*%t(t[index,])))

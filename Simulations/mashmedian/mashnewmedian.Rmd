@@ -39,12 +39,11 @@ Now we proceed as in mash, selecting the strongest deviations from the median:
 ```{r}
 
 s.j=se/se
-v.j=s.j
 absmat=abs(t(apply(t,1,function(x){x-median(x)})))
 tmedian=(t(apply(t,1,function(x){x-median(x)})))
 
 index=which(rowSums(c$beta)!=0)
-sparsestrongt=tmedian[index,]
+sparsestrongt=t[index,]
 strongprojectedt=sparsestrongt
 ```
 
@@ -61,7 +60,7 @@ Now, we need to project into the centered space to estimate the covariance matri
 
 
 ```{r}
-system('/Users/sarahurbut/miniconda3/bin/sfa -gen sparsestrongt.txt -g 789 -k 5 -n 8 i -o sparseFmediancentered')
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen sparsestrongt.txt -g 1000 -k 5 -n 8 i -o sparseFmediancentered')
 A="sparseFmediancentered"
 
 factor.mat=as.matrix(read.table("sparseFmediancentered_F.out"))
@@ -69,9 +68,8 @@ lambda.mat=as.matrix(read.table("sparseFmediancentered_lambda.out"))
 
 library("ExtremeDeconvolution")
 t.stat=strongprojectedt
-w=wfull
+w=chat%*%L
 R=ncol(t.stat)
-K=3; P=3
 init.cov=init.covmat(t.stat=t.stat,factor.mat = factor.mat,lambda.mat = lambda.mat,K=K,P=P)
 init.cov.list=list()
 for(i in 1:K){init.cov.list[[i]]=init.cov[i,,]}
@@ -82,7 +80,7 @@ ydata=  t.stat
 xamp= rep(1/K,K)
 xcovar= init.cov.list
 fixmean= TRUE     
-ycovar=  v.j 
+ycovar=  v.j     
 xmean=   mean.mat   
 projection= list();for(l in 1:nrow(t.stat)){projection[[l]]=diag(1,R)}
 
