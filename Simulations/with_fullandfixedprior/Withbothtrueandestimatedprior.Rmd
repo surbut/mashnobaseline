@@ -7,7 +7,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library('knitr')
-knitr::opts_chunk$set(cache=TRUE)
 ```
 
 
@@ -17,6 +16,7 @@ We can have a look at the them first. Here, for the inference we will still scal
 ```{r}
 
 rm(list=ls())
+system("ls; rm *rds;rm *txt; rm *pdf")
 library('mashr')
 set.seed(123)
 c=chat_sim_fsingle_fixedomega(n = 10000,d = 8,omega = 2,esd = 1)
@@ -546,7 +546,7 @@ compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covs,A=A,pen
 pis=readRDS(paste0("pis",A,".rds"))$pihat
 
 
-weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp.no.baseline(j,covs,b.gp.hat=w[,-1],se.gp.hat = se,pis,A=A,checkpoint = FALSE,L = L[-1,])})
+weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp.no.baseline(j,covs,b.gp.hat=wfull[,-1],se.gp.hat = se,pis,A=A,checkpoint = FALSE,L = L[-1,])})
 
 ```
 

@@ -194,6 +194,7 @@ w=data.frame(wfull[,-1])
 a=post.mean.with.proj(b.mle = t(w[1,]),tinv = solve(L[-1,]%*%diag(se[1,],R)%*%t(L[-1,])+L[-1,]%*%edcov[[1]]%*%t(L[-1,])),U.k = edcov[[1]],L=L[-1,])
 mashnobasemeans=read.table("mashnobedcovposterior.means.txt")[,-1]
 all.equal(as.numeric(mashnobasemeans[1,]),as.numeric(a))
+
 ```
 
 
@@ -220,6 +221,25 @@ identical(as.numeric(likmattruth[j]),as.numeric(lltest))
 
 sum(log(exp(likmattruth)))
 sum(log(exp(likmattruth[1:1000])))
+
+
+
+weightedquants=lapply(seq(1:nrow(w)),function(j){total.quant.per.snp.no.baseline(j,covtruthlist,b.gp.hat=w,se.gp.hat = se,pis,A=A,checkpoint = FALSE,L=L[-1,])})
+
+w=data.frame(wfull[,-1])
+a=post.mean.with.proj(b.mle = t(w[1,]),tinv = solve(L[-1,]%*%diag(se[1,],R)%*%t(L[-1,])+L[-1,]%*%covtruthlist[[1]]%*%t(L[-1,])),U.k = covtruthlist[[1]],L=L[-1,])
+mashnobasemeans=read.table("truthposterior.means.txt")[,-1]
+all.equal(as.numeric(mashnobasemeans[1,]),as.numeric(a))
+
+
+##Let's try with mash truth##
+pis=1
+A="mashtruth"
+weightedquants=lapply(seq(1:nrow(w)),function(j){total.quant.per.snp.no.baseline(j,covtruthlist,b.gp.hat=wfull,se.gp.hat = se,pis,A=A,checkpoint = FALSE,L=diag(1,R))})
+a=post.mean.with.proj(b.mle = wfull[1,],tinv = solve(diag(se[1,])+covtruthlist[[1]]),U.k = covtruthlist[[1]],L=diag(1,R))
+mashtruth=read.table("mashtruthposterior.means.txt")[,-1]
+all.equal(as.numeric(mashtruth[1,]),as.numeric(a))
+
 
 
 liked=t(as.matrix(readRDS("liketrainwithoneKandoneomeganewwithnoscale.rds")))
@@ -317,17 +337,21 @@ Let's compare RMSEs:
 ```{r}
 mash.means=read.table("mashposterior.means.txt")[,-1]
 mash.nobasemeans=read.table("mashnobedcovposterior.means.txt")[,-1]
-
+mash.nobtruth=read.table("truthposterior.means.txt")[,-1]
+mash.truth=read.table("mashtruthposterior.means.txt")[,-1]
 mle=w
 
 head(mle)
 rmse.mash=sqrt(mean((mash.means-mle)^2))
 rmse.mnb=sqrt(mean((mash.nobasemeans-mle)^2))
-
+rmse.truth=sqrt(mean((mash.nobtruth-mle)^2))
+rmse.mashtruth=sqrt(mean((mash.truth-mle)^2))
 rmse.all.table=cbind(mash=rmse.mash,mnb=rmse.mnb)
 
 rmse.mash
 rmse.mnb
+rmse.truth
+rmse.mashtruth
 
 barplot(rmse.all.table)
 U.gp1kl = post.b.gpkl.cov(V.gp.hat.inv = solve(diag(se[1,],R)),U.0k.l = covlist[[1]])
@@ -335,4 +359,61 @@ U.gp1kl = post.b.gpkl.cov(V.gp.hat.inv = solve(diag(se[1,],R)),U.0k.l = covlist[
 all.equal(as.numeric(post.b.gpkl.mean(b.mle = w[1,],V.gp.hat.inv = solve(diag(se[1,],R)),U.gp1kl = U.gp1kl)),as.numeric(mash.means[1,]))
 
 ```
+
+We should also compute the likelihood with *MASH* using the truth:
+
+```{r}
+c=readRDS("chatfixedomega.rds")
+t=c$t;b=c$chat;se=c$shat
+length(which(rowSums(c$beta)!=0))
+
+###Here we're just going to use the 'real associations'
+index=which(rowSums(c$beta)!=0)
+t=c$t[index,];b=c$chat[index,];se=c$shat[index,]
+R=ncol(t)
+##center the estimates
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+w=t(L%*%t(b))
+wt=t(L%*%t(t))
+
+dim(t)
+identical(t,b)
+strongt=wt[index,]
+v.j=se
+
+
+
+covtruthlist=list(2*c$covmat)
+A="truthmash"
+compute.hm.train.log.lik.pen(train.b = w[index,],se.train = se,covmat = covtruthlist,A = A,pen = 1)
+
+likmattruth=t(as.matrix(readRDS("liketraintruthmash.rds")))
+
+
+j=10
+lltest=log.lik.func(b.mle=w[j,],V.gp.hat =diag(se[j,])^2,covmat =covtruthlist)                                                                                          
+
+identical(as.numeric(likmattruth[j]),as.numeric(lltest))
+
+sum(log(exp(likmattruth)))
+sum(log(exp(likmattruth[1:1000])))
+
+
+
+
+
+train.b=data.frame(w);se.train = se;covmat = covtruthlist;pen = 1;L = diag(1,R);J=nrow(train.b)
+lik.mat=t(sapply(seq(1:J),function(j){
+  V.gp.hat=diag(se.train[j,])^2;
+  b.mle=train.b[j,]
+  dmvnorm(x=b.mle, sigma=(covtruthlist[[1]]+V.gp.hat),log=TRUE)}))##here the likelihood estimate is different
+
+dim(lik.mat)
+sum(log(exp(lik.mat)))
+j=10
+lik.mat[10]
+V.gp.hat=diag(se.train[j,])^2;
+dmvnorm(x=train.b[j,], sigma=(covtruthlist[[1]]+V.gp.hat),log=TRUE)
+mean(lik.mat)
+
 
