@@ -13,7 +13,7 @@ library('mashr')
 library("ExtremeDeconvolution")
 library("MASS")
 knitr::opts_chunk$set(cache=TRUE)
-system("ls; rm *rds;rm *txt; rm *pdf")
+#system("ls; rm *rds;rm *txt; rm *pdf")
 
 ```
 
@@ -41,6 +41,8 @@ For the non-null effects, $v_{2...R}$ is simulated according to one of three MVN
 We then use the observations $$LChat = Chat_2-Chat_1, Chat_3-Chat_1 ... Chat_8-Chat_1$$ to estimate v, that is $$LChat ~ N(LC,LVL')$$
 
 Where the matrix L subtracts the first entry from the other r=2 ... r=8 entires:
+
+The question is, when I simulate these real effects, am I simulating v or Lv? What is the dimension of each? If I am simulating v, then shouldn't Lchat be N(0,LUL' + LVL')?
 
 
 ```{r}
@@ -236,6 +238,20 @@ legend("bottomright",legend = c("mashLVL","mashId"),col=c("green","red"),pch=c(1
 
 ```
 
+
+
+We can also compute RMSE:
+
+```{r}
+withresmreans=as.matrix(read.table("allmashlvlposterior.means.txt")[,-1])
+noresmeans=as.matrix(read.table("allmashposterior.means.txt")[,-1])
+b=as.matrix(beta)
+
+sqrt(mean((withresmreans-b)^2))
+sqrt(mean((noresmeans-b)^2))
+```
+
+And you can see we do much better in terms of RMSE.
 
 
 

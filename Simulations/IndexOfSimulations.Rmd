@@ -1,0 +1,60 @@
+---
+title: "IndexofSimulations"
+output: html_document
+---
+Here I summarize my simulations.
+
+In the old `Mash No baseline`, we assumed 
+
+$$C = \mu + v$$
+$$Chat = C + E$$
+$$LChat = Lv + E$$ 
+
+where E was N (0,LVL'), L was the R-1 x R centering matrix which removed the mean entry of the row. 
+
+and v was a mixture of normals $\sum_{p} N(0,U_{p}$
+
+We compared to mash with $$LChat = v + E$$ where L was RxR and E was N(0,V).
+
+In [this sim](with_fullandfixedprior/Withbothtrueandestimatedprior.html) where we use the full set of matrices, we found that the RMSE with MNB was not better and using the truth was only slightly better.
+
+In this sim where we use only [one component](justonelikcompare/jol.html) we confirmed this result - in fact the RMSE were identical. We used a standard error or 1 and made all the associations 'real' so that the likelihood that was being maximized by training Bovy on the maxes was the same as that estimate in the likelihood matrix.
+
+##Post Feb 25 conversation
+
+Because of the lack of identificability and a change of focus to an interest in the contrast between average expression in R=2...R, we chose instead to tray and estimate the change in effect over a control condition:
+
+In our first setting with no true effect, $C$ is the average uncentered true expression in all R conditions:
+
+$$C = \mu_ {R}$$
+
+where \mu_{R} is an R vector of identical $\mu$
+
+Then the observed estimates are independent, with uncorrelated residuals:
+$$Chat = N(C, 1/2 I_{8})$$
+
+thus they can be written as :
+
+$$Chat = \mu + v + E$$
+
+However, if you try and estimate the observed differences:
+
+$$Chat_{2..R}-Chat_{1}$$ and assume the residuals are uncorrelated (i.e., $N(0,I_{7})$ you will identify more false positives. We show that is indeed the case - you call many more things significant under [this simulation](newsims/simulating.html) than if you were to truly simulate data $N(0,I_{7})$ and use mash to estimate effects and lfsr. When accounting for the correlation in residuals, i.e., assuming V was $N(0,L1/2I_{8}L')$ we signficantly reduced the number of false positives. I tried this with both 1 and multiple components.
+
+###With Effects
+
+The next step was to add effects, such that the $R-1$ vector of estimates v arose from one of three different MVN distributions $N_{R-1}(0,U_{k})$.
+
+I simulated according to three different $U_{k}$, and then again comparee the number of false positives and true positives recongizing the correlated residuals and [not](withsignal/withsignal.html). We also do much better in terms of RMSE. So maybe we could say that Bovy is estimate LUL' when we use the max like estimate on LChat.
+
+
+My problem is that I think I am simulating the matrix of 'projected effects' Lv, because they are R-1, and the true effects need to be v, or else we should be using $LChat~N(0, LUL' + LVL')$ instead of $LChat ~ N(0,U+LVL')$. I suppose we could try and estimate the RxR matrix Uk (and force all of the control condition entries to be 0) but that doesn't really make sense.
+
+
+
+##Applying to John's Data
+I had previously applied MASH no BASELINE to John's [non control data](../john/withbatchcorrects2.html), but now I applied it to the matrix of observed differences over the [uninfected condition](../john/rerun.html).
+
+###Question
+
+Has the objective changed, i.e., minimizing FP over RMSE?
