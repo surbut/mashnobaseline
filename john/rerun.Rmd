@@ -1,0 +1,331 @@
+---
+title: "usingjohnwithnewcode"
+output: html_document
+---
+
+
+Let's try this out with john's data at time point 18, and notperform the centering in advnace. 
+
+Critically, I'm going to use the batch corrected data from John to avoid having to add back in the intercept term
+The weights don't make a sizeable difference, and the modeling with mean included is difficult if we need to remove the covariates for whom the mean will be partially assumed.
+
+
+```{r setup, include=FALSE}
+require(knitr)
+knitr::opts_chunk$set(cache=TRUE)
+opts_chunk$set(fig.path = "/Users/sarahurbut/Dropbox/PhDThesis/Figures/") 
+library("mashr")
+```
+
+
+REad in the batch corrected data. This includes the mean gene expression for each gene: 
+```{r}
+batchcorrectdata=read.table("~/Dropbox/oldnobaseline/john/s1table.txt",header = T,stringsAsFactors = F)[,-c(1,2)]
+anno=read.table("~/Dropbox/oldnobaseline/john/annotation.txt",header=T)
+library('limma')
+```
+
+
+Prepare the factors for use in the linear model.
+
+```{r annotation}
+groups <- anno[, c("ind", "bact", "time", "extr", "rin")]
+groups$bact <- gsub("\\+", "plus", groups$bact)
+groups$ind <- factor(groups$ind)
+groups$bact <- factor(groups$bact, levels = c("none", "Rv", "Rvplus", "GC",
+                                              "BCG", "Smeg", "Yers", "Salm",
+                                              "Staph"))
+groups$time <- factor(groups$time, levels = c(4, 18, 48))
+groups$extr <- factor(groups$extr)
+head(groups)
+```
+Prepare model_matrix
+```{r}
+design <- model.matrix(~ bact-1, data = groups)
+# Clean up names of design matrix
+colnames(design) <- gsub("bact", "", colnames(design))
+dim(design)
+
+beta_class <- matrix(0, dim(batchcorrectdata)[1], dim(design)[2]);
+sebeta_class <- matrix(0, dim(batchcorrectdata)[1], dim(design)[2])
+t_class = matrix(0, dim(batchcorrectdata)[1], dim(design)[2])
+colnames(beta_class)=colnames(sebeta_class)=colnames(t_class)=colnames(design)
+  
+knownsamples=which(groups$time=="18")
+colnames(batchcorrectdata)[10]
+which(design[10,]==1)
+
+for(k in c(1:9)){
+  
+  model_mat_temp <- cbind(design[knownsamples,k]);
+  #vsarah <- voom(y[,knownsamples], model_mat_temp)##ccurrent model
+  #vsarah2 <- voom(y[,knownsamples], model_mat)###total model
+  #vjohn <- voom(y[,knownsamples], design[knownsamples,])###john'sdesign
+  #limma.obj <- limma::lmFit(vsarah$E, model_mat_temp,weights=vsarah$weights);
+  #limma.obj2 <- limma::lmFit(vsarah$E, model_mat_temp,weights=vsarah2$weights);
+  #limma.obj3 <- limma::lmFit(vsarah$E, model_mat_temp,weights=johnsweights[,knownsamples]);
+  ##ask why not the same as 
+  l=lmFit(object = batchcorrectdata[,knownsamples],model_mat_temp)
+  beta_class[,k] <- as.matrix(l$coefficients[,1]);
+  sebeta_class[,k] <- l$sigma*(as.matrix(l$stdev.unscaled[,1]));
+  t_class[,k] = (as.matrix(l$coefficients[,1]))/(l$sigma*(as.matrix(l$stdev.unscaled[,1])));
+  }
+
+##show that beta_class[j,k] ##roughly## corresponds to the average expression at gene j of samples from class k, without incorporation of weights
+j=100
+k=2
+data=as.matrix(batchcorrectdata[,knownsamples])
+mean(data[j,c(which(design[knownsamples,k]==1))])
+beta_class[j,k]
+```
+
+Now we compute the average for each subgroup of the uncentered read counts at each gene. Here, voom_class_adj will not acutally be adjusted byt the mean.
+
+```{r, echo=FALSE, eval=FALSE}
+write.table(beta_class,"betabatchcorrected.txt",col.names = T)
+write.table(sebeta_class,"sebetabatchcorrected.txt",col.names = T)
+write.table(t_class,"tbatchcorrected.txt",col.names = T)
+```
+
+Check to make sure these are stored properly:
+```{r,check}
+j=8
+k=3
+lmFit(batchcorrectdata[,knownsamples],design[knownsamples,k])$coefficients[j,1]
+beta_class[j,k]
+sebeta_class[j,k]
+t_class[j,k]
+beta_class[j,k]/sebeta_class[j,k]
+```
+
+Now we compute factors on the centered T statistics:
+
+```{r}
+b=read.table("betabatchcorrected.txt")
+se=read.table("sebetabatchcorrected.txt")
+t=read.table("tbatchcorrected.txt")
+```
+
+Now Lchat will be the matrix of contrasts:
+
+```{r}
+R=ncol(b)
+lchat=b[,2:ncol(b)]-b[,1]
+```
+
+So now, $$Lchat$$ will represent the differences in observed averages over control, and the variances add.
+
+We can write the maxes to a file:
+```{r}
+maxes=lchat[order(apply(lchat,1,max),decreasing = T),][1:1000,]
+write.table(maxes,"maxes.txt",col.names = FALSE,row.names = FALSE)
+m=read.table("maxes.txt")
+
+
+index=order(apply(lchat,1,max),decreasing = T)[1:1000]
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen maxes.txt -g 1000 -k 5 -n 8 i -o lchatwithE')
+
+
+factor.mat=as.matrix(read.table("lchatwithE_F.out"))
+lambda.mat=as.matrix(read.table("lchatwithE_lambda.out"))
+
+library("ExtremeDeconvolution")
+R=9;L=cbind(rep(-1,R-1),diag(1,R-1))
+lvlarray=genlvllist(s.j = se[index,],L = L )
+
+R=ncol(lchat);K=3;P=3
+init.cov=init.covmat(t.stat=maxes,factor.mat = factor.mat,lambda.mat = lambda.mat,K=K,P=P)
+init.cov.list=list()
+for(i in 1:K){init.cov.list[[i]]=init.cov[i,,]}
+mean.mat=matrix(rep(0,ncol(maxes)*nrow(maxes)),ncol=ncol(maxes),nrow=nrow(maxes))  
+ydata= maxes ##train on the max like estimates (same as using max ws)
+xamp=rep(1/K,K)
+
+xcovar=init.cov.list
+fixmean=TRUE     
+ycovar=lvlarray 
+xmean=mean.mat   
+projection=list();for(l in 1:nrow(maxes)){projection[[l]]=diag(1,R)}##no projection in mash because we feed in centered estimates
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)##notice no projection.
+true.covs=array(dim=c(K,R,R))
+for(i in 1:K){true.covs[i,,]=e$xcovar[[i]]}
+pi=e$xamp
+max.step=list(true.covs=true.covs,pi=pi)
+
+max.step=deconvolution.em.with.bovy(t.stat = maxes,factor.mat = factor.mat,v.j = lvlarray,lambda.mat = lambda.mat,K = 3,P = 3)
+
+sapply(seq(1:3),function(k){all.equal(as.numeric(max.step$true.covs[k,,]),as.numeric(e$xcovar[[k]]))})
+```
+
+
+
+```{r}
+###recall e is the output using lvl
+
+
+covmash=compute.hm.covmat.all.max.step(b.hat = lchat,se.hat = se,t.stat = lchat,Q = 5,lambda.mat = lambda.mat,A = "allmash",factor.mat = factor.mat,max.step = max.step,zero = T,power = 2)$covmat
+
+
+all.equal(covmash[[2]]/max(diag(covmash[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
+all.equal(covmash[[3]]/max(diag(covmash[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
+all.equal(covmash[[9]]/max(diag(covmash[[9]])),max.step$true.covs[2,,]/max(diag(max.step$true.covs[2,,])))
+
+```
+
+Now, proceed as always, estimating likelihood and computing posteriors.
+
+```{r, eval=F}
+
+
+A="allmashlvl"
+compute.hm.train.log.lik.pen.lvlarray(train.b = lchat,lvlarray= lvlarray,covmat = covmash,A=A,pen=1)
+
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+b.test=lchat
+se.test=se
+  for(j in 1:nrow(lchat)){
+    total.quant.per.snp.with.lvlarray(j=j,covmat = covmash,b.gp.hat=lchat,lvlarray = lvlarray,pis,A=A,checkpoint = FALSE)}
+  
+```
+
+Let's check our code:
+
+
+```{r}
+lvlarray=genlvllist(s.j = se,L = L)
+means=read.table("allmashlvlposterior.means.txt")[,-1]
+lfsrlvl=read.table("allmashlvllfsr.txt")[,-1]
+
+j=10
+arrays=post.array.per.snp.with.lvlmat(j = j,covmat = covmash,b.gp.hat = lchat,lvlmat = lvlarray[[j]])
+Ugp1kl=post.b.gpkl.cov(V.gp.hat.inv = solve(lvlarray[[j]]),U.0k.l = covmash[[k]])
+mu=post.b.gpkl.mean(b.mle = t(as.vector(lchat[j,])),V.gp.hat.inv = solve(lvlarray[[j]]),U.gp1kl = Ugp1kl)
+
+all.equal(as.numeric(mu),as.numeric(arrays$post.means[k,]))
+all.equal(diag(Ugp1kl),as.numeric((arrays$post.covs[k,])))
+log.lik.snp=log.lik.func(lchat[j,],V.gp.hat = lvlarray[[j]],covmat = covmash)
+log.lik.minus.max=log.lik.snp-max(log.lik.snp)
+pis=readRDS("pisallmashlvl.rds")$pihat
+exp.vec=exp(log.lik.minus.max)
+post.weights=t(exp.vec*pis/sum(exp.vec*pis))
+all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(means[j,]))
+```
+
+
+And here, we plot the patterns of sharing:
+```{r,echo=F}
+cov=readRDS("covmatallmash.rds")
+pis=readRDS("pisallmashlvl.rds")$pihat
+length(pis)
+library('gplots')
+library('colorRamps')
+barplot(colSums(matrix(pis[-length(pis)],byrow = T,ncol=18)))
+
+for(k in 2:9){
+  x=cov[[k]]/max(diag(cov[[k]]))
+  colnames(x)=rownames(x)=levels(groups$bact)[-1]
+  heatmap.2(x,revC=T,dendrogram="none",main=paste0("Uk",k,round(colSums(matrix(pis[-433],byrow = T,ncol=18))[k],2)),density.info = "none",trace="none",col=blue2green(256))
+  }
+
+```
+
+
+```{r pairwisesharingmnb}
+library("mashr")
+post.means=read.table("allmashlvlposterior.means.txt")[,-1]
+lfsr.mash=read.table("allmashlvllfsr.txt")[,-1]
+se.matched=as.matrix(read.table("sebetabatchcorrected.txt"))[,-1]
+strain.names=read.table("StrainNames.txt",header = T,stringsAsFactors = F)[,1]
+pm.mash.beta=post.means*se.matched
+colnames(pm.mash.beta)=colnames(lfsr.mash)=strain.names
+lfsr.mash.sig=lfsr.mash[rowSums(lfsr.mash<0.05)>0,]##only 137,223 are significant in at least one subgroup
+pm.mash.sig=pm.mash.beta[rowSums(lfsr.mash<0.05)>0,]
+
+
+
+library(RColorBrewer)
+p=colorRampPalette(brewer.pal(9,"Greens"))(100)
+g=colorRampPalette(brewer.pal(9,"Blues"))(100)
+
+signheatmap=compute.sharing.by.sign(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.mash.beta = pm.mash.sig)
+signheatmap[lower.tri(signheatmap)] <- NA
+magheatmap=compute.mag.by.sharing(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.mash.beta = pm.mash.sig)
+magheatmap[lower.tri(magheatmap)] <- NA
+
+
+library('colorRamps')
+library('corrplot')
+library(gplots)
+library(ggplot2)
+
+class(signheatmap)
+
+
+
+library('lattice')
+
+clrs <- colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
+                               "#E0F3F8","#91BFDB","#4575B4")))(64)
+#clrs[63:64] <- "darkviolet"
+lat=signheatmap
+lat[lower.tri(lat)] <- NA
+print(levelplot(lat,col.regions = p,xlab = "",ylab = "",colorkey = TRUE,main="PairwiseSharingBySign"))
+
+
+heatmap.2(magheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by Magnitude"),
+          cexRow=0.6,cexCol=2,cex.main=0.5,#breaks=seq(0.35,1,0.01),
+          labCol=NA)
+
+library('lattice')
+
+clrs <- colorRampPalette(rev(c("#D73027","#FC8D59","#FEE090","#FFFFBF",
+                               "#E0F3F8","#91BFDB","#4575B4")))(64)
+#clrs[63:64] <- "darkviolet"
+absmagheatmap=compute.mag.by.sharing(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.mash.beta = abs(pm.mash.sig))
+absmagheatmap[lower.tri(absmagheatmap)] <- NA
+lat=absmagheatmap
+lat[lower.tri(lat)] <- NA
+print(levelplot(lat,col.regions = g,
+                xlab = "",ylab = "",colorkey = TRUE,main="PairwiseSharingByAbsMagnitude"))
+```
+
+Now, let's look at sharing my absolute value of magnitude:
+```{r}
+
+heatmap.2(signheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by Sign"),
+          cexRow=0.6,cexCol=0.5,cex.main=0.5)
+#,breaks=seq(0.7,1,0.01))
+
+heatmap.2(1-signheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by Opposite Sign"),
+          cexRow=0.6,cexCol=0.5,cex.main=0.5)
+#,breaks=seq(0.7,1,0.01))
+
+
+
+absmagheatmap=compute.mag.by.sharing(lfsr.mash = lfsr.mash.sig,thresh = 0.05,pm.mash.beta = abs(pm.mash.sig))
+absmagheatmap[lower.tri(absmagheatmap)] <- NA
+heatmap.2(absmagheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by abs(Magnitude)"),
+          cexRow=0.6,cexCol=2,cex.main=0.5,#breaks=seq(0.35,1,0.01),
+          labCol=NA)
+
+heatmap.2(magheatmap,Rowv=FALSE,Colv=FALSE,
+          symm=TRUE,dendrogram="none",density="none",trace="none",#col=redblue,
+          col=blue2green,main=paste0("Pairwise Sharing by Magnitude"),
+          cexRow=0.6,cexCol=2,cex.main=0.5,#breaks=seq(0.35,1,0.01),
+          labCol=NA)
+```
+
+
+
+
+
+
+

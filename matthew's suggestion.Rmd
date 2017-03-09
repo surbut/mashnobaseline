@@ -1,0 +1,126 @@
+---
+title: "mashiterative"
+output: html_document
+---
+In this document, we can use the mash estimates to estimate the liklihooed with MNB.
+```{r}
+rm(list=ls())
+
+system("ls; rm *rds;rm *txt; rm *pdf")
+library("ExtremeDeconvolution")
+library("mashr")
+set.seed(123)
+c=chat_sim_fsingle_fixedomega(n = 1000,d = 8,omega = 2,esd = 1,reals=1)
+saveRDS(c,"chatfixedomega.rds")
+
+t=c$t;b=c$chat;se=c$shat
+length(which(rowSums(c$beta)!=0))
+
+###Here we're just going to use the 'real associations'
+index=which(rowSums(c$beta)!=0)
+t=c$t[index,];b=c$chat[index,];se=c$shat[index,]
+R=ncol(t)
+##center the estimates
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+w=t(L%*%t(b))
+wt=t(L%*%t(t))
+muhats=rowMeans(t)
+dim(t)
+identical(t,b)
+strongt=wt[index,]
+v.j=se
+
+
+
+init.cov.list=list()
+init.cov.list[[1]]=cov(strongt)
+
+#head(init.cov.list)
+mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)  
+ydata= strongt##train on the max like estimates (same as using max ws)
+xamp=1
+xcovar=init.cov.list
+fixmean=TRUE     
+ycovar=v.j     
+xmean=mean.mat   
+projection=list();for(l in 1:nrow(strongt)){projection[[l]]=diag(1,R)}##no projection in mash
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)##notice no projection.
+se.train=se
+
+covlist=e$xcovar
+```
+
+##Let's try with mash truth##
+```{r}
+pis=1
+A="mashiterone"
+weightedquants=lapply(seq(1:nrow(w)),function(j){total.quant.per.snp.no.baseline(j,covlist,b.gp.hat=w,se.gp.hat = se,pis,A=A,checkpoint = FALSE,L=diag(1,R))})
+a=post.mean.with.proj(b.mle = w[1,],tinv = solve(diag(se[1,])+covlist[[1]]),U.k = covlist[[1]],L=diag(1,R))
+
+mashtruth=read.table("mashiteroneposterior.means.txt")[,-1]
+all.equal(as.numeric(mashtruth[1,]),as.numeric(a))
+
+```
+
+Then, we can use these estimates of $v$ to recompute $chat$, and then recenter:
+
+```{r}
+chat2=muhats+mashtruth
+t=b=chat2
+t=c$t[index,];b=c$chat[index,];se=c$shat[index,]
+R=ncol(t)
+##center the estimates
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+w=t(L%*%t(b))
+wt=t(L%*%t(t))
+muhats=rowMeans(t)
+dim(t)
+identical(t,b)
+strongt=wt[index,]
+v.j=se
+
+
+
+init.cov.list=list()
+init.cov.list[[1]]=cov(strongt)
+
+#head(init.cov.list)
+mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)  
+ydata= strongt##train on the max like estimates (same as using max ws)
+xamp=1
+xcovar=init.cov.list
+fixmean=TRUE     
+ycovar=v.j     
+xmean=mean.mat   
+projection=list();for(l in 1:nrow(strongt)){projection[[l]]=diag(1,R)}##no projection in mash
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)##notice no projection.
+se.train=se
+
+covlist=e$xcovar
+```
+
+##Let's try with mash truth##
+```{r}
+pis=1
+A="mashitertwo"
+weightedquants=lapply(seq(1:nrow(w)),function(j){total.quant.per.snp.no.baseline(j,covlist,b.gp.hat=w,se.gp.hat = se,pis,A=A,checkpoint = FALSE,L=diag(1,R))})
+a=post.mean.with.proj(b.mle = w[1,],tinv = solve(diag(se[1,])+covlist[[1]]),U.k = covlist[[1]],L=diag(1,R))
+
+mashtwo=read.table("mashitertwoposterior.means.txt")[,-1]
+all.equal(as.numeric(mashtwo[1,]),as.numeric(a))
+
+```
+
+And then we can compute the rmse for both:
+
+```{r}
+
+beta=as.matrix(c$beta)
+mle=as.matrix(c$chat)
+mashone=as.matrix(read.table("mashiteroneposterior.means.txt")[,-1])
+mashtwo=as.matrix(mashtwo)
+standard=sqrt(mean((beta-mle)^2))
+sqrt(mean((mashone-beta)^2))/standard
+sqrt(mean((mashtwo-beta)^2))/standard
+
+

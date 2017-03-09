@@ -286,10 +286,15 @@ Our question is, if you were to add the matrix of 1s (i.e., $\onemat$ ) to each 
 
 \begin{equation}
 \begin{aligned}
-\mu^{1}_{jp} ( \Sigma_p ) = \Sigma_{p} \lstar ' T_{jp}^{-1} \lstar  \chat_{j} \\
-\mu^{1}_{jp} ( \Sigma_p + \onemat) = \Sigma_{p} \lstar ' T_{jp}^{-1} \lstar  \chat_{j} +  \onemat \lstar ' T_{jp}^{-1} \lstar  \chat_{j}  \\
-\mu^{1}_{jp} ( \Sigma_p + \onemat) = \Sigma_{p} \lstar ' T_{jp}^{-1} \lstar  \chat_{j} +  \bm{0}' T_{jp}^{-1} \lstar  \chat_{j}  \\
-\mu^{1}_{jp} ( \Sigma_p + \onemat) = \Sigma_{p} \lstar ' T_{jp}^{-1} \lstar  \chat_{j}  \\
+\mu^{1}_{jp} ( \Sigma_p ) = \Sigma_{p} \lstar ' T_{jp}^{-1} \lstar  \chat_{j} 
+\end{aligned}
+\end{equation}
+
+\begin{equation}
+\begin{aligned}
+\mu^{1}_{jp} ( \Sigma_p + \onemat) &= \Sigma_{p} \lstar ' T_{jp}^{-1} \lstar  \chat_{j} +  \onemat \lstar ' T_{jp}^{-1} \lstar  \chat_{j}  \\
+ &= \Sigma_{p} \lstar ' T_{jp}^{-1} \lstar  \chat_{j} +  \bm{0}' T_{jp}^{-1} \lstar  \chat_{j}  \\
+&= \Sigma_{p} \lstar ' T_{jp}^{-1} \lstar  \chat_{j}  \\
 \end{aligned}
 \end{equation}
 
@@ -405,6 +410,10 @@ And so this turns out our formula for $\mu^{1}$ and $U^{1}$:
 U^{1} ( \Sigma_p ) = \Sigma - \Sigma \lstar ' T^{-1} \lstar  \Sigma_{p}\\
 \end{equation}
 \end{center}
+
+\subsection{Fundamental Problem}
+
+Using equation 4.7, we can see that L(U) = L(U+a11') and thus U is not identifiable. However, from the equation above, we can see that U matters in the computation of the posterior
 
 \subsection{Selecting The Covariance Matrices}
 

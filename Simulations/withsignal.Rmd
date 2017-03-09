@@ -1,0 +1,176 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+Now, let's simulate with some signal involved;
+
+```{r}
+library("knitr")
+knitr::opts_chunk$set(cache=TRUE)
+rm(list=ls())
+library('mashr')
+library("Extreme_Deconvolution")
+library("MASS")
+set.seed(123)
+R=8;n=1000;K=3;J=0.10*n;betasd=1
+mu_mat = t(sapply(seq(1:n),function(i){rep(rnorm(1),R)})) ##the same mu for all conditions
+d=R-1
+F=t(sapply(seq(1:K),function(x){rnorm(d,mean=0,sd=betasd)}))###simulate random factors
+covmat=lapply(seq(1:K),function(f){t=as.matrix((F[f,]))%*%F[f,]})
+possible_loadings = diag(K) #set possible loadings to be "sparse" (loaded on one factor each)
+z = sample(nrow(F),J,replace=TRUE)
+beta=matrix(rep(0,n*R),ncol=R,nrow=n)
+for(j in 1:J){
+    k=z[j]
+    beta[j,c(2:R)]=mvrnorm(1,mu=rep(0,d),Sigma=covmat[[k]])###deviations only simulated for non-controls
+    }
+c=mu_mat+beta
+error = t(sapply(seq(1:n),function(i){rnorm(R,1/2)}))##the errors are uncorrelated
+chat=c+error
+lchat=chat[,c(2:8)]-chat[,1]
+```
+
+Now again, let's test if recognizing the correlated residuals with multiple matrices (as in the full mash framework) is helpful.
+
+####Let's try running regular mash:
+
+```{r}
+
+write.table(lchat,"lchatwitheffect.txt",col.names = F,row.names = F)
+system('/Users/sarahurbut/miniconda3/bin/sfa -gen lchatwitheffect.txt -g 1000 -k 5 -n 7 i -o lchatwithE')
+
+
+factor.mat=as.matrix(read.table("lchatwithE_F.out"))
+lambda.mat=as.matrix(read.table("lchatwithE_lambda.out"))
+
+max.step=deconvolution.em.with.bovy(t.stat = lchat,factor.mat =factor.mat,lambda.mat=lambda.mat,v.j = se,K = 3,P = 3)
+
+##Show how the ranks is preserved
+apply(max.step$true.covs,1,function(x){qr(x)$rank})
+
+covmash=compute.hm.covmat.all.max.step(b.hat = lchat,se.hat = se,t.stat = lchat,Q = 5,lambda.mat = lambda.mat,A = "allmash",factor.mat = factor.mat,max.step = max.step,zero = T,power = 2)$covmat
+
+
+all.equal(covmash[[2]]/max(diag(covmash[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
+all.equal(covmash[[3]]/max(diag(covmash[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
+all.equal(covmash[[9]]/max(diag(covmash[[9]])),max.step$true.covs[2,,]/max(diag(max.step$true.covs[2,,])))
+
+```
+
+Now, proceed as always, estimating likelihood and computing posteriors.
+
+```{r mashmethod, eval=T}
+A="allmash"
+compute.hm.train.log.lik.pen(train.b = lchat,se.train = se,covmat = covmash,A=A,pen=1)
+
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+b.test=lchat
+se.test=se
+weightedquants=lapply(seq(1:nrow(lchat)),function(j){total.quant.per.snp(j,covmash,b.gp.hat=lchat,se.gp.hat = se,pis,A=A,checkpoint = FALSE)})
+```
+
+Check to see if correct:
+
+```{r}
+j=1
+means=read.table("allmashposterior.means.txt")[,-1]
+arrays=post.array.per.snp(j = 1,covmat = covmash,b.gp.hat = lchat,se.gp.hat = se)
+
+log.lik.snp=log.lik.func(lchat[1,],V.gp.hat = diag(se[1,])^2,covmat = covmash)
+log.lik.minus.max=log.lik.snp-max(log.lik.snp)
+pis=readRDS("pisallmash.rds")$pihat
+exp.vec=exp(log.lik.minus.max)
+post.weights=t(exp.vec*pis/sum(exp.vec*pis))
+
+all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(means[j,]))
+```
+
+Now, let's see how many false positive we caught here;
+
+```{r}
+lfsrmash=read.table("allmashlfsr.txt")[,-1]
+```
+
+You can see we catch even more then when we use one component. Now, let's try full $mash$ with the correct projection matrix. We will run Bovy again, this time recognizing the correlated residuals and using multiple matrices.
+
+```{r}
+
+R=ncol(lchat);K=3;P=3
+init.cov=init.covmat(t.stat=lchat,factor.mat = factor.mat,lambda.mat = lambda.mat,K=K,P=P)
+init.cov.list=list()
+for(i in 1:K){init.cov.list[[i]]=init.cov[i,,]}
+mean.mat=matrix(rep(0,ncol(lchat)*nrow(lchat)),ncol=ncol(lchat),nrow=nrow(lchat))  
+ydata= lchat ##train on the max like estimates (same as using max ws)
+#xamp=rep(1/K,K)
+xamp=1
+xcovar=init.cov.list
+fixmean=TRUE     
+ycovar=lvlarray 
+xmean=mean.mat   
+projection=list();for(l in 1:nrow(lchat)){projection[[l]]=diag(1,R)}##no projection in mash because we feed in centered estimates
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)##notice no projection.
+true.covs=array(dim=c(K,R,R))
+for(i in 1:K){true.covs[i,,]=e$xcovar[[i]]}
+pi=e$xamp
+max.step=list(true.covs=true.covs,pi=pi)
+
+max.step=deconvolution.em.with.bovy(t.stat = lchat,factor.mat = factor.mat,v.j = lvlarray,lambda.mat = lambda.mat,K = 3,P = 3)
+
+sapply(seq(1:3),function(k){all.equal(as.numeric(d$true.covs[k,,]),as.numeric(e$xcovar[[k]]))})
+```
+
+
+
+```{r}
+###recall e is the output using lvl
+covmash=compute.hm.covmat.all.max.step(b.hat = lchat,se.hat = se,t.stat = lchat,Q = 5,lambda.mat = lambda.mat,A = "allmash",factor.mat = factor.mat,max.step = max.step,zero = T,power = 2)$covmat
+
+
+all.equal(covmash[[2]]/max(diag(covmash[[2]])),max.step$true.covs[1,,]/max(diag(max.step$true.covs[1,,])))
+all.equal(covmash[[3]]/max(diag(covmash[[3]])),max.step$true.covs[3,,]/max(diag(max.step$true.covs[3,,])))
+all.equal(covmash[[9]]/max(diag(covmash[[9]])),max.step$true.covs[2,,]/max(diag(max.step$true.covs[2,,])))
+
+```
+
+Now, proceed as always, estimating likelihood and computing posteriors.
+
+```{r, eval=T}
+A="allmashlvl"
+compute.hm.train.log.lik.pen.lvlmat(train.b = lchat,lvlmat = lvlarray[[1]],covmat = covmash,A=A,pen=1)
+
+pis=readRDS(paste0("pis",A,".rds"))$pihat
+b.test=lchat
+se.test=se
+weightedquants=lapply(seq(1:nrow(lchat)),function(j){total.quant.per.snp.with.lvlmat(j,covmash,b.gp.hat=lchat,lvlmat = lvlarray[[1]],pis,A=A,checkpoint = FALSE)})
+```
+
+Check to see if correct:
+
+```{r}
+means=read.table("allmashlvlposterior.means.txt")[,-1]
+lfsrlvl=read.table("allmashlvllfsr.txt")[,-1]
+arrays=post.array.per.snp.with.lvlmat(j = 1,covmat = covmash,b.gp.hat = lchat,lvlmat = lvlarray[[1]])
+
+log.lik.snp=log.lik.func(lchat[1,],V.gp.hat = lvlarray[[1]],covmat = covmash)
+log.lik.minus.max=log.lik.snp-max(log.lik.snp)
+pis=readRDS("pisallmashlvl.rds")$pihat
+exp.vec=exp(log.lik.minus.max)
+post.weights=t(exp.vec*pis/sum(exp.vec*pis))
+
+all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(means[j,]))
+mean(lfsrlvl<0.05)
+
+```
+
+
+
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

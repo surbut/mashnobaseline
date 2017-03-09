@@ -49,7 +49,7 @@ t.stat =strongprojectedt;v.j = lvllist;L = L[-1,]
 init.cov.list=list()
 init.cov.list[[1]]=cov(strongprojectedt)
 #head(init.cov.list)
-mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)  
+mean.mat=matrix(rep(0,ncol(t.stat)*nrow(t.stat)),ncol=ncol(t.stat),nrow=nrow(t.stat))  
 ydata=strongprojectedt[,-1]##train on the max like estimates
 xamp=1
 xcovar=init.cov.list
@@ -115,7 +115,7 @@ t.stat =strongprojectedt;v.j = lvllist;L = L[-1,]
 init.cov.list=list()
 init.cov.list[[1]]=diag(1,R)
 #head(init.cov.list)
-mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)  
+mean.mat=matrix(rep(0,ncol(t.stat)*nrow(t.stat)),ncol=ncol(t.stat),nrow=nrow(t.stat)) 
 ydata=strongprojectedt[,-1]
 xamp=1
 xcovar=init.cov.list
@@ -183,7 +183,7 @@ t.stat =strongprojectedt;v.j = lvllist;L = L[-1,]
 init.cov.list=list()
 init.cov.list[[1]]=c$covmat
 #head(init.cov.list)
-mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)  
+mean.mat=matrix(rep(0,ncol(t.stat)*nrow(t.stat)),ncol=ncol(t.stat),nrow=nrow(t.stat)) 
 ydata=strongprojectedt[,-1]
 xamp=1
 xcovar=init.cov.list

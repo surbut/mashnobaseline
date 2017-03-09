@@ -249,7 +249,7 @@ c=readRDS("chatfixedomega.rds")
 diag(c$covmat)
 
 t=c$t;b=c$chat;se=c$shat
-covl=list();covl[[1]]=c$covmat
+covl=list(2*c$covmat)
 #hist(t)
 #hist(b)
 R=ncol(t)
@@ -257,18 +257,20 @@ L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 wfull=t(L%*%t(b))
 sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is 
 A="withfixedomega"
-covs=compute.covmat.using.truth.fixed.omega(covlist = covl,A = "withfixedomega",omega = 2,zero = TRUE)
-length(covs)
-barplot(diag(covs[[2]]/max(diag(covs[[2]]))))
+#covs=compute.covmat.using.truth.fixed.omega(covlist = covl,A = "withfixedomega",omega = 2,zero = TRUE)
+#length(covs)
+#barplot(diag(covs[[2]]/max(diag(covs[[2]]))))
+covs=covl
 w=data.frame(wfull)[,-1]
 ```
 
 ```{r,eval=T}
 A="withfixedomegamnb"
 compute.hm.train.log.lik.pen.with.L(w,se.train = se,covmat = covs,A = A,pen = 1,L = L[-1,])
-pis=readRDS(paste0("pis",A,".rds"))$pihat
+#pis=readRDS(paste0("pis",A,".rds"))$pihat
+pis=1
 
-likmat=readRDS(paste0("liketrain",A,".rds"))
+likmat=t(readRDS(paste0("liketrain",A,".rds")))
 test=exp(likmat)
 sum(log(test%*%pis))
 
@@ -283,10 +285,10 @@ total.quant.per.snp.no.baseline(j = j,covmat = covs,b.gp.hat = w,se.gp.hat = se,
 ```{r,eval=T,echo=T}
 mash.means=as.matrix(read.table("withfixedomegamnbposterior.means.txt")[,-1])
 lfsr.mash=as.matrix(read.table("withfixedomegamnblfsr.txt"))[,-1]
-edcov=readRDS("covmatwithfixedomega.rds")
+edcov=covl
 j=10
 arrays=post.array.per.snp.no.baseline(j = 10,covmat = edcov,b.gp.hat = w,se.gp.hat = se,L = L[-1,])
-k=2
+k=1
 
 V.gp.hat=diag(se[j,])^2
 
@@ -302,7 +304,8 @@ identical(as.numeric(arrays$post.covs[k,]),as.numeric(diag(post.cov.with.proj(ti
 
 log.lik.snp=log.lik.func(b.mle,LVL,LSigL_list)
 log.lik.minus.max=log.lik.snp-max(log.lik.snp)
-pis=readRDS("piswithfixedomegamnb.rds")$pihat
+#pis=readRDS("piswithfixedomegamnb.rds")$pihat
+pis=1
 exp.vec=exp(log.lik.minus.max)
 post.weights=t(exp.vec*pis/sum(exp.vec*pis))
 
@@ -314,24 +317,27 @@ And let's also do this with the mash framework:
 ```{r}
 rm(list=ls())
 c=readRDS("chatfixedomega.rds")
-covl=list();covl[[1]]=c$covmat
+covl=list(2*c$covmat)
 t=c$t;b=c$chat;se=c$shat
 
 R=ncol(t)
 L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
 wfull=t(L%*%t(b))
 sjmat=convertstandarderrors(s.j = se,L=L)##make this be the standard errors of all, it is 
-covs=compute.covmat.using.truth(b.gp.hat = wfull,sebetahat = sjmat,A="test",zero=TRUE,covlist=covl,power=2)
+#covs=compute.covmat.using.truth(b.gp.hat = wfull,sebetahat = sjmat,A="test",zero=TRUE,covlist=covl,power=2)
+covs=covl
 
 ```
 
 ```{r mashtruth,eval=T}
 A="mashtruthwithfixedomega"
-covs=readRDS("covmatwithfixedomega.rds")
+covs=covl
 compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covs,A=A,pen=1)
 
 
 pis=readRDS(paste0("pis",A,".rds"))$pihat
+
+pis=1
 
 
 weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp(j,covs,b.gp.hat=wfull,se.gp.hat = se,pis,A=A,checkpoint = FALSE)})
@@ -342,7 +348,8 @@ And test to see if calculations are accurate:
 
 
 ```{r,eval=T,echo=T}
-cov=readRDS("covmatwithfixedomega.rds")
+#cov=readRDS("covmatwithfixedomega.rds")
+cov=covl
 mash.means=as.matrix(read.table("mashtruthwithfixedomegaposterior.means.txt")[,-1])
 w=data.frame(wfull)
 R=ncol(w)
@@ -353,7 +360,7 @@ mash.arrays=post.array.per.snp(j = 10,covmat = cov,b.gp.hat = w,se.gp.hat = se)
 ##show same algebra
 
 
-k=2
+k=1
 
 V.gp.hat=diag(se[j,])^2
 
@@ -382,7 +389,8 @@ identical(as.numeric(mash.arrays$post.means[k,]),as.numeric(post.b.gpkl.mean(b.m
 identical(as.numeric(mash.arrays$post.covs[k,]),as.numeric(diag(U.gp1kl)))
 
 
-pis=readRDS("pismashtruthwithfixedomega.rds")$pihat
+#pis=readRDS("pismashtruthwithfixedomega.rds")$pihat
+pis=1
 log.lik.snp=log.lik.func(b.mle,LVL,LSigL_list)
 log.lik.minus.max=log.lik.snp-max(log.lik.snp)
 exp.vec=exp(log.lik.minus.max)

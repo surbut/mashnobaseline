@@ -1,0 +1,217 @@
+---
+title: "testingthelikelihoodwith"
+output: html_document
+---
+
+In this document, we can use the mash estimates to estimate the liklihooed with MNB.
+```{r}
+rm(list=ls())
+
+system("ls; rm *rds;rm *txt; rm *pdf")
+library("ExtremeDeconvolution")
+library("mashr")
+set.seed(123)
+c=chat_sim_fsingle_fixedomega(n = 1000,d = 8,omega = 2,esd = 1,reals=1)
+saveRDS(c,"chatfixedomega.rds")
+
+t=c$t;b=c$chat;se=c$shat
+length(which(rowSums(c$beta)!=0))
+
+###Here we're just going to use the 'real associations'
+index=which(rowSums(c$beta)!=0)
+t=c$t[index,];b=c$chat[index,];se=c$shat[index,]
+R=ncol(t)
+##center the estimates
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+w=t(L%*%t(b))
+wt=t(L%*%t(t))
+
+dim(t)
+identical(t,b)
+strongt=wt[index,]
+v.j=se
+
+
+
+init.cov.list=list()
+init.cov.list[[1]]=cov(strongt)
+
+#head(init.cov.list)
+mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)  
+ydata= strongt##train on the max like estimates (same as using max ws)
+xamp=1
+xcovar=init.cov.list
+fixmean=TRUE     
+ycovar=v.j     
+xmean=mean.mat   
+projection=list();for(l in 1:nrow(strongt)){projection[[l]]=diag(1,R)}##no projection in mash
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)##notice no projection.
+se.train=se
+
+covlist=e$xcovar
+```
+
+Now, run the mash no baseline likelihood computation:
+
+```{r}
+
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+
+j=1
+A="checkingwithmashestimate"
+compute.hm.train.log.lik.pen.with.L(w[index,-1],se.train = se,covmat = covlist,A = A,pen = 1,L = L[-1,])
+
+
+
+train.b=data.frame(w)[index,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
+lik.mat=t(sapply(seq(1:J),function(j){
+  V.gp.hat=diag(se.train[j,])^2;
+  LVL=L%*%V.gp.hat%*%t(L);
+  LSigL=L%*%covlist[[1]]%*%t(L)
+  b.mle=train.b[j,]
+  dmvnorm(x=b.mle, sigma=(LSigL + LVL),log=TRUE)}))
+
+l=readRDS("liketraincheckingwithmashestimate.rds")
+
+all.equal(as.numeric(l),as.numeric(lik.mat))
+
+sum(log(exp(l[1:1000])))
+```
+
+Now we can compare to the estimate using the maxlikestimate of Uk using mash no baseline.
+
+```{r}
+
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+strongprojectedt=strongt
+lvllist=genlvllist(se[index,],L = L[-1,])
+##w should represent transformed betahats using all R subgroups and j genes
+wfull=t(L%*%t(b))
+
+t.stat =strongt;v.j = lvllist;L = L[-1,]
+init.cov.list=list()
+init.cov.list[[1]]=cov(strongprojectedt)
+#head(init.cov.list)
+mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)  
+ydata=strongt[,-1]##train on the max like estimates
+xamp=1
+xcovar=init.cov.list
+fixmean=TRUE     
+ycovar=v.j     
+xmean=mean.mat   
+projection=list();for(l in 1:nrow(t.stat)){projection[[l]]=L}
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+
+
+
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+library("ExtremeDeconvolution")
+efunc=deconvolution.em.with.bovy.with.L.oneK(t.stat = strongt,v.j = lvllist,L = L[-1,],w = strongt[,-1])
+
+
+covlist=list();covlist=e$xcovar
+R=8;L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+train.b=data.frame(wfull)[index,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
+lik.mat=t(sapply(seq(1:J),function(j){
+  V.gp.hat=diag(se.train[j,])^2;
+  LVL=L%*%V.gp.hat%*%t(L);
+  LSigL=L%*%covlist[[1]]%*%t(L)
+  b.mle=train.b[j,]
+  dmvnorm(x=b.mle, sigma=(LSigL + LVL),log=TRUE)}))
+
+
+
+A="mnb"
+R=8;L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+
+compute.hm.train.log.lik.pen.with.L(data.frame(wfull)[index,-1],se.train = se,covmat = covlist,A = A,pen = 1,L = L[-1,])
+
+
+
+likcom=readRDS("liketrainmnb.rds")
+all.equal(as.numeric(likcom),as.numeric(lik.mat))
+
+sum(log(exp(lik.mat[1:1000])))
+
+```
+
+
+And we can use the mash median estimates:
+
+```{r}
+t=c$t;b=c$chat;se=c$shat;R=ncol(t)
+
+#Now wfull will be the median
+wfull=t(apply(b,1,function(x){x-median(x)}))
+##show that they sum to 0
+
+#plot(rowSums(wfull),ylim=c(-1,1))
+```
+
+Now we proceed as in mash, selecting the strongest deviations from the median:
+```{r}
+
+s.j=se/se
+v.j=s.j
+absmat=abs(t(apply(t,1,function(x){x-median(x)})))
+tmedian=(t(apply(t,1,function(x){x-median(x)})))
+
+index=which(rowSums(c$beta)!=0)
+sparsestrongt=tmedian[index,]
+
+```
+
+
+
+Now, we need to project into the centered space to estimate the covariance matrix of the true deviations, using the full L since $v$ will be R, and not $R-1$.
+
+
+```{r}
+
+t.stat=sparsestrongt
+w=wfull
+R=ncol(t.stat)
+init.cov.list=list()
+init.cov.list[[1]]=cov(sparsestrongt)
+mean.mat=matrix(rep(0,ncol(t.stat)*nrow(t.stat)),ncol=ncol(t.stat),nrow=nrow(t.stat))
+K=1
+ydata=  sparsestrongt
+xamp= rep(1/K,K)
+xcovar= init.cov.list
+fixmean= TRUE     
+ycovar=  v.j 
+xmean=   mean.mat   
+projection= list();for(l in 1:nrow(t.stat)){projection[[l]]=diag(1,R)}
+
+e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)
+
+```
+
+Now we check:
+
+```{r}
+
+covlist=list();covlist=e$xcovar
+L=diag(R)-1/R*as.vector(rep(1,R))%*%t(as.vector(rep(1,R)))
+
+j=1
+A="checkingwithmashmedianestimate"
+compute.hm.train.log.lik.pen.with.L(w[index,-1],se.train = se,covmat = covlist,A = A,pen = 1,L = L[-1,])
+
+
+
+train.b=data.frame(w)[index,-1];se.train = se;covmat = covlist;pen = 1;L = L[-1,];J=nrow(train.b)
+lik.mat=t(sapply(seq(1:J),function(j){
+  V.gp.hat=diag(se.train[j,])^2;
+  LVL=L%*%V.gp.hat%*%t(L);
+  LSigL=L%*%covlist[[1]]%*%t(L)
+  b.mle=train.b[j,]
+  dmvnorm(x=b.mle, sigma=(LSigL + LVL),log=TRUE)}))
+
+l=readRDS("liketraincheckingwithmashmedianestimate.rds")
+
+all.equal(as.numeric(l),as.numeric(lik.mat))
+
+sum(log(exp(l[1:1000])))
+```
+

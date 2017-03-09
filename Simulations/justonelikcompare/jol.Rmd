@@ -287,7 +287,7 @@ init.cov.list=list()
 init.cov.list[[1]]=cov(strongt)
 
 #head(init.cov.list)
-mean.mat=matrix(rep(0,R*R),ncol=R,nrow=R)  
+mean.mat=matrix(rep(0,ncol(strongt)*nrow(strongt)),ncol=ncol(strongt),nrow=nrow(strongt)) 
 ydata= strongt##train on the max like estimates (same as using max ws)
 xamp=1
 xcovar=init.cov.list
@@ -339,13 +339,15 @@ mash.means=read.table("mashposterior.means.txt")[,-1]
 mash.nobasemeans=read.table("mashnobedcovposterior.means.txt")[,-1]
 mash.nobtruth=read.table("truthposterior.means.txt")[,-1]
 mash.truth=read.table("mashtruthposterior.means.txt")[,-1]
-mle=w
+beta=as.matrix(c$beta)
+mle=as.matrix(w)
+mash.means=as.matrix(mash.means)
+standard=sqrt(mean((beta-mle)^2))
 
-head(mle)
-rmse.mash=sqrt(mean((mash.means-mle)^2))
-rmse.mnb=sqrt(mean((mash.nobasemeans-mle)^2))
-rmse.truth=sqrt(mean((mash.nobtruth-mle)^2))
-rmse.mashtruth=sqrt(mean((mash.truth-mle)^2))
+rmse.mash=sqrt(mean((mash.means-beta)^2))/standard
+rmse.mnb=sqrt(mean((mash.nobasemeans-beta)^2))/standard
+rmse.truth=sqrt(mean((mash.nobtruth-beta)^2))/standard
+rmse.mashtruth=sqrt(mean((mash.truth-beta)^2))/standard
 rmse.all.table=cbind(mash=rmse.mash,mnb=rmse.mnb)
 
 rmse.mash

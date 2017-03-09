@@ -39,7 +39,7 @@ head(groups)
 ```
 Prepare model_matrix
 ```{r}
-design <- model.matrix(~ bact-1, data = groups)[,-1]
+design <- model.matrix(~ bact-1, data = groups)
 # Clean up names of design matrix
 colnames(design) <- gsub("bact", "", colnames(design))
 dim(design)
@@ -47,12 +47,13 @@ dim(design)
 beta_class <- matrix(0, dim(batchcorrectdata)[1], dim(design)[2]);
 sebeta_class <- matrix(0, dim(batchcorrectdata)[1], dim(design)[2])
 t_class = matrix(0, dim(batchcorrectdata)[1], dim(design)[2])
-
-knownsamples=which(groups$time=="18"&groups$bact!="none")
+colnames(beta_class)=colnames(sebeta_class)=colnames(t_class)=colnames(design)
+  
+knownsamples=which(groups$time=="18")
 colnames(batchcorrectdata)[10]
 which(design[10,]==1)
 
-for(k in c(1:8)){
+for(k in c(1:9)){
   
   model_mat_temp <- cbind(design[knownsamples,k]);
   #vsarah <- voom(y[,knownsamples], model_mat_temp)##ccurrent model

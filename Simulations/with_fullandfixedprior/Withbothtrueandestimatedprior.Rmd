@@ -418,7 +418,7 @@ log.lik.minus.max=log.lik.snp-max(log.lik.snp)
 exp.vec=exp(log.lik.minus.max)
 post.weights=t(exp.vec*pis/sum(exp.vec*pis))
 
-all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(mash.means[j,]))
+all.equal(as.numeric(post.weights%*%mash.arrays$post.means),as.numeric(mash.means[j,]))
 
 ```
 
@@ -546,7 +546,7 @@ compute.hm.train.log.lik.pen(train.b = wfull,se.train = se,covmat = covs,A=A,pen
 pis=readRDS(paste0("pis",A,".rds"))$pihat
 
 
-weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp.no.baseline(j,covs,b.gp.hat=wfull[,-1],se.gp.hat = se,pis,A=A,checkpoint = FALSE,L = L[-1,])})
+weightedquants=lapply(seq(1:nrow(wfull)),function(j){total.quant.per.snp.no.baseline(j,covs,b.gp.hat=wfull,se.gp.hat = se,pis,A=A,checkpoint = FALSE,L = diag(1,R))})
 
 ```
 
@@ -556,7 +556,6 @@ And test to see if calculations are accurate:
 ```{r,eval=T,echo=T}
 cov=readRDS("covmatwithfixedomega.rds")
 c=readRDS("chatfixedomega.rds")
-
 mash.means=as.matrix(read.table("mashtruthwithfixedomegaposterior.means.txt"))[1:1000,-1]
 w=data.frame(wfull)[1:1000,]
 R=ncol(w)
@@ -602,7 +601,7 @@ log.lik.minus.max=log.lik.snp-max(log.lik.snp)
 exp.vec=exp(log.lik.minus.max)
 post.weights=t(exp.vec*pis/sum(exp.vec*pis))
 
-all.equal(as.numeric(post.weights%*%arrays$post.means),as.numeric(mash.means[j,]))
+all.equal(as.numeric(post.weights%*%mash.arrays$post.means),as.numeric(mash.means[j,]))
 
 
 mashnobase.means=as.matrix(read.table("withfixedomegamnbposterior.means.txt")[1:1000,-1])
@@ -615,6 +614,8 @@ standard=sqrt(mean((beta-mle)^2))
 mashrmse=sqrt(mean((mash.means-beta)^2))/standard
 mnbrmse=sqrt(mean((mashnobase.means-beta)^2))/standard
 
+mashrmse
+mnbrmse
 rmse.all.table=cbind(mash=mashrmse,mnb=mnbrmse)
 
 barplot(as.numeric(rmse.all.table),main="RMRSE:MASH vs MNB",
