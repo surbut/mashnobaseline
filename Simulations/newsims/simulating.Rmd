@@ -5,9 +5,9 @@ output: html_document
 
 In this document, we will simulate uncentered effects that are null; that is the uncentered averages are identical in all conditions (i.e., all $\mu$)
 
-$$C = \mu_ {R}$$
+$$C = \mu * \textbf{1}_R$$
 
-where \mu_{R} is an R vector of identical $\mu$
+where $C$ is a vector of identical $\mu$ gene expression.
 
 Then the observed estimates are independent, with uncorrelated residuals:
 $$Chat = N(C, 1/2 I_{8})$$
@@ -22,35 +22,45 @@ However, we want to show that the matrix of contrasts in observed effects, $LCha
 
 $$LChat = Chat_2-Chat_1, Chat_3-Chat_1 ... Chat_8-Chat_1$$
 
+Thus:
+
+$$LChat \sim N(0,LVL')$$
 Where the matrix L subtracts the first entry from the other r=2 ... r=8 entires:
 
 ```{r}
 library("knitr")
 knitr::opts_chunk$set(cache=TRUE)
-system("ls; rm *rds;rm *txt; rm *pdf")
-set.seed(123)
+library("ExtremeDeconvolution")
+library('mashr')
+```
+
+Now run stuff:
+
+```{r}
+
+lfsrresult=NULL
+sim=10
 R=8;n=1000
+for(s in 1:sim){
+
+#set.seed(123)
+
 mu_mat = t(sapply(seq(1:n),function(i){rep(rnorm(1),R)})) ##the same mu for all conditions
 c = mu_mat ### the uncentered true effect is thus just mu
 error = t(sapply(seq(1:n),function(i){rnorm(R,1/2)}))##the errors are uncorrelated
 chat=c+error
 
-````
 
-Then, we produce the matrix of contrasts and associated standard errors (variances):
-```{r}
+#Then, we produce the matrix of contrasts and associated standard errors (variances):
+
 lchat=chat[,2:8]-chat[,1]
-dim(lchat)
+#dim(lchat)
 ##v.j is the variance of lchat
 v.j=matrix(rep(1,ncol(chat)*nrow(chat)),ncol=ncol(chat),nrow=nrow(chat))[,-1]##because the variance of a difference is the sum of the variances
 se=sqrt(v.j)
-```
 
-Now, we can run mash on this matrix of centered observations. Let's just use one component:
+#Now, we can run mash on this matrix of centered observations. Let's just use one component:
 
-
-```{r}
-library("ExtremeDeconvolution")
 init.cov.list=list()
 init.cov.list[[1]]=cov(lchat)
 mean.mat=matrix(rep(0,ncol(lchat)*nrow(lchat)),ncol=ncol(lchat),nrow=nrow(lchat))  
@@ -63,13 +73,9 @@ xmean=mean.mat
 projection=list();for(l in 1:nrow(lchat)){projection[[l]]=diag(1,R-1)}##no projection in mash because we feed in centered estimates
 e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)##notice no projection.
 
-```
 
-Now, use this estimate to run mash on the matrix of observed centered averages:
+#Now, use this estimate to run mash on the matrix of observed centered averages:
 
-
-```{r}
-library('mashr')
 
 w=lchat
 pis=1
@@ -79,8 +85,14 @@ weightedquants=lapply(seq(1:nrow(w)),function(j){total.quant.per.snp(j = j,covma
 a=post.mean.with.proj(b.mle = w[1,],tinv = solve(diag(v.j[1,])+covlist[[1]]),U.k = covlist[[1]],L=diag(1,R-1))
 
 mashtruth=read.table("mashfpposterior.means.txt")[,-1]
-all.equal(as.numeric(mashtruth[1,]),as.numeric(a))
+print(all.equal(as.numeric(mashtruth[1,]),as.numeric(a)))
 
+lfsr.one=read.table("mashfplfsr.txt")[,-1]
+lfsrresult[s]=mean(lfsr.one<0.05)
+system('rm mashfp*')
+}
+
+barplot(lfsrresult,main="Proportion of False Positives",ylim=c(0,0.6))
 ```
 
 Now, we will also simulate noisy observations that truly are independent:
@@ -91,13 +103,15 @@ Here, because the simulated 'contrasts' do not have correlated residuals, we sho
 
 ```{r}
 
+lfsrresult=NULL
+sim=10
+for(s in 1:sim){
+  
 lchat_unc=t(sapply(seq(1:n),function(i){(rnorm(R-1))}))
-```
 
-```{r}
 library("ExtremeDeconvolution")
 init.cov.list=list()
-init.cov.list[[1]]=cov(lchat)
+init.cov.list[[1]]=cov(lchat_unc)
 mean.mat=matrix(rep(0,ncol(lchat)*nrow(lchat)),ncol=ncol(lchat),nrow=nrow(lchat))  
 ydata= lchat_unc ##train on the max like estimates (same as using max ws)
 xamp=1
@@ -108,13 +122,12 @@ xmean=mean.mat
 projection=list();for(l in 1:nrow(lchat)){projection[[l]]=diag(1,R-1)}##no projection in mash because we feed in centered estimates
 e=extreme_deconvolution(ydata=ydata,ycovar=ycovar,xamp=xamp,xmean=xmean,xcovar=init.cov.list,fixmean=T,projection=projection)##notice no projection.
 
-```
-
-Now, use this estimate to run mash on the matrix of observed centered averages:
 
 
-```{r}
-library('mashr')
+#Now, use this estimate to run mash on the matrix of observed centered averages:
+
+
+
 
 w=lchat_unc
 pis=1
@@ -124,22 +137,20 @@ weightedquants=lapply(seq(1:nrow(w)),function(j){total.quant.per.snp(j = j,covma
 a=post.mean.with.proj(b.mle = w[1,],tinv = solve(diag(v.j[1,])+covlist[[1]]),U.k = covlist[[1]],L=diag(1,R-1))
 
 mashtruth=read.table("mash_trueIndposterior.means.txt")[,-1]
-all.equal(as.numeric(mashtruth[1,]),as.numeric(a))
+print(all.equal(as.numeric(mashtruth[1,]),as.numeric(a)))
 
+lfsr.two=read.table("mash_trueIndlfsr.txt")[,-1]
+lfsrresult[s]=mean(lfsr.two<0.05)
+system('rm mash_trueInd*')
+}
+
+lfsrresult
 ```
 
 
 We can show that the false positive produces more lfsr < 0.05:
 
-```{r}
 
-lfsr.one=read.table("mashfplfsr.txt")[,-1]
-lfsr.two=read.table("mash_trueIndlfsr.txt")[,-1]
-
-mean(lfsr.one<0.05)
-mean(lfsr.two<0.05)
-
-```
 
 ###
 Now, we want to run MASH using the matrix of "true" residuals, which is
@@ -147,6 +158,14 @@ Now, we want to run MASH using the matrix of "true" residuals, which is
 $$L 1/2 I_{8} L'$$
 
 ```{r}
+system('rm withlvlarray*')
+set.seed(123)
+R=8;n=1000
+mu_mat = t(sapply(seq(1:n),function(i){rep(rnorm(1),R)})) ##the same mu for all conditions
+c = mu_mat ### the uncentered true effect is thus just mu
+error = t(sapply(seq(1:n),function(i){rnorm(R,1/2)}))##the errors are uncorrelated
+chat=c+error
+lchat=chat[,2:8]-chat[,1]
 
 ##matrix of contrasts##
 L=cbind(rep(-1,R-1),diag(1,7))
@@ -200,8 +219,8 @@ And so we have shown that:
 Let's try running regular mash:
 
 ```{r}
-
 write.table(lchat,"lchat.txt",col.names = F,row.names = F)
+
 system('/Users/sarahurbut/miniconda3/bin/sfa -gen lchat.txt -g 1000 -k 5 -n 7 i -o lchat')
 
 

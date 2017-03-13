@@ -14,7 +14,7 @@ library("ExtremeDeconvolution")
 library("MASS")
 knitr::opts_chunk$set(cache=TRUE)
 #system("ls; rm *rds;rm *txt; rm *pdf")
-
+opts_chunk$set(fig.path = "/Users/sarahurbut/Dropbox/PhDThesis/Figures/") 
 ```
 
 
@@ -245,6 +245,7 @@ We can also compute RMSE:
 ```{r}
 withresmreans=as.matrix(read.table("allmashlvlposterior.means.txt")[,-1])
 noresmeans=as.matrix(read.table("allmashposterior.means.txt")[,-1])
+
 b=as.matrix(beta)
 
 sqrt(mean((withresmreans-b)^2))
@@ -253,5 +254,14 @@ sqrt(mean((noresmeans-b)^2))
 
 And you can see we do much better in terms of RMSE.
 
+```{r rmseplotsignal}
+(standard=sqrt(mean((lchat-b)^2)))
+mnb.rmse=sqrt(mean((withresmreans-b)^2))/standard
+ind.rmse=sqrt(mean((noresmeans-b)^2))/standard
 
+
+rmse.all.table=data.frame(mnb=mnb.rmse,ind=ind.rmse)
+barplot(as.numeric(rmse.all.table),main
+        ="RRMSE from Non-Null Simulation",
+        ylab="relative error (RRMSE)",xlab="Method",col=c("green","red"),names=colnames(rmse.all.table),ylim=c(0,1),cex.main=1.5,cex.lab=1,cex.names=1.5)
 

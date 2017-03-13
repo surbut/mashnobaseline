@@ -1,0 +1,37 @@
+---
+title: "plotsformnb"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cordemo}
+
+library("knitr")
+opts_chunk$set(fig.path = "/Users/sarahurbut/Dropbox/PaperEdits/PhDThesis/Figures") 
+
+set.seed(123)
+R=8;n=1000
+mu_mat = t(sapply(seq(1:n),function(i){rep(rnorm(1),R)})) ##the same mu for all conditions
+c = mu_mat ### the uncentered true effect is thus just mu
+error = t(sapply(seq(1:n),function(i){rnorm(R,1/2)}))##the errors are uncorrelated
+chat=c+error
+lchat=chat[,2:R]
+
+independent=t(sapply(seq(1:n),function(i){rnorm(7)}))
+indcor=cor(independent)
+library("lattice")
+library("colorRamps")
+clrs=colorRampPalette(c('dark red','white','dark blue'))
+#clrs=blue2red(256)
+print(levelplot(indcor,col.regions = clrs,xlab = "",ylab = "",colorkey = TRUE,at=seq(-1, 1, length.out=120),main="CorInd"))
+print(levelplot(cor(lchat),col.regions = clrs,xlab = "",ylab = "",colorkey = TRUE,at=seq(-1, 1, length.out=120),main="CorLChat"))
+```
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

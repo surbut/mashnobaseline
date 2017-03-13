@@ -53,6 +53,7 @@ My problem is that I think I am simulating the matrix of 'projected effects' Lv,
 
 
 ##Applying to John's Data
+
 I had previously applied MASH no BASELINE to John's [non control data](../john/withbatchcorrects2.html), but now I applied it to the matrix of observed differences over the [uninfected condition](../john/rerun.html).
 
 ###Question

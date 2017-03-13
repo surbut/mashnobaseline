@@ -219,12 +219,16 @@ pis=readRDS("pisallmashlvl.rds")$pihat
 length(pis)
 library('gplots')
 library('colorRamps')
-barplot(colSums(matrix(pis[-length(pis)],byrow = T,ncol=18)))
-
-for(k in 2:9){
+barplot(colSums(matrix(pis[-length(pis)],byrow = T,ncol=18)),names=c(rep(paste0("Uk",seq(1:9))),levels(groups$bact)[-1],"all"),las=2,main="Prior Weighting")
+clrs=colorRampPalette(c('dark red','white','dark blue'))
+for(k in c(1,2,3,4,5,6,7,8,9)){
   x=cov[[k]]/max(diag(cov[[k]]))
+  #x=cov2cor(cov[[k]])
   colnames(x)=rownames(x)=levels(groups$bact)[-1]
-  heatmap.2(x,revC=T,dendrogram="none",main=paste0("Uk",k,round(colSums(matrix(pis[-433],byrow = T,ncol=18))[k],2)),density.info = "none",trace="none",col=blue2green(256))
+heatmap.2(x,revC=T,dendrogram="none",main=paste0("Uk",k,round(colSums(matrix(pis[-433],byrow = T,ncol=18))[k],2)),density.info = "none",trace="none",col=#blue2green(256)
+clrs)
+#   print(levelplot(x,col.regions = clrs,xlab = "",ylab = "",colorkey = TRUE,main=paste0("Uk",k,round(colSums(matrix(pis[-433],byrow = T,ncol=18))[k],2))))
+
   }
 
 ```
